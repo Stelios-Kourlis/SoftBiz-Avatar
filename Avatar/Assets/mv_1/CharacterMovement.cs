@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class CharacterMovement : MonoBehaviour
 {
-    public bool move = true; 
+    public bool move = true;
     public float speed = 5f; // Editable speed value
 
     //private void Update()
@@ -27,7 +27,7 @@ public class CharacterMovement : MonoBehaviour
         if (!move) return;
 
         // Calculate the movement vector
-        Vector3 movement = Vector3.forward * speed * Time.deltaTime;
+        Vector3 movement = speed * Time.deltaTime * Vector3.forward;
 
         // Move the character
         transform.Translate(movement);
@@ -42,6 +42,6 @@ public class CharacterMovement : MonoBehaviour
     {
         move = !move;
     }
-   
+
 }
 
