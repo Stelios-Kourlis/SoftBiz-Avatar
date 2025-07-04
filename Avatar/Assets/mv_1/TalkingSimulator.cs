@@ -37,6 +37,8 @@ public class TalkingSimulator : MonoBehaviour
     [SerializeField] private float EYE_MOVEMENT_INTERVAL = 0.25f;
 
     private SkinnedMeshRenderer bodySkinnedMeshRenderer, eyesSkinnedMeshRenderer;
+    private bool isTalking = false;
+    private Coroutine talkingCoroutine;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -55,12 +57,12 @@ public class TalkingSimulator : MonoBehaviour
             return;
         }
 
-        StartCoroutine(StartBlinking());
-        StartCoroutine(StartTalking());
-        StartCoroutine(StartRandomEyeMovement());
+        StartCoroutine(StartBlinkingCor());
+        // StartCoroutine(StartTalking());
+        StartCoroutine(StartRandomEyeMovementCor());
     }
 
-    IEnumerator StartBlinking()
+    IEnumerator StartBlinkingCor()
     {
         bodySkinnedMeshRenderer.SetBlendShapeWeight((int)BodyBlendSpapes.Blink, 10f);
         while (true)
@@ -93,7 +95,7 @@ public class TalkingSimulator : MonoBehaviour
 
     }
 
-    IEnumerator StartTalking()
+    IEnumerator StartTalkingCor()
     {
         bodySkinnedMeshRenderer.SetBlendShapeWeight((int)BodyBlendSpapes.Smile, 25f);
         bodySkinnedMeshRenderer.SetBlendShapeWeight((int)BodyBlendSpapes.Sad, 50f);
@@ -120,7 +122,7 @@ public class TalkingSimulator : MonoBehaviour
         }
     }
 
-    IEnumerator StartRandomEyeMovement()
+    IEnumerator StartRandomEyeMovementCor()
     {
         (int, int) currentEyePosition = (50, 30);
         (int, int) nextEyePosition;
@@ -143,5 +145,30 @@ public class TalkingSimulator : MonoBehaviour
 
             yield return new WaitForSeconds(EYE_MOVEMENT_INTERVAL);
         }
+    }
+
+    public void ToggleTalking()
+    {
+        if (isTalking)
+        {
+            StopTalking();
+        }
+        else
+        {
+            StartTalking();
+        }
+    }
+
+    public void StartTalking()
+    {
+        talkingCoroutine = StartCoroutine(StartTalkingCor());
+        isTalking = true;
+    }
+
+    public void StopTalking()
+    {
+        StopCoroutine(talkingCoroutine);
+        bodySkinnedMeshRenderer.SetBlendShapeWeight((int)BodyBlendSpapes.Laugh, 0);
+        isTalking = false;
     }
 }
