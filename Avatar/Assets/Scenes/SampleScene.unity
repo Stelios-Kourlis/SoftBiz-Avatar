@@ -234,6 +234,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 483b800e6ebf9b542b881e300a86415b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  RESPONSE_DURATION_PER_WORD: 0.3
   textResponseObject: {fileID: 4609179994940494014, guid: f1392bb077e87d04ca5ab45bb0a821d5, type: 3}
   clickCaptureObject: {fileID: 8829322433189467606, guid: 87790e95e1ede1b4cbc542c541512200, type: 3}
   talkingSimulator: {fileID: 1241786140}
@@ -797,21 +798,34 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 462618947}
         m_TargetAssemblyTypeName: TextResponseController, Assembly-CSharp
-        m_MethodName: Respond
+        m_MethodName: RespondEntry
         m_Mode: 5
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-            Donec at blandit nulla. Suspendisse varius ante et justo finibus semper
-            ut non velit. Integer a varius nisl. Nullam in felis ex. Suspendisse
+          m_StringArgument: a. Lorem ipsum dolor sit amet, consectetur adipiscing
+            elit. Donec at blandit nulla. Suspendisse varius ante et justo finibus
+            semper ut non velit. Integer a varius nisl. Nullam in felis ex. Suspendisse
             ultrices condimentum dui vel sagittis. Pellentesque lacinia suscipit
             tortor, eget elementum augue fringilla vel. Nulla et justo tincidunt,
             imperdiet ligula sed, euismod augue. Integer sit amet felis in erat mattis
             maximus vitae et neque. Nunc blandit tempor ante, quis rutrum erat viverra
-            ut.
+            ut.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec at
+            blandit nulla. Suspendisse varius ante et justo finibus semper ut non
+            velit. Integer a varius nisl. Nullam in felis ex. Suspendisse ultrices
+            condimentum dui vel sagittis. Pellentesque lacinia suscipit tortor, eget
+            elementum augue fringilla vel. Nulla et justo tincidunt, imperdiet ligula
+            sed, euismod augue. Integer sit amet felis in erat mattis maximus vitae
+            et neque. Nunc blandit tempor ante, quis rutrum erat viverra ut.Lorem
+            ipsum dolor sit amet, consectetur adipiscing elit. Donec at blandit nulla.
+            Suspendisse varius ante et justo finibus semper ut non velit. Integer
+            a varius nisl. Nullam in felis ex. Suspendisse ultrices condimentum dui
+            vel sagittis. Pellentesque lacinia suscipit tortor, eget elementum augue
+            fringilla vel. Nulla et justo tincidunt, imperdiet ligula sed, euismod
+            augue. Integer sit amet felis in erat mattis maximus vitae et neque.
+            Nunc blandit tempor ante, quis rutrum erat viverra ut.
           m_BoolArgument: 0
         m_CallState: 2
 --- !u!114 &1762703279
