@@ -98,3 +98,5 @@ ServerData
 # Auto-generated scenes by play mode tests
 /[Aa]ssets/[Ii]nit[Tt]est[Ss]cene*.unity*
 /Avatar/.plastic
+Avatar/Website/UnityWebGL/index.html
+/Avatar/Website/UnityWebGL/TemplateData
