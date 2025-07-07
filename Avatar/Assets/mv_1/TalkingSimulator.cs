@@ -43,6 +43,7 @@ public class TalkingSimulator : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        Application.runInBackground = true;
         bodySkinnedMeshRenderer = gameObject.transform.Find("body_Applied").GetComponent<SkinnedMeshRenderer>();
         if (bodySkinnedMeshRenderer == null)
         {
