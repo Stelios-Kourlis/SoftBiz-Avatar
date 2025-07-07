@@ -6,11 +6,12 @@ using UnityEngine.EventSystems;
 public class TextResponseController : MonoBehaviour
 {
 
-    [SerializeField] private float RESPONSE_DURATION_PER_WORD = 0.1f;
+    [SerializeField] private float RESPONSE_DURATION_PER_WORD = 0.3f;
+    [SerializeField] private float BOX_ANIMATION_DURATION = 0.5f;
 
-    [SerializeField] private GameObject textResponseObject, clickCaptureObject;
+    [SerializeField] private GameObject textResponseObject, clickCaptureObject, thinkingTextObject;
     [SerializeField] private TalkingSimulator talkingSimulator;
-    private GameObject responseObject, clickForwader;
+    private GameObject responseObject, clickForwader, thinkingText;
     private Coroutine responseCoroutine;
     private bool responseConcluded = false;
 
@@ -38,12 +39,32 @@ public class TextResponseController : MonoBehaviour
         StartCoroutine(Respond(response));
     }
 
+    public void Think()
+    {
+        if (thinkingText != null)
+        {
+            thinkingText.GetComponent<TextAnimation>().StopAllCoroutines();
+            Destroy(thinkingText);
+            thinkingText = null;
+        }
+
+        thinkingText = Instantiate(thinkingTextObject, transform);
+        StartCoroutine(thinkingText.GetComponent<TextAnimation>().AnimateTextLoop());
+    }
+
 
     private IEnumerator Respond(string response)
     {
         if (string.IsNullOrEmpty(response))
         {
             yield break;
+        }
+
+        if (thinkingText != null)
+        {
+            thinkingText.GetComponent<TextAnimation>().StopAllCoroutines();
+            Destroy(thinkingText);
+            thinkingText = null;
         }
 
         responseObject = Instantiate(textResponseObject, transform);
@@ -62,10 +83,8 @@ public class TextResponseController : MonoBehaviour
             string nextSentence = responseSentences[index].Trim() + ". ";
 
             string testPiece = responsePiece + nextSentence;
-            Debug.Log($"Testing piece: {testPiece}");
 
             Vector2 sizeRestraints = textComponent.GetPreferredValues(testPiece, tmpRectTransform.rect.width, tmpRectTransform.rect.height);
-            Debug.Log($"Size restraints: {sizeRestraints.x}x{sizeRestraints.y}, RectTransform size: {tmpRectTransform.rect.width}x{tmpRectTransform.rect.height}");
 
             fitsWidth = sizeRestraints.x <= tmpRectTransform.rect.width;
             fitsHeight = sizeRestraints.y <= tmpRectTransform.rect.height;
@@ -74,15 +93,12 @@ public class TextResponseController : MonoBehaviour
             {
                 responsePiece = testPiece;
                 index++;
-                Debug.Log($"Fits adding index: {index}/{responseSentences.Length}");
             }
             else
             {
-                Debug.Log($"Doesn't Fit, outputing at index {index}/{responseSentences.Length}...");
                 responseCoroutine = StartCoroutine(RespondPiece(responsePiece));
                 yield return new WaitUntil(() => responseConcluded);
                 responseConcluded = false; //Reset the flag for the next piece
-                Debug.Log("Response piece sent, resetting...");
                 responsePiece = string.Empty; //Reset the response piece
                 responseObject.SetActive(false);
                 yield return new WaitForSecondsRealtime(0.1f);
@@ -93,7 +109,6 @@ public class TextResponseController : MonoBehaviour
 
         if (!string.IsNullOrEmpty(responsePiece))
         {
-            Debug.Log("Sending leftover piece...");
             responseCoroutine = StartCoroutine(RespondPiece(responsePiece));
             yield return new WaitUntil(() => responseConcluded);
             responseConcluded = false;
@@ -118,6 +133,9 @@ public class TextResponseController : MonoBehaviour
         textComponent.text = responsePiece;
         int wordCount = responsePiece.Split(new char[] { ' ', '\n', '\t' }, System.StringSplitOptions.RemoveEmptyEntries).Length; //Get word count
         talkingSimulator.StartTalking();
+        // This makes the animation duration be wordCount * RESPONSE_DURATION_PER_WORD
+        textComponent.GetComponent<TextAnimation>().delayBetweenJumps = (wordCount * RESPONSE_DURATION_PER_WORD - textComponent.GetComponent<TextAnimation>().jumpDuration) / (textComponent.GetComponent<TextAnimation>().TmpCharCount - 1);
+        StartCoroutine(textComponent.GetComponent<TextAnimation>().AnimateTextOnce());
         yield return new WaitForSeconds(wordCount * RESPONSE_DURATION_PER_WORD);
         talkingSimulator.StopTalking();
         responseConcluded = true;

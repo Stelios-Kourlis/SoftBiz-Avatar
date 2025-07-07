@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 147cfbb7b4c11a74cb8ffa4eb5ae75ef
+guid: d910fcd18bc158a4882a1e205fc2991e
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -8718697580280951945
-    second: TalkRectBubble_0
+      213: -4346244404228752641
+    second: Arrow_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,23 +113,23 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: TalkRectBubble_0
+      name: Arrow_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 5000
-        height: 4116
+        width: 1000
+        height: 1000
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 250, y: 850, z: 250, w: 250}
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 77bcb4f8eb6f00780800000000000000
-      internalID: -8718697580280951945
+      spriteID: ffa7ae2edb90fa3c0800000000000000
+      internalID: -4346244404228752641
       vertices: []
       indices: 
       edges: []
@@ -138,7 +138,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: ff714e24f3930b44aa0ba31d5cfd1597
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      TalkRectBubble_0: -8718697580280951945
+      Arrow_0: -4346244404228752641
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
