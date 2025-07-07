@@ -1,6 +1,9 @@
-async function sendToGemini() {
-  const geminiApiKey = "AIzaSyC2YV4tiwz6vJ6oc5pwt-w82itmvBV_ASs"; // Replace with your Gemini key
-  const elevenLabsApiKey = "sk_48db9614c3e60f815f5aaa1b8f930a222519597bec8f01ad"; // Replace with your ElevenLabs key
+import { GEMINI_API_KEY, ELEVEN_LABS_API_KEY } from './keys.js';
+
+window.sendToGemini = async function sendToGemini() {
+  const geminiApiKey = GEMINI_API_KEY;
+  const elevenLabsApiKey = ELEVEN_LABS_API_KEY;
+  //There are free keys, should we get them off the repo?
   const voiceId = "21m00Tcm4TlvDq8ikWAM";
 
   const userInput = document.getElementById("userInput").value;
@@ -69,7 +72,7 @@ async function sendToGemini() {
   }
 }
 
-function HandleUnityMessage(jsonString) {
+window.HandleUnityMessage = function HandleUnityMessage(jsonString) {
   console.log("JS received text: ", jsonString)
   //TODO
 }
