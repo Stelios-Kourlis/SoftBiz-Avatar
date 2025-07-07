@@ -991,6 +991,7 @@ GameObject:
   - component: {fileID: 1762703280}
   - component: {fileID: 1762703279}
   - component: {fileID: 1762703278}
+  - component: {fileID: 1762703281}
   m_Layer: 5
   m_Name: Force Respond
   m_TagString: Untagged
@@ -1132,6 +1133,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1762703276}
   m_CullTransparentMesh: 1
+--- !u!114 &1762703281
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1762703276}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 20920eb3dfc4e2d4d82dcbc17134c7ea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2048804489
 GameObject:
   m_ObjectHideFlags: 0
@@ -1144,6 +1157,7 @@ GameObject:
   - component: {fileID: 2048804493}
   - component: {fileID: 2048804492}
   - component: {fileID: 2048804491}
+  - component: {fileID: 2048804494}
   m_Layer: 5
   m_Name: Force Think
   m_TagString: Untagged
@@ -1285,6 +1299,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2048804489}
   m_CullTransparentMesh: 1
+--- !u!114 &2048804494
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2048804489}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 20920eb3dfc4e2d4d82dcbc17134c7ea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

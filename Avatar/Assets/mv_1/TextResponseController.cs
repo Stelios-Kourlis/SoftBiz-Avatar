@@ -23,7 +23,7 @@ public class TextResponseController : MonoBehaviour
     [SerializeField] private TalkingSimulator talkingSimulator;
     private GameObject responseObject, clickForwader, thinkingText;
     private Coroutine responseCoroutine;
-    private bool responseConcluded = false;
+    private bool responsePieceConcluded = false, responseConcluded = true;
 
     public void Start()
     {
@@ -51,6 +51,8 @@ public class TextResponseController : MonoBehaviour
 
     public void RespondEntry(string response)
     {
+        if (!responseConcluded) return;
+        responseConcluded = false;
         StartCoroutine(Respond(response));
     }
 
@@ -75,6 +77,7 @@ public class TextResponseController : MonoBehaviour
             yield break;
         }
 
+
         if (thinkingText != null)
         {
             thinkingText.GetComponent<TextAnimation>().StopAllCoroutines();
@@ -83,7 +86,11 @@ public class TextResponseController : MonoBehaviour
         }
 
         yield return AnimateTextBox(); //Animate the text box
-        clickForwader = Instantiate(clickCaptureObject, transform); //Capture click events
+        if (clickForwader == null)
+        {
+            clickForwader = Instantiate(clickCaptureObject, transform); //Capture click events
+        }
+        // responseConcluded = false;
         clickForwader.GetComponent<ClickForwader>().OnClick += OnClick;
         TMP_Text textComponent = responseObject.GetComponentInChildren<TMP_Text>();
         RectTransform tmpRectTransform = textComponent.GetComponent<RectTransform>();
@@ -112,8 +119,8 @@ public class TextResponseController : MonoBehaviour
             else
             {
                 responseCoroutine = StartCoroutine(RespondPiece(responsePiece));
-                yield return new WaitUntil(() => responseConcluded);
-                responseConcluded = false; //Reset the flag for the next piece
+                yield return new WaitUntil(() => responsePieceConcluded);
+                responsePieceConcluded = false; //Reset the flag for the next piece
                 responsePiece = string.Empty; //Reset the response piece
                 responseObject.SetActive(false);
                 yield return new WaitForSecondsRealtime(0.1f);
@@ -125,18 +132,23 @@ public class TextResponseController : MonoBehaviour
         if (!string.IsNullOrEmpty(responsePiece))
         {
             responseCoroutine = StartCoroutine(RespondPiece(responsePiece));
-            yield return new WaitUntil(() => responseConcluded);
-            responseConcluded = false;
+            yield return new WaitUntil(() => responsePieceConcluded);
+            responsePieceConcluded = false;
         }
 
         Destroy(responseObject);
         Destroy(clickForwader);
         responseObject = null;
+        responseConcluded = true;
     }
 
     private IEnumerator AnimateTextBox()
     {
-        responseObject = Instantiate(textResponseObject, transform);
+        if (responseObject == null)
+        {
+            responseObject = Instantiate(textResponseObject, transform);
+        }
+
         responseObject.GetComponentInChildren<TMP_Text>().text = string.Empty; //Clear the text initially
         RectTransform boxRectTransform = responseObject.transform.Find("Box").GetComponent<RectTransform>();
         RectTransform arrowRectTransform = responseObject.transform.Find("Arrow").GetComponent<RectTransform>();
@@ -174,13 +186,14 @@ public class TextResponseController : MonoBehaviour
         textComponent.text = responsePiece;
         int wordCount = responsePiece.Split(new char[] { ' ', '\n', '\t' }, System.StringSplitOptions.RemoveEmptyEntries).Length; //Get word count
         talkingSimulator.StartTalking();
+        yield return null;
         float totalTime = TEXT_TO_SPEECH_AUDIO_DURATION > 0 ? TEXT_TO_SPEECH_AUDIO_DURATION : wordCount * RESPONSE_DURATION_PER_WORD;
         // This makes the animation duration be totalTime
-        textComponent.GetComponent<TextAnimation>().delayBetweenJumps = (totalTime - textComponent.GetComponent<TextAnimation>().jumpDuration) / (textComponent.GetComponent<TextAnimation>().TmpCharCount - 1);
+        textComponent.GetComponent<TextAnimation>().delayBetweenJumps = ((totalTime / 2) - textComponent.GetComponent<TextAnimation>().jumpDuration) / (textComponent.GetComponent<TextAnimation>().TmpCharCount - 1);
         StartCoroutine(textComponent.GetComponent<TextAnimation>().AnimateTextOnce());
         yield return new WaitForSeconds(totalTime);
         talkingSimulator.StopTalking();
-        responseConcluded = true;
+        responsePieceConcluded = true;
     }
 
     public void OnClick(PointerEventData eventData)
@@ -191,7 +204,7 @@ public class TextResponseController : MonoBehaviour
             // Debug.Log("Ending response cor.");
             StopCoroutine(responseCoroutine); //Refrence the exact coroutine
             responseCoroutine = null;
-            responseConcluded = true;
+            responsePieceConcluded = true;
         }
     }
 }
