@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chat with Poppy</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  
+  <h1 style="text-align: center;">Chat with Poppy</h1>
+<iframe id="UnityFrame" src="UnityWebGL/index.html"></iframe>  
+<div class="container">
+  <textarea id="userInput" placeholder="Type your question..."></textarea>
+  <button onclick="sendToGemini()">Send</button>
+</div>
+
+<audio id="audioPlayer" style="display: none;"></audio>
+
+  <script src=" script.js"></script>
+</body>
+
+</html>
