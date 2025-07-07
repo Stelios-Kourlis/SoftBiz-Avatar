@@ -1,13 +1,13 @@
 async function sendToGemini() {
   const geminiApiKey = "AIzaSyC2YV4tiwz6vJ6oc5pwt-w82itmvBV_ASs"; // Replace with your Gemini key
   const elevenLabsApiKey = "sk_48db9614c3e60f815f5aaa1b8f930a222519597bec8f01ad"; // Replace with your ElevenLabs key
-  const voiceId = "21m00Tcm4TlvDq8ikWAM"; 
+  const voiceId = "21m00Tcm4TlvDq8ikWAM";
 
   const userInput = document.getElementById("userInput").value;
   document.getElementById("userInput").value = "";
 
   const unityInstance = document.getElementById('UnityFrame').contentWindow.unityInstance;
-  unityInstance.SendMessage("Canvas", "RespondEntry", "Thinking...");
+  unityInstance.SendMessage("Canvas", "Think");
 
   const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiApiKey}`;
   const requestBody = {

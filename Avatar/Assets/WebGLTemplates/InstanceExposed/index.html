@@ -6,10 +6,6 @@
     <title>Unity Web Player | {{{ PRODUCT_NAME }}}</title>
     <link rel="shortcut icon" href="TemplateData/favicon.ico">
     <link rel="stylesheet" href="TemplateData/style.css">
-#if SHOW_DIAGNOSTICS
-    <link rel="stylesheet" href="<<<TemplateData/diagnostics.css>>>">
-    <script src="<<<TemplateData/diagnostics.js>>>"></script>
-#endif
   </head>
   <body>
     <div id="unity-container" class="unity-desktop">
@@ -21,14 +17,6 @@
         </div>
       </div>
       <div id="unity-warning"> </div>
-      <div id="unity-footer">
-        <div id="unity-logo-title-footer"></div>
-        <div id="unity-fullscreen-button"></div>
-#if SHOW_DIAGNOSTICS
-        <img id="diagnostics-icon" src="TemplateData/webmemd-icon.png">
-#endif
-        <div id="unity-build-title">{{{ PRODUCT_NAME }}}</div>
-      </div>
     </div>
     <script>
       var canvas = document.querySelector("#unity-canvas");
@@ -111,15 +99,6 @@
         // performance, uncomment the following line:
         // config.devicePixelRatio = 1;
 
-#if SHOW_DIAGNOSTICS
-        // position the diagnostics icon in the corner on the canvas
-        let diagnostics_icon = document.getElementById("diagnostics-icon");
-        diagnostics_icon.style.position = "fixed";
-        diagnostics_icon.style.bottom = "10px";
-        diagnostics_icon.style.right = "0px";
-        canvas.after(diagnostics_icon);
-#endif
-
       } else {
         // Desktop style: Render the game canvas in a window that can be maximized to fullscreen:
         canvas.style.width = "{{{ WIDTH }}}px";
@@ -139,46 +118,6 @@
               }).then((unityInstance) => {
 		window.unityInstance = unityInstance;
                 document.querySelector("#unity-loading-bar").style.display = "none";
-#if SHOW_DIAGNOSTICS
-                document.getElementById("diagnostics-icon").onclick = () => {
-                  unityDiagnostics.openDiagnosticsDiv(unityInstance.GetMetricsInfo);
-                };
-#endif
-                document.querySelector("#unity-fullscreen-button").onclick = () => {
-                  unityInstance.SetFullscreen(1);
-                };
-
-#if DEVELOPMENT_PLAYER
-                // Unloading web content from DOM so that browser GC can run can be tricky to get right.
-                // This code snippet shows how to correctly implement a Unity content Unload mechanism to a web page.
-
-                // Unloading Unity content enables a web page to reclaim the memory used by Unity, e.g. for
-                // the purpose of later loading another Unity content instance on the _same_ web page.
-
-                // When using this functionality, take caution to carefully make sure to clear all JavaScript code,
-                // DOM element and event handler references to the old content you may have retained, or
-                // otherwise the browser's garbage collector will be unable to reclaim the old page.
-
-                // N.b. Unity content does _not_ need to be manually unloaded when the user is navigating away from
-                // the current page to another web page. The browser will take care to clear memory of old visited
-                // pages automatically. This functionality is only needed if you want to switch between loading
-                // multiple Unity builds on a single web page.
-                var quit = document.createElement("button");
-                quit.style = "margin-left: 5px; background-color: lightgray; border: none; padding: 5px; cursor: pointer";
-                quit.innerHTML = "Unload";
-                document.querySelector("#unity-build-title").appendChild(quit);
-                quit.onclick = () => {
-                  // Quit Unity application execution
-                  unityInstance.Quit().then(() => {
-                    // Remove DOM elements from the page so GC can run
-                    document.querySelector("#unity-container").remove();
-                    canvas = null;
-                    // Remover script elements from the page so GC can run
-                    script.remove();
-                    script = null;
-                  });
-                };
-#endif
               }).catch((message) => {
                 alert(message);
               });
