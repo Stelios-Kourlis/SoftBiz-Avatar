@@ -1,4 +1,5 @@
 using System.Collections;
+using DG.Tweening;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -8,6 +9,8 @@ public class TextResponseController : MonoBehaviour
 
     [SerializeField] private float RESPONSE_DURATION_PER_WORD = 0.3f;
     [SerializeField] private float BOX_ANIMATION_DURATION = 0.5f;
+    [SerializeField] private float ARROW_ANIMATION_DURATION = 0.5f;
+    [SerializeField] private Ease ANIMATION_EASE_TYPE = Ease.OutCubic;
 
     [SerializeField] private GameObject textResponseObject, clickCaptureObject, thinkingTextObject;
     [SerializeField] private TalkingSimulator talkingSimulator;
@@ -67,7 +70,7 @@ public class TextResponseController : MonoBehaviour
             thinkingText = null;
         }
 
-        responseObject = Instantiate(textResponseObject, transform);
+        yield return AnimateTextBox(); //Animate the text box
         clickForwader = Instantiate(clickCaptureObject, transform); //Capture click events
         clickForwader.GetComponent<ClickForwader>().OnClick += OnClick;
         TMP_Text textComponent = responseObject.GetComponentInChildren<TMP_Text>();
@@ -119,6 +122,28 @@ public class TextResponseController : MonoBehaviour
         responseObject = null;
     }
 
+    private IEnumerator AnimateTextBox()
+    {
+        responseObject = Instantiate(textResponseObject, transform);
+        responseObject.GetComponentInChildren<TMP_Text>().text = string.Empty; //Clear the text initially
+        RectTransform boxRectTransform = responseObject.transform.Find("Box").GetComponent<RectTransform>();
+        RectTransform arrowRectTransform = responseObject.transform.Find("Arrow").GetComponent<RectTransform>();
+
+        boxRectTransform.localScale = Vector3.zero;
+        boxRectTransform.rotation = Quaternion.Euler(0, 0, 90);
+        arrowRectTransform.gameObject.SetActive(false);
+
+        Tween tween = boxRectTransform.DOScale(Vector3.one, BOX_ANIMATION_DURATION).SetEase(ANIMATION_EASE_TYPE);
+        boxRectTransform.DORotate(Vector3.zero, BOX_ANIMATION_DURATION).SetEase(ANIMATION_EASE_TYPE);
+        yield return new WaitForSecondsRealtime(BOX_ANIMATION_DURATION / 2);
+
+        arrowRectTransform.gameObject.SetActive(true);
+        arrowRectTransform.rotation = Quaternion.Euler(0, 0, 180);
+
+        arrowRectTransform.DORotate(new Vector3(0, 0, 270), ARROW_ANIMATION_DURATION).SetEase(ANIMATION_EASE_TYPE);
+        yield return tween.WaitForCompletion();
+    }
+
     private IEnumerator RespondPiece(string responsePiece)
     {
         TMP_Text textComponent = responseObject.GetComponentInChildren<TMP_Text>();
@@ -146,7 +171,7 @@ public class TextResponseController : MonoBehaviour
         talkingSimulator.StopTalking(); //If user prematurely stops the response also stop the talking
         if (responseCoroutine != null)
         {
-            Debug.Log("Ending response cor.");
+            // Debug.Log("Ending response cor.");
             StopCoroutine(responseCoroutine); //Refrence the exact coroutine
             responseCoroutine = null;
             responseConcluded = true;
