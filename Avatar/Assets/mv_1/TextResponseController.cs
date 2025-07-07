@@ -3,14 +3,21 @@ using DG.Tweening;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using System.Runtime.InteropServices;
 
 public class TextResponseController : MonoBehaviour
 {
+
+#if UNITY_WEBGL && !UNITY_EDITOR
+    [DllImport("__Internal")]
+    private static extern void ReceiveMessageFromUnity(string message); //defined in JS
+#endif
 
     [SerializeField] private float RESPONSE_DURATION_PER_WORD = 0.3f;
     [SerializeField] private float BOX_ANIMATION_DURATION = 0.5f;
     [SerializeField] private float ARROW_ANIMATION_DURATION = 0.5f;
     [SerializeField] private Ease ANIMATION_EASE_TYPE = Ease.OutCubic;
+    private float TEXT_TO_SPEECH_AUDIO_DURATION = -1f;
 
     [SerializeField] private GameObject textResponseObject, clickCaptureObject, thinkingTextObject;
     [SerializeField] private TalkingSimulator talkingSimulator;
@@ -35,6 +42,11 @@ public class TextResponseController : MonoBehaviour
             Debug.LogError("Please place this script on the Canvas");
             return;
         }
+    }
+
+    public void SetTTSAudioDuration(float duration)
+    {
+        TEXT_TO_SPEECH_AUDIO_DURATION = duration;
     }
 
     public void RespondEntry(string response)
@@ -155,13 +167,18 @@ public class TextResponseController : MonoBehaviour
             yield break;
         }
 
+#if UNITY_WEBGL && !UNITY_EDITOR
+        ReceiveMessageFromUnity(responsePiece);
+#endif
+
         textComponent.text = responsePiece;
         int wordCount = responsePiece.Split(new char[] { ' ', '\n', '\t' }, System.StringSplitOptions.RemoveEmptyEntries).Length; //Get word count
         talkingSimulator.StartTalking();
-        // This makes the animation duration be wordCount * RESPONSE_DURATION_PER_WORD
-        textComponent.GetComponent<TextAnimation>().delayBetweenJumps = (wordCount * RESPONSE_DURATION_PER_WORD - textComponent.GetComponent<TextAnimation>().jumpDuration) / (textComponent.GetComponent<TextAnimation>().TmpCharCount - 1);
+        float totalTime = TEXT_TO_SPEECH_AUDIO_DURATION > 0 ? TEXT_TO_SPEECH_AUDIO_DURATION : wordCount * RESPONSE_DURATION_PER_WORD;
+        // This makes the animation duration be totalTime
+        textComponent.GetComponent<TextAnimation>().delayBetweenJumps = (totalTime - textComponent.GetComponent<TextAnimation>().jumpDuration) / (textComponent.GetComponent<TextAnimation>().TmpCharCount - 1);
         StartCoroutine(textComponent.GetComponent<TextAnimation>().AnimateTextOnce());
-        yield return new WaitForSeconds(wordCount * RESPONSE_DURATION_PER_WORD);
+        yield return new WaitForSeconds(totalTime);
         talkingSimulator.StopTalking();
         responseConcluded = true;
     }

@@ -60,10 +60,16 @@ async function sendToGemini() {
 
     // Now send Gemini reply to Unity and play audio
     unityInstance.SendMessage("Canvas", "RespondEntry", responseText);
+    // unityInstance.SendMessage("Canvas", "SetTTSAudioDuration", audioPlayer.duration);
     audioPlayer.play().catch(e => console.error("Audio play failed:", e));
 
   } catch (error) {
     console.error("Network error:", error);
     unityInstance.SendMessage("Canvas", "RespondEntry", "Network error: " + error.message);
   }
+}
+
+function HandleUnityMessage(jsonString) {
+  console.log("JS received text: ", jsonString)
+  //TODO
 }

@@ -9,17 +9,25 @@
 </head>
 
 <body>
-  
-  <h1 style="text-align: center;">Chat with Poppy</h1>
-<iframe id="UnityFrame" src="UnityWebGL/index.html"></iframe>  
-<div class="container" style="height: 235px;">
-  <textarea id="userInput" placeholder="Type your question..."></textarea>
-  <button onclick="sendToGemini()">Send</button>
-</div>
 
-<audio id="audioPlayer" style="display: none;"></audio>
+  <h1 style="text-align: center;">Chat with Poppy</h1>
+  <iframe id="UnityFrame" src="UnityWebGL/index.html"></iframe>
+  <div class="container" style="height: 235px;">
+    <textarea id="userInput" placeholder="Type your question..."></textarea>
+    <button onclick="sendToGemini()">Send</button>
+  </div>
+
+  <audio id="audioPlayer" style="display: none;"></audio>
 
   <script src=" script.js"></script>
+  <script>
+    window.addEventListener("message", (event) => {
+      if (event.data?.type === "UnityMessage") {
+        // console.log("Got from Unity iframe:", event.data.payload);
+        HandleUnityMessage(event.data.payload);
+      }
+    });
+  </script>
 </body>
 
 </html>
