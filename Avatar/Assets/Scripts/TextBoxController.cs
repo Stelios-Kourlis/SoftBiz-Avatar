@@ -69,13 +69,19 @@ public class TextBoxController : MonoBehaviour
     }
     public void ClearResponse()
     {
-        if (responseObject != null)
+        Debug.Log("[ClearResponse] Called");
+
+        if (responseObject == null)
         {
-            TMP_Text textComponent = responseObject.GetComponentInChildren<TMP_Text>();
-            if (textComponent != null)
-            {
-                textComponent.text = "";
-            }
+            Debug.LogWarning("[ClearResponse] responseObject was null — creating it.");
+            StartCoroutine(CreateResponseObject(forceCreate: true));
+            return;
+        }
+
+        TMP_Text textComponent = responseObject.GetComponentInChildren<TMP_Text>();
+        if (textComponent != null)
+        {
+            textComponent.text = "";
         }
     }
     public void AddToResponse(string nextSentense)
