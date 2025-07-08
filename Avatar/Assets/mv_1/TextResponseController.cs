@@ -4,6 +4,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using System.Runtime.InteropServices;
+using Unity.VisualScripting;
 
 public class TextResponseController : MonoBehaviour
 {
@@ -17,6 +18,8 @@ public class TextResponseController : MonoBehaviour
     [SerializeField] private float BOX_ANIMATION_DURATION = 0.5f;
     [SerializeField] private float ARROW_ANIMATION_DURATION = 0.5f;
     [SerializeField] private Ease ANIMATION_EASE_TYPE = Ease.OutCubic;
+    [SerializeField, Range(0.1f, 2f)] private float TEXT_ANIMATION_SPEED_MULTIPLIER = 0.5f;
+    [SerializeField] private int TRIANGLE_JUMP_HEIGHT_PIXELS = 30;
     private float TEXT_TO_SPEECH_AUDIO_DURATION = -1f;
 
     [SerializeField] private GameObject textResponseObject, clickCaptureObject, thinkingTextObject;
@@ -163,8 +166,10 @@ public class TextResponseController : MonoBehaviour
 
         arrowRectTransform.gameObject.SetActive(true);
         arrowRectTransform.rotation = Quaternion.Euler(0, 0, 180);
+        arrowRectTransform.localScale = Vector3.zero;
 
         arrowRectTransform.DORotate(new Vector3(0, 0, 270), ARROW_ANIMATION_DURATION).SetEase(ANIMATION_EASE_TYPE);
+        arrowRectTransform.DOScale(new Vector3(3, 3, 3), BOX_ANIMATION_DURATION).SetEase(ANIMATION_EASE_TYPE);
         yield return tween.WaitForCompletion();
     }
 
@@ -188,12 +193,36 @@ public class TextResponseController : MonoBehaviour
         talkingSimulator.StartTalking();
         yield return null;
         float totalTime = TEXT_TO_SPEECH_AUDIO_DURATION > 0 ? TEXT_TO_SPEECH_AUDIO_DURATION : wordCount * RESPONSE_DURATION_PER_WORD;
+        float textAnimationTime = totalTime * TEXT_ANIMATION_SPEED_MULTIPLIER;
         // This makes the animation duration be totalTime
-        textComponent.GetComponent<TextAnimation>().delayBetweenJumps = ((totalTime / 2) - textComponent.GetComponent<TextAnimation>().jumpDuration) / (textComponent.GetComponent<TextAnimation>().TmpCharCount - 1);
+        textComponent.GetComponent<TextAnimation>().delayBetweenJumps = (textAnimationTime - textComponent.GetComponent<TextAnimation>().jumpDuration) / (textComponent.GetComponent<TextAnimation>().TmpCharCount - 1);
         StartCoroutine(textComponent.GetComponent<TextAnimation>().AnimateTextOnce());
-        yield return new WaitForSeconds(totalTime);
+        yield return new WaitForSeconds(textAnimationTime);
+        StartCoroutine(WaitForUserClick());
+        yield return new WaitForSeconds(totalTime - textAnimationTime); //Wait for the rest of the time
         talkingSimulator.StopTalking();
-        responsePieceConcluded = true;
+    }
+
+    private IEnumerator WaitForUserClick()
+    {
+        RectTransform triangleRectTransform = responseObject.transform.Find("Triangle").GetComponent<RectTransform>();
+        triangleRectTransform.gameObject.SetActive(true);
+        Vector2 trianglePos = triangleRectTransform.anchoredPosition;
+
+        while (true)
+        {
+            // triangleRectTransform.anchoredPosition = new(-50, 50);
+            if (responsePieceConcluded || !triangleRectTransform.gameObject.activeInHierarchy || triangleRectTransform == null) //If the response piece is concluded, stop the coroutine
+            {
+                triangleRectTransform.gameObject.SetActive(false);
+                yield break;
+            }
+
+            Tween tween = triangleRectTransform.DOAnchorPos(trianglePos - new Vector2(0, TRIANGLE_JUMP_HEIGHT_PIXELS), 0.5f).SetEase(Ease.InQuad);
+            yield return tween.WaitForCompletion();
+            tween = triangleRectTransform.DOAnchorPos(trianglePos, 0.5f).SetEase(Ease.OutQuad);
+            yield return tween.WaitForCompletion();
+        }
     }
 
     public void OnClick(PointerEventData eventData)
