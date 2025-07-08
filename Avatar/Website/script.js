@@ -45,7 +45,7 @@ async function sendToGemini() {
       const responseText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
 
       if (!responseText) {
-        unityInstance.SendMessage("Canvas", "AddToResponse", "No valid response from Gemini.");
+        // unityInstance.SendMessage("Canvas", "AddToResponse", "No valid response from Gemini.");
         return;
       }
 
@@ -56,19 +56,20 @@ async function sendToGemini() {
       currentLineIndex = -1;
       document.getElementById("nextButton").style.display = "inline-block";
       document.getElementById("prevButton").style.display = "inline-block";
+      console.log("Response lines:", responseLines);
       skipLine();
       // console.log("Sending line:", responseLines[currentLineIndex]);
       // await sendLineToUnityAndTTS(responseLines[currentLineIndex]);
     } catch (error) {
       console.error("Network error:", error);
-      unityInstance.SendMessage("Canvas", "AddToResponse", "Network error: " + error.message);
+      // unityInstance.SendMessage("Canvas", "AddToResponse", "Network error: " + error.message);
     }
   });
 }
 
 async function sendLineToUnityAndTTS(textLine) {
 
-  console.log("Sending line to Unity and TTS:", textLine);
+  console.log("Sending line to Unity and TTS (Start):", textLine);
 
   try {
     const ttsRes = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
@@ -90,7 +91,7 @@ async function sendLineToUnityAndTTS(textLine) {
     if (!ttsRes.ok) {
       const errText = await ttsRes.text();
       console.error("TTS error:", errText);
-      unityInstance.SendMessage("Canvas", "AddToResponse", "TTS Error: " + errText);
+      // unityInstance.SendMessage("Canvas", "AddToResponse", "TTS Error: " + errText);
       return;
     }
 
@@ -99,14 +100,15 @@ async function sendLineToUnityAndTTS(textLine) {
     audioPlayer.src = audioUrl;
 
     audioPlayer.addEventListener('loadedmetadata', () => {
+      console.log("Sending line to Unity and TTS (Call):", textLine);
       unityInstance.SendMessage("Canvas", "SetTTSAudioDuration", audioPlayer.duration);
       unityInstance.SendMessage("Canvas", "AddToResponse", textLine);
-    });
-    audioPlayer.play().catch(e => console.error("Audio play failed:", e));
+      audioPlayer.play().catch(e => console.error("Audio play failed:", e));
+    }, { once: true });
 
   } catch (error) {
     console.error("TTS or Unity error:", error);
-    unityInstance.SendMessage("Canvas", "AddToResponse", "TTS Error: " + error.message);
+    // unityInstance.SendMessage("Canvas", "AddToResponse", "TTS Error: " + error.message);
   }
 }
 
@@ -146,5 +148,5 @@ function prevLine() {
 // Called from Unity
 function ReceiveMessageFromUnity(jsonString) {
   console.log("JS received message: ", jsonString);
-  skipLine();
+  // skipLine();
 }

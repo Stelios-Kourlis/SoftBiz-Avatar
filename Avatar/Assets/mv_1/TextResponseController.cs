@@ -46,6 +46,7 @@ public class TextResponseController : MonoBehaviour
     public void SetTTSAudioDuration(float duration)
     {
         TEXT_TO_SPEECH_AUDIO_DURATION = duration;
+        Debug.Log($"[SetTTSAudioDuration] Duration set to: {TEXT_TO_SPEECH_AUDIO_DURATION}");
     }
 
     // public void RespondEntry(string response)
@@ -172,7 +173,7 @@ public class TextResponseController : MonoBehaviour
 
         Debug.Log("Text after check: " + textComponent.text);
 
-        textComponent.text = textComponent.text + nextSentence;
+        textComponent.text += nextSentence;
         Debug.Log("Text after add: " + textComponent.text);
         int wordCount = nextSentence.Split(new char[] { ' ', '\n', '\t' }, System.StringSplitOptions.RemoveEmptyEntries).Length; //Get word count
         talkingSimulator.StartTalking();
@@ -181,10 +182,9 @@ public class TextResponseController : MonoBehaviour
         float textAnimationTime = totalTime * TEXT_ANIMATION_SPEED_MULTIPLIER;
         // This makes the animation duration be totalTime
         responseTextAnimation.delayBetweenJumps = (textAnimationTime - responseTextAnimation.jumpDuration) / (responseTextAnimation.TmpCharCount - 1);
-        StartCoroutine(responseTextAnimation.AnimateTextOnce(oldCharCount + 1));
-        yield return new WaitForSeconds(textAnimationTime);
+        StartCoroutine(responseTextAnimation.AnimateTextOnce(oldCharCount));
         // StartCoroutine(WaitForUserClick());
-        yield return new WaitForSeconds(totalTime - textAnimationTime); //Wait for the rest of the time
+        yield return new WaitForSeconds(totalTime); //Wait for the rest of the time
         talkingSimulator.StopTalking();
     }
     // private IEnumerator WaitForUserClick()
