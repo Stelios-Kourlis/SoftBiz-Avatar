@@ -1,4 +1,6 @@
- import { geminiApiKey, elevenLabsApiKey } from './keys.js';
+
+ const geminiApiKey = "AIzaSyC2YV4tiwz6vJ6oc5pwt-w82itmvBV_ASs"; // Replace with your Gemini key
+  const elevenLabsApiKey = "sk_48db9614c3e60f815f5aaa1b8f930a222519597bec8f01ad"; // Replace with your ElevenLabs key
   const voiceId = "21m00Tcm4TlvDq8ikWAM";
 // Globals
 let unityInstance = null;
