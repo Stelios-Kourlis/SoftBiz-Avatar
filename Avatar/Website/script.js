@@ -1,7 +1,7 @@
 
- const geminiApiKey = "AIzaSyC2YV4tiwz6vJ6oc5pwt-w82itmvBV_ASs"; // Replace with your Gemini key
-  const elevenLabsApiKey = "sk_48db9614c3e60f815f5aaa1b8f930a222519597bec8f01ad"; // Replace with your ElevenLabs key
-  const voiceId = "21m00Tcm4TlvDq8ikWAM";
+const geminiApiKey = "AIzaSyC2YV4tiwz6vJ6oc5pwt-w82itmvBV_ASs"; // Replace with your Gemini key
+const elevenLabsApiKey = "sk_48db9614c3e60f815f5aaa1b8f930a222519597bec8f01ad"; // Replace with your ElevenLabs key
+const voiceId = "21m00Tcm4TlvDq8ikWAM";
 // Globals
 let unityInstance = null;
 let responseLines = [];
@@ -44,27 +44,32 @@ async function sendToGemini() {
       const data = await geminiRes.json();
       const responseText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
 
-if (!responseText) {
-  unityInstance.SendMessage("Canvas", "RespondEntry", "No valid response from Gemini.");
-  return;
-}
+      if (!responseText) {
+        unityInstance.SendMessage("Canvas", "AddToResponse", "No valid response from Gemini.");
+        return;
+      }
 
-// Break response into sentences instead of lines
-responseLines = responseText.match(/[^.!?]+[.!?]+/g) || [responseText];
-responseLines = responseLines.map(line => line.trim());
+      // Break response into sentences instead of lines
+      responseLines = responseText.match(/[^.!?]+[.!?]+/g) || [responseText];
+      responseLines = responseLines.map(line => line.trim());
 
-currentLineIndex = 0;
-document.getElementById("nextButton").style.display = "inline-block";
-document.getElementById("prevButton").style.display = "inline-block";
-await sendLineToUnityAndTTS(responseLines[currentLineIndex]);
+      currentLineIndex = -1;
+      document.getElementById("nextButton").style.display = "inline-block";
+      document.getElementById("prevButton").style.display = "inline-block";
+      skipLine();
+      // console.log("Sending line:", responseLines[currentLineIndex]);
+      // await sendLineToUnityAndTTS(responseLines[currentLineIndex]);
     } catch (error) {
       console.error("Network error:", error);
-      unityInstance.SendMessage("Canvas", "RespondEntry", "Network error: " + error.message);
+      unityInstance.SendMessage("Canvas", "AddToResponse", "Network error: " + error.message);
     }
   });
 }
 
 async function sendLineToUnityAndTTS(textLine) {
+
+  console.log("Sending line to Unity and TTS:", textLine);
+
   try {
     const ttsRes = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
       method: "POST",
@@ -85,7 +90,7 @@ async function sendLineToUnityAndTTS(textLine) {
     if (!ttsRes.ok) {
       const errText = await ttsRes.text();
       console.error("TTS error:", errText);
-      unityInstance.SendMessage("Canvas", "RespondEntry", "TTS Error: " + errText);
+      unityInstance.SendMessage("Canvas", "AddToResponse", "TTS Error: " + errText);
       return;
     }
 
@@ -93,12 +98,15 @@ async function sendLineToUnityAndTTS(textLine) {
     const audioUrl = URL.createObjectURL(audioBlob);
     audioPlayer.src = audioUrl;
 
-    unityInstance.SendMessage("Canvas", "RespondEntry", textLine);
+    audioPlayer.addEventListener('loadedmetadata', () => {
+      unityInstance.SendMessage("Canvas", "SetTTSAudioDuration", audioPlayer.duration);
+      unityInstance.SendMessage("Canvas", "AddToResponse", textLine);
+    });
     audioPlayer.play().catch(e => console.error("Audio play failed:", e));
 
   } catch (error) {
     console.error("TTS or Unity error:", error);
-    unityInstance.SendMessage("Canvas", "RespondEntry", "TTS Error: " + error.message);
+    unityInstance.SendMessage("Canvas", "AddToResponse", "TTS Error: " + error.message);
   }
 }
 
@@ -111,10 +119,11 @@ function skipLine() {
   currentLineIndex++;
 
   if (currentLineIndex < responseLines.length) {
+    console.log("Sending line:", responseLines[currentLineIndex]);
     sendLineToUnityAndTTS(responseLines[currentLineIndex]);
   } else {
-    unityInstance.SendMessage("Canvas", "RespondEntry", "End of message.");
-  document.getElementById("nextButton").style.display = "none";
+    unityInstance.SendMessage("Canvas", "ConcludeResponse");
+    document.getElementById("nextButton").style.display = "none";
     document.getElementById("prevButton").style.display = "none";
   }
 }

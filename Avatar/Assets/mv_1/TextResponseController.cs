@@ -1,16 +1,14 @@
+using System;
 using System.Collections;
 using DG.Tweening;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using System.Runtime.InteropServices;
-using Unity.VisualScripting;
+// using System.Runtime.InteropServices;
+// using Unity.VisualScripting;
 
 public class TextResponseController : MonoBehaviour
 {
-
-
-
     [SerializeField] private float RESPONSE_DURATION_PER_WORD = 0.3f;
     [SerializeField] private float BOX_ANIMATION_DURATION = 0.5f;
     [SerializeField] private float ARROW_ANIMATION_DURATION = 0.5f;
@@ -50,11 +48,64 @@ public class TextResponseController : MonoBehaviour
         TEXT_TO_SPEECH_AUDIO_DURATION = duration;
     }
 
-    public void RespondEntry(string response)
+    // public void RespondEntry(string response)
+    // {
+    //     if (!responseConcluded) return;
+    //     responseConcluded = false;
+    //     StartCoroutine(Respond(response));
+    // }
+
+
+    private IEnumerator CreateResponseObject(bool forceCreate = false)
     {
-        if (!responseConcluded) return;
-        responseConcluded = false;
-        StartCoroutine(Respond(response));
+        if (responseObject != null)
+        {
+            if (!forceCreate) yield break;
+            Destroy(responseObject);
+            if (clickForwader != null) Destroy(clickForwader);
+        }
+
+        if (thinkingText != null)
+        {
+            thinkingText.GetComponent<TextAnimator>().StopAllCoroutines();
+            Destroy(thinkingText);
+            thinkingText = null;
+        }
+
+        // clickForwader = Instantiate(clickCaptureObject, transform); //Capture click events
+        // clickForwader.transform.SetAsFirstSibling();
+        responseObject = Instantiate(textResponseObject, transform);
+        responseObject.GetComponentInChildren<TMP_Text>().text = string.Empty; //Clear the text initially
+        yield return AnimateTextBox();
+    }
+    public void AddToResponse(string nextSentense)
+    {
+        Debug.Log($"[AddToResponse] Adding: {nextSentense}");
+        Debug.Log($"[AddToResponse] Call stack:\n{Environment.StackTrace}");
+        if (responseCoroutine != null) StopCoroutine(responseCoroutine);
+        responseCoroutine = StartCoroutine(AddToResponseCor(nextSentense));
+    }
+
+    public void ConcludeResponse()
+    {
+        if (responseObject != null) Destroy(responseObject);
+        if (clickForwader != null) Destroy(clickForwader);
+
+        talkingSimulator.StopTalking();
+    }
+
+    private bool TextFitsInTextBox(string text)
+    {
+        TMP_Text textComponent = responseObject.GetComponentInChildren<TMP_Text>();
+        RectTransform tmpRectTransform = textComponent.GetComponent<RectTransform>();
+
+        Vector2 sizeRestraints = textComponent.GetPreferredValues(text, tmpRectTransform.rect.width, tmpRectTransform.rect.height);
+
+        bool fitsWidth = sizeRestraints.x <= tmpRectTransform.rect.width;
+        bool fitsHeight = sizeRestraints.y <= tmpRectTransform.rect.height;
+
+        return fitsHeight && fitsWidth;
+
     }
 
     public void Think()
@@ -66,91 +117,14 @@ public class TextResponseController : MonoBehaviour
             thinkingText = null;
         }
 
+        ConcludeResponse();
+
         thinkingText = Instantiate(thinkingTextObject, transform);
         StartCoroutine(thinkingText.GetComponent<TextAnimator>().AnimateTextLoop());
     }
 
-
-    private IEnumerator Respond(string response)
-    {
-        if (string.IsNullOrEmpty(response))
-        {
-            yield break;
-        }
-
-
-        if (thinkingText != null)
-        {
-            thinkingText.GetComponent<TextAnimator>().StopAllCoroutines();
-            Destroy(thinkingText);
-            thinkingText = null;
-        }
-
-        yield return AnimateTextBox(); //Animate the text box
-        if (clickForwader == null)
-        {
-            clickForwader = Instantiate(clickCaptureObject, transform); //Capture click events
-        }
-        // responseConcluded = false;
-        clickForwader.GetComponent<ClickForwader>().OnClick += OnClick;
-        TMP_Text textComponent = responseObject.GetComponentInChildren<TMP_Text>();
-        RectTransform tmpRectTransform = textComponent.GetComponent<RectTransform>();
-        string[] responseSentences = response.Split(new char[] { '.', '!', '?' }, System.StringSplitOptions.RemoveEmptyEntries);
-        string responsePiece = string.Empty;
-        bool fitsWidth = true, fitsHeight = true;
-        int index = 0;
-        yield return null; //Wait for the text component to be initialized
-
-        while (index < responseSentences.Length) //Keep adding sentences until they don't fit or the text runs out
-        {
-            string nextSentence = responseSentences[index].Trim() + ". ";
-
-            string testPiece = responsePiece + nextSentence;
-
-            Vector2 sizeRestraints = textComponent.GetPreferredValues(testPiece, tmpRectTransform.rect.width, tmpRectTransform.rect.height);
-
-            fitsWidth = sizeRestraints.x <= tmpRectTransform.rect.width;
-            fitsHeight = sizeRestraints.y <= tmpRectTransform.rect.height;
-
-            if (fitsWidth && fitsHeight)
-            {
-                responsePiece = testPiece;
-                index++;
-            }
-            else
-            {
-                responseCoroutine = StartCoroutine(RespondPiece(responsePiece));
-                yield return new WaitUntil(() => responsePieceConcluded);
-                responsePieceConcluded = false; //Reset the flag for the next piece
-                responsePiece = string.Empty; //Reset the response piece
-                responseObject.SetActive(false);
-                yield return new WaitForSecondsRealtime(0.1f);
-                responseObject.SetActive(true); //To signify text change
-
-            }
-        }
-
-        if (!string.IsNullOrEmpty(responsePiece))
-        {
-            responseCoroutine = StartCoroutine(RespondPiece(responsePiece));
-            yield return new WaitUntil(() => responsePieceConcluded);
-            responsePieceConcluded = false;
-        }
-
-        Destroy(responseObject);
-        Destroy(clickForwader);
-        responseObject = null;
-        responseConcluded = true;
-    }
-
     private IEnumerator AnimateTextBox()
     {
-        if (responseObject == null)
-        {
-            responseObject = Instantiate(textResponseObject, transform);
-        }
-
-        responseObject.GetComponentInChildren<TMP_Text>().text = string.Empty; //Clear the text initially
         RectTransform boxRectTransform = responseObject.transform.Find("Box").GetComponent<RectTransform>();
         RectTransform arrowRectTransform = responseObject.transform.Find("Arrow").GetComponent<RectTransform>();
 
@@ -171,8 +145,13 @@ public class TextResponseController : MonoBehaviour
         yield return tween.WaitForCompletion();
     }
 
-    private IEnumerator RespondPiece(string responsePiece)
+    private IEnumerator AddToResponseCor(string nextSentence)
     {
+        if (responseObject == null)
+        {
+            yield return CreateResponseObject();
+        }
+
         TMP_Text textComponent = responseObject.GetComponentInChildren<TMP_Text>();
         TextAnimator responseTextAnimation = textComponent.GetComponent<TextAnimator>();
 
@@ -183,53 +162,63 @@ public class TextResponseController : MonoBehaviour
             yield break;
         }
 
-        textComponent.text = responsePiece;
-        int wordCount = responsePiece.Split(new char[] { ' ', '\n', '\t' }, System.StringSplitOptions.RemoveEmptyEntries).Length; //Get word count
+        Debug.Log("Text before check: " + textComponent.text);
+
+        int oldCharCount = responseTextAnimation.TmpCharCount;
+        if (!TextFitsInTextBox(textComponent.text + nextSentence))
+        {
+            textComponent.text = string.Empty;
+        }
+
+        Debug.Log("Text after check: " + textComponent.text);
+
+        textComponent.text = textComponent.text + nextSentence;
+        Debug.Log("Text after add: " + textComponent.text);
+        int wordCount = nextSentence.Split(new char[] { ' ', '\n', '\t' }, System.StringSplitOptions.RemoveEmptyEntries).Length; //Get word count
         talkingSimulator.StartTalking();
         yield return null;
         float totalTime = TEXT_TO_SPEECH_AUDIO_DURATION > 0 ? TEXT_TO_SPEECH_AUDIO_DURATION : wordCount * RESPONSE_DURATION_PER_WORD;
         float textAnimationTime = totalTime * TEXT_ANIMATION_SPEED_MULTIPLIER;
         // This makes the animation duration be totalTime
         responseTextAnimation.delayBetweenJumps = (textAnimationTime - responseTextAnimation.jumpDuration) / (responseTextAnimation.TmpCharCount - 1);
-        StartCoroutine(responseTextAnimation.AnimateTextOnce());
+        StartCoroutine(responseTextAnimation.AnimateTextOnce(oldCharCount + 1));
         yield return new WaitForSeconds(textAnimationTime);
-        StartCoroutine(WaitForUserClick());
+        // StartCoroutine(WaitForUserClick());
         yield return new WaitForSeconds(totalTime - textAnimationTime); //Wait for the rest of the time
         talkingSimulator.StopTalking();
     }
+    // private IEnumerator WaitForUserClick()
+    // {
+    //     RectTransform triangleRectTransform = responseObject.transform.Find("Triangle").GetComponent<RectTransform>();
+    //     triangleRectTransform.gameObject.SetActive(true);
+    //     Vector2 trianglePos = triangleRectTransform.anchoredPosition;
 
-    private IEnumerator WaitForUserClick()
-    {
-        RectTransform triangleRectTransform = responseObject.transform.Find("Triangle").GetComponent<RectTransform>();
-        triangleRectTransform.gameObject.SetActive(true);
-        Vector2 trianglePos = triangleRectTransform.anchoredPosition;
+    //     while (true)
+    //     {
+    //         // triangleRectTransform.anchoredPosition = new(-50, 50);
+    //         if (responsePieceConcluded || triangleRectTransform == null || !triangleRectTransform.gameObject.activeInHierarchy) //If the response piece is concluded, stop the coroutine
+    //         {
+    //             if (triangleRectTransform != null) triangleRectTransform.gameObject.SetActive(false);
+    //             yield break;
+    //         }
 
-        while (true)
-        {
-            // triangleRectTransform.anchoredPosition = new(-50, 50);
-            if (responsePieceConcluded || !triangleRectTransform.gameObject.activeInHierarchy || triangleRectTransform == null) //If the response piece is concluded, stop the coroutine
-            {
-                triangleRectTransform.gameObject.SetActive(false);
-                yield break;
-            }
+    //         Tween tween = triangleRectTransform.DOAnchorPos(trianglePos - new Vector2(0, TRIANGLE_JUMP_HEIGHT_PIXELS), 0.5f).SetEase(Ease.InQuad);
+    //         yield return tween.WaitForCompletion();
+    //         tween = triangleRectTransform.DOAnchorPos(trianglePos, 0.5f).SetEase(Ease.OutQuad);
+    //         yield return tween.WaitForCompletion();
+    //     }
+    // }
 
-            Tween tween = triangleRectTransform.DOAnchorPos(trianglePos - new Vector2(0, TRIANGLE_JUMP_HEIGHT_PIXELS), 0.5f).SetEase(Ease.InQuad);
-            yield return tween.WaitForCompletion();
-            tween = triangleRectTransform.DOAnchorPos(trianglePos, 0.5f).SetEase(Ease.OutQuad);
-            yield return tween.WaitForCompletion();
-        }
-    }
-
-    public void OnClick(PointerEventData eventData)
-    {
-        talkingSimulator.StopTalking(); //If user prematurely stops the response also stop the talking
-        Application.ExternalCall("ReceiveMessageFromUnity", "next");
-        if (responseCoroutine != null)
-        {
-            // Debug.Log("Ending response cor.");
-            StopCoroutine(responseCoroutine); //Refrence the exact coroutine
-            responseCoroutine = null;
-            responsePieceConcluded = true;
-        }
-    }
+    // public void OnClick(PointerEventData eventData)
+    // {
+    //     talkingSimulator.StopTalking(); //If user prematurely stops the response also stop the talking
+    //     Application.ExternalCall("ReceiveMessageFromUnity", "next");
+    //     if (responseCoroutine != null)
+    //     {
+    //         // Debug.Log("Ending response cor.");
+    //         StopCoroutine(responseCoroutine); //Refrence the exact coroutine
+    //         responseCoroutine = null;
+    //         responsePieceConcluded = true;
+    //     }
+    // }
 }

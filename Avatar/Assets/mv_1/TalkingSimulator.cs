@@ -168,7 +168,7 @@ public class TalkingSimulator : MonoBehaviour
 
     public void StopTalking()
     {
-        StopCoroutine(talkingCoroutine);
+        if (talkingCoroutine != null) StopCoroutine(talkingCoroutine);
         bodySkinnedMeshRenderer.SetBlendShapeWeight((int)BodyBlendSpapes.Laugh, 0);
         isTalking = false;
     }

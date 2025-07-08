@@ -8,7 +8,7 @@ public class TextAnimator : MonoBehaviour
 {
     private TMP_Text tmpText;
     private TMP_TextInfo textInfo;
-    public float TmpCharCount => tmpText.textInfo.characterCount;
+    public int TmpCharCount => tmpText.textInfo.characterCount;
     public float jumpHeight = 2f;
     public float jumpDuration = 0.25f;
     public float delayBetweenJumps = 0.1f;
@@ -81,7 +81,7 @@ public class TextAnimator : MonoBehaviour
         }
     }
 
-    public IEnumerator AnimateTextOnce()
+    public IEnumerator AnimateTextOnce(int startIndex = 0)
     {
         tmpText.ForceMeshUpdate();
         textInfo = tmpText.textInfo;
@@ -103,7 +103,7 @@ public class TextAnimator : MonoBehaviour
             tmpText.ForceMeshUpdate();
             textInfo = tmpText.textInfo;
 
-            for (int i = 0; i < textInfo.characterCount; i++)
+            for (int i = startIndex; i < textInfo.characterCount; i++)
             {
                 var charInfo = textInfo.characterInfo[i];
                 if (!charInfo.isVisible) continue;
