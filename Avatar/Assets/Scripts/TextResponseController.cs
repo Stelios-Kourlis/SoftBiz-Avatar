@@ -14,7 +14,7 @@ public class TextResponseController : MonoBehaviour
     [SerializeField] private float ARROW_ANIMATION_DURATION = 0.5f;
     [SerializeField] private Ease ANIMATION_EASE_TYPE = Ease.OutCubic;
     [SerializeField, Range(0.1f, 2f)] private float TEXT_ANIMATION_SPEED_MULTIPLIER = 0.5f;
-    [SerializeField] private int TRIANGLE_JUMP_HEIGHT_PIXELS = 30;
+    // [SerializeField] private int TRIANGLE_JUMP_HEIGHT_PIXELS = 30;
     private float TEXT_TO_SPEECH_AUDIO_DURATION = -1f;
 
     [SerializeField] private GameObject textResponseObject, clickCaptureObject, thinkingTextObject;
