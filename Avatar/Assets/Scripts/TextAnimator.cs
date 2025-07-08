@@ -2,10 +2,12 @@ using System.Collections;
 using UnityEngine;
 using TMPro;
 using System.Linq;
+using System.Collections.Generic;
 
 [RequireComponent(typeof(TMP_Text))]
 public class TextAnimator : MonoBehaviour
 {
+
     private TMP_Text tmpText;
     private TMP_TextInfo textInfo;
     public int TmpCharCount => tmpText.textInfo.characterCount;
@@ -13,6 +15,8 @@ public class TextAnimator : MonoBehaviour
     public float jumpDuration = 0.25f;
     public float delayBetweenJumps = 0.1f;
     public float delayBetweenLoops = 0.5f;
+    public float fadeInDuration = 0.5f;
+    public float delayBetweenFades = 0.3f;
 
     void Awake()
     {
@@ -81,7 +85,7 @@ public class TextAnimator : MonoBehaviour
         }
     }
 
-    public IEnumerator AnimateTextOnce(int startIndex = 0)
+    public IEnumerator AnimateTextBounce(int startIndex = 0)
     {
         tmpText.ForceMeshUpdate();
         textInfo = tmpText.textInfo;

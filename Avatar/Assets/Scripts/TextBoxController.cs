@@ -7,19 +7,16 @@ using UnityEngine.EventSystems;
 // using System.Runtime.InteropServices;
 // using Unity.VisualScripting;
 
-public class TextResponseController : MonoBehaviour
+public class TextBoxController : MonoBehaviour
 {
-    [SerializeField] private float RESPONSE_DURATION_PER_WORD = 0.3f;
-    [SerializeField] private float BOX_ANIMATION_DURATION = 0.5f;
-    [SerializeField] private float ARROW_ANIMATION_DURATION = 0.5f;
-    [SerializeField] private Ease ANIMATION_EASE_TYPE = Ease.OutCubic;
     [SerializeField, Range(0.1f, 2f)] private float TEXT_ANIMATION_SPEED_MULTIPLIER = 0.5f;
-    // [SerializeField] private int TRIANGLE_JUMP_HEIGHT_PIXELS = 30;
+    [SerializeField] private float RESPONSE_DURATION_PER_WORD = 0.3f;
     private float TEXT_TO_SPEECH_AUDIO_DURATION = -1f;
 
     [SerializeField] private GameObject textResponseObject, clickCaptureObject, thinkingTextObject;
     [SerializeField] private TalkingSimulator talkingSimulator;
     // [SerializeField] private TextAnimation responseTextAnimation;
+    private TextBoxAnimator Animator => gameObject.GetComponent<TextBoxAnimator>();
     private GameObject responseObject, thinkingText;
     private Coroutine responseCoroutine;
 
@@ -68,7 +65,7 @@ public class TextResponseController : MonoBehaviour
         // clickForwader.transform.SetAsFirstSibling();
         responseObject = Instantiate(textResponseObject, transform);
         responseObject.GetComponentInChildren<TMP_Text>().text = string.Empty; //Clear the text initially
-        yield return AnimateTextBox();
+        yield return Animator.AnimateTextBoxAppearance(responseObject);
     }
     public void AddToResponse(string nextSentense)
     {
@@ -80,7 +77,8 @@ public class TextResponseController : MonoBehaviour
 
     public void ConcludeResponse()
     {
-        if (responseObject != null) Destroy(responseObject);
+        responseObject.GetComponentInChildren<TMP_Text>().text = string.Empty;
+        StartCoroutine(Animator.AnimateTextBoxDisappearance(responseObject));
         talkingSimulator.StopTalking();
     }
 
@@ -111,28 +109,6 @@ public class TextResponseController : MonoBehaviour
 
         thinkingText = Instantiate(thinkingTextObject, transform);
         StartCoroutine(thinkingText.GetComponent<TextAnimator>().AnimateTextLoop());
-    }
-
-    private IEnumerator AnimateTextBox()
-    {
-        RectTransform boxRectTransform = responseObject.transform.Find("Box").GetComponent<RectTransform>();
-        RectTransform arrowRectTransform = responseObject.transform.Find("Arrow").GetComponent<RectTransform>();
-
-        boxRectTransform.localScale = Vector3.zero;
-        boxRectTransform.rotation = Quaternion.Euler(0, 0, 90);
-        arrowRectTransform.gameObject.SetActive(false);
-
-        Tween tween = boxRectTransform.DOScale(Vector3.one, BOX_ANIMATION_DURATION).SetEase(ANIMATION_EASE_TYPE);
-        boxRectTransform.DORotate(Vector3.zero, BOX_ANIMATION_DURATION).SetEase(ANIMATION_EASE_TYPE);
-        yield return new WaitForSecondsRealtime(BOX_ANIMATION_DURATION / 2);
-
-        arrowRectTransform.gameObject.SetActive(true);
-        arrowRectTransform.rotation = Quaternion.Euler(0, 0, 180);
-        arrowRectTransform.localScale = Vector3.zero;
-
-        arrowRectTransform.DORotate(new Vector3(0, 0, 270), ARROW_ANIMATION_DURATION).SetEase(ANIMATION_EASE_TYPE);
-        arrowRectTransform.DOScale(new Vector3(3, 3, 3), BOX_ANIMATION_DURATION).SetEase(ANIMATION_EASE_TYPE);
-        yield return tween.WaitForCompletion();
     }
 
     private IEnumerator AddToResponseCor(string nextSentence)
@@ -166,7 +142,7 @@ public class TextResponseController : MonoBehaviour
         float textAnimationTime = totalTime * TEXT_ANIMATION_SPEED_MULTIPLIER;
         // This makes the animation duration be totalTime
         responseTextAnimation.delayBetweenJumps = (textAnimationTime - responseTextAnimation.jumpDuration) / (responseTextAnimation.TmpCharCount - 1);
-        StartCoroutine(responseTextAnimation.AnimateTextOnce(oldCharCount));
+        StartCoroutine(responseTextAnimation.AnimateTextBounce(oldCharCount));
         // StartCoroutine(WaitForUserClick());
         yield return new WaitForSeconds(totalTime); //Wait for the rest of the time
         talkingSimulator.StopTalking();
@@ -177,12 +153,12 @@ public class TextResponseController : MonoBehaviour
     {
         string mdText = "This is a **bold** text with *italic* and ***both*** formatting.\n\n" +
             "Here is a list:\n" +
-            "- Item 1\n" +
-            "- Item 2\n" +
-            "- Item 3\n\n" +
-            "# And a heading 1\n" +
-            "## And a heading 2\n" +
-            "###### And a heading 6\n" +
+            "- Item 1.\n" +
+            "- Item 2.\n" +
+            "- Item 3.\n\n" +
+            "# And a heading 1.\n" +
+            "## And a heading 2.\n" +
+            "###### And a heading 6.\n" +
             "> This is a block quote.\n" +
             ">> This is a nested block quote.\n";
 
