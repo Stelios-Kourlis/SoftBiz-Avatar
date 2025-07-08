@@ -20,9 +20,8 @@ public class TextResponseController : MonoBehaviour
     [SerializeField] private GameObject textResponseObject, clickCaptureObject, thinkingTextObject;
     [SerializeField] private TalkingSimulator talkingSimulator;
     // [SerializeField] private TextAnimation responseTextAnimation;
-    private GameObject responseObject, clickForwader, thinkingText;
+    private GameObject responseObject, thinkingText;
     private Coroutine responseCoroutine;
-    private bool responsePieceConcluded = false, responseConcluded = true;
 
     public void Start()
     {
@@ -49,13 +48,6 @@ public class TextResponseController : MonoBehaviour
         Debug.Log($"[SetTTSAudioDuration] Duration set to: {TEXT_TO_SPEECH_AUDIO_DURATION}");
     }
 
-    // public void RespondEntry(string response)
-    // {
-    //     if (!responseConcluded) return;
-    //     responseConcluded = false;
-    //     StartCoroutine(Respond(response));
-    // }
-
 
     private IEnumerator CreateResponseObject(bool forceCreate = false)
     {
@@ -63,7 +55,6 @@ public class TextResponseController : MonoBehaviour
         {
             if (!forceCreate) yield break;
             Destroy(responseObject);
-            if (clickForwader != null) Destroy(clickForwader);
         }
 
         if (thinkingText != null)
@@ -82,16 +73,14 @@ public class TextResponseController : MonoBehaviour
     public void AddToResponse(string nextSentense)
     {
         Debug.Log($"[AddToResponse] Adding: {nextSentense}");
-        Debug.Log($"[AddToResponse] Call stack:\n{Environment.StackTrace}");
+        talkingSimulator.StopTalking();
         if (responseCoroutine != null) StopCoroutine(responseCoroutine);
-        responseCoroutine = StartCoroutine(AddToResponseCor(nextSentense));
+        responseCoroutine = StartCoroutine(AddToResponseCor(MarkdownToTMPConverter.ConvertToTMPCompatibleText(nextSentense)));
     }
 
     public void ConcludeResponse()
     {
         if (responseObject != null) Destroy(responseObject);
-        if (clickForwader != null) Destroy(clickForwader);
-
         talkingSimulator.StopTalking();
     }
 
@@ -163,18 +152,13 @@ public class TextResponseController : MonoBehaviour
             yield break;
         }
 
-        Debug.Log("Text before check: " + textComponent.text);
-
         int oldCharCount = responseTextAnimation.TmpCharCount;
         if (!TextFitsInTextBox(textComponent.text + nextSentence))
         {
             textComponent.text = string.Empty;
         }
 
-        Debug.Log("Text after check: " + textComponent.text);
-
         textComponent.text += nextSentence;
-        Debug.Log("Text after add: " + textComponent.text);
         int wordCount = nextSentence.Split(new char[] { ' ', '\n', '\t' }, System.StringSplitOptions.RemoveEmptyEntries).Length; //Get word count
         talkingSimulator.StartTalking();
         yield return null;
@@ -187,38 +171,22 @@ public class TextResponseController : MonoBehaviour
         yield return new WaitForSeconds(totalTime); //Wait for the rest of the time
         talkingSimulator.StopTalking();
     }
-    // private IEnumerator WaitForUserClick()
-    // {
-    //     RectTransform triangleRectTransform = responseObject.transform.Find("Triangle").GetComponent<RectTransform>();
-    //     triangleRectTransform.gameObject.SetActive(true);
-    //     Vector2 trianglePos = triangleRectTransform.anchoredPosition;
 
-    //     while (true)
-    //     {
-    //         // triangleRectTransform.anchoredPosition = new(-50, 50);
-    //         if (responsePieceConcluded || triangleRectTransform == null || !triangleRectTransform.gameObject.activeInHierarchy) //If the response piece is concluded, stop the coroutine
-    //         {
-    //             if (triangleRectTransform != null) triangleRectTransform.gameObject.SetActive(false);
-    //             yield break;
-    //         }
+    // #if !DEVELOPMENT_BUILD && !UNITY_EDITOR
+    public void ForceMDTest()
+    {
+        string mdText = "This is a **bold** text with *italic* and ***both*** formatting.\n\n" +
+            "Here is a list:\n" +
+            "- Item 1\n" +
+            "- Item 2\n" +
+            "- Item 3\n\n" +
+            "# And a heading 1\n" +
+            "## And a heading 2\n" +
+            "###### And a heading 6\n" +
+            "> This is a block quote.\n" +
+            ">> This is a nested block quote.\n";
 
-    //         Tween tween = triangleRectTransform.DOAnchorPos(trianglePos - new Vector2(0, TRIANGLE_JUMP_HEIGHT_PIXELS), 0.5f).SetEase(Ease.InQuad);
-    //         yield return tween.WaitForCompletion();
-    //         tween = triangleRectTransform.DOAnchorPos(trianglePos, 0.5f).SetEase(Ease.OutQuad);
-    //         yield return tween.WaitForCompletion();
-    //     }
-    // }
-
-    // public void OnClick(PointerEventData eventData)
-    // {
-    //     talkingSimulator.StopTalking(); //If user prematurely stops the response also stop the talking
-    //     Application.ExternalCall("ReceiveMessageFromUnity", "next");
-    //     if (responseCoroutine != null)
-    //     {
-    //         // Debug.Log("Ending response cor.");
-    //         StopCoroutine(responseCoroutine); //Refrence the exact coroutine
-    //         responseCoroutine = null;
-    //         responsePieceConcluded = true;
-    //     }
-    // }
+        AddToResponse(mdText);
+    }
+    // #endif
 }
