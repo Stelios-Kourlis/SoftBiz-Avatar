@@ -341,8 +341,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: acb0b1627136de540b17e3dd400774d0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  jumpHeight: 10
-  jumpDuration: 0.5
+  jumpHeight: 2.5
+  jumpDuration: 0.25
   delayBetweenJumps: 0.1
   delayBetweenLoops: 0.5
 --- !u!1 &3078639083390082809
