@@ -32,6 +32,7 @@ public class TextBoxAnimator : MonoBehaviour
 
     public IEnumerator AnimateTextBoxDisappearance(GameObject responseObject)
     {
+        responseObject.GetComponentInChildren<TMPro.TMP_Text>().text = string.Empty;
         RectTransform boxRectTransform = responseObject.transform.Find("Box").GetComponent<RectTransform>();
         RectTransform arrowRectTransform = responseObject.transform.Find("Arrow").GetComponent<RectTransform>();
 

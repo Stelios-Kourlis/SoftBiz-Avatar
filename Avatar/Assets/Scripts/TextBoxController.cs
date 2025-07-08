@@ -88,7 +88,6 @@ public class TextBoxController : MonoBehaviour
 
     public void ConcludeResponse()
     {
-        responseObject.GetComponentInChildren<TMP_Text>().text = string.Empty;
         StartCoroutine(Animator.AnimateTextBoxDisappearance(responseObject));
         talkingSimulator.StopTalking();
     }
@@ -116,7 +115,7 @@ public class TextBoxController : MonoBehaviour
             thinkingText = null;
         }
 
-        ConcludeResponse();
+        if (responseObject != null) ConcludeResponse();
 
         thinkingText = Instantiate(thinkingTextObject, transform);
         StartCoroutine(thinkingText.GetComponent<TextAnimator>().AnimateTextLoop());

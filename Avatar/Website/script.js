@@ -54,8 +54,8 @@ async function sendToGemini() {
       responseLines = responseLines.map(line => line.trim());
 
       currentLineIndex = -1;
-      document.getElementById("nextButton").style.display = "inline-block";
-      document.getElementById("prevButton").style.display = "inline-block";
+      document.getElementById("response-movement").style.display = "flex";
+      // document.getElementById("prevButton").style.display = "inline-block";
       console.log("Response lines:", responseLines);
       skipLine();
       // console.log("Sending line:", responseLines[currentLineIndex]);
@@ -126,8 +126,8 @@ function skipLine() {
     sendLineToUnityAndTTS(responseLines[currentLineIndex]);
   } else {
     unityInstance.SendMessage("Canvas", "ConcludeResponse");
-    document.getElementById("nextButton").style.display = "none";
-    document.getElementById("prevButton").style.display = "none";
+    document.getElementById("response-movement").style.display = "none";
+    // document.getElementById("prevButton").style.display = "none";
   }
 }
 

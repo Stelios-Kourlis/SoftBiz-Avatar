@@ -19,6 +19,9 @@ body {
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   backdrop-filter: blur(8px);
+  display: flex;
+  flex-direction: column;
+  height: auto;
   /* Optional: Glassmorphism effect */
 }
 
@@ -81,4 +84,10 @@ iframe#UnityFrame {
   button {
     font-size: 14px;
   }
+}
+
+#response-movement {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
 }

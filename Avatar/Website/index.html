@@ -12,16 +12,18 @@
 
   <h1 style="text-align: center;">Chat with Poppy</h1>
   <iframe id="UnityFrame" src="UnityWebGL/index.html"></iframe>
-  <div class="container" style="height: 235px;">
+  <div class="container">
     <textarea id="userInput" placeholder="Type your question..."></textarea>
     <button onclick="sendToGemini()">Send</button>
-    <button id="prevButton" onclick="prevLine()" style="display: none;">Previous</button>
-    <button id="nextButton" onclick="skipLine()" style="display: none;">Next</button>
+    <div id="response-movement">
+      <button id="prevButton" onclick="prevLine()">Previous</button>
+      <button id="nextButton" onclick="skipLine()">Next</button>
+    </div>
   </div>
 
   <audio id="audioPlayer" style="display: none;"></audio>
 
-  <script  src="./script.js"></script>
+  <script src="./script.js"></script>
 </body>
 
 </html>
