@@ -15,6 +15,8 @@
   <div class="container" style="height: 235px;">
     <textarea id="userInput" placeholder="Type your question..."></textarea>
     <button onclick="sendToGemini()">Send</button>
+    <button id="prevButton" onclick="prevLine()" style="display: none;">Previous</button>
+    <button id="nextButton" onclick="skipLine()" style="display: none;">Next</button>
   </div>
 
   <audio id="audioPlayer" style="display: none;"></audio>
@@ -24,7 +26,7 @@
     window.addEventListener("message", (event) => {
       if (event.data?.type === "UnityMessage") {
         // console.log("Got from Unity iframe:", event.data.payload);
-        HandleUnityMessage(event.data.payload);
+        ReceiveMessageFromUnity(event.data.payload);
       }
     });
   </script>

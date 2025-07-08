@@ -9,10 +9,7 @@ using Unity.VisualScripting;
 public class TextResponseController : MonoBehaviour
 {
 
-#if UNITY_WEBGL && !UNITY_EDITOR
-    [DllImport("__Internal")]
-    private static extern void ReceiveMessageFromUnity(string message); //defined in JS
-#endif
+
 
     [SerializeField] private float RESPONSE_DURATION_PER_WORD = 0.3f;
     [SerializeField] private float BOX_ANIMATION_DURATION = 0.5f;
@@ -184,10 +181,6 @@ public class TextResponseController : MonoBehaviour
             yield break;
         }
 
-#if UNITY_WEBGL && !UNITY_EDITOR
-        ReceiveMessageFromUnity(responsePiece);
-#endif
-
         textComponent.text = responsePiece;
         int wordCount = responsePiece.Split(new char[] { ' ', '\n', '\t' }, System.StringSplitOptions.RemoveEmptyEntries).Length; //Get word count
         talkingSimulator.StartTalking();
@@ -228,6 +221,7 @@ public class TextResponseController : MonoBehaviour
     public void OnClick(PointerEventData eventData)
     {
         talkingSimulator.StopTalking(); //If user prematurely stops the response also stop the talking
+        Application.ExternalCall("ReceiveMessageFromUnity", "next");
         if (responseCoroutine != null)
         {
             // Debug.Log("Ending response cor.");
