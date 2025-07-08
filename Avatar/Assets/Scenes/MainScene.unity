@@ -673,6 +673,7 @@ GameObject:
   - component: {fileID: 462618944}
   - component: {fileID: 462618943}
   - component: {fileID: 462618947}
+  - component: {fileID: 462618948}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -775,15 +776,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 483b800e6ebf9b542b881e300a86415b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  RESPONSE_DURATION_PER_WORD: 0.3
-  BOX_ANIMATION_DURATION: 0.5
-  ARROW_ANIMATION_DURATION: 0.5
-  ANIMATION_EASE_TYPE: 3
   TEXT_ANIMATION_SPEED_MULTIPLIER: 0.5
+  RESPONSE_DURATION_PER_WORD: 0.3
   textResponseObject: {fileID: 4609179994940494014, guid: f1392bb077e87d04ca5ab45bb0a821d5, type: 3}
   clickCaptureObject: {fileID: 8829322433189467606, guid: 87790e95e1ede1b4cbc542c541512200, type: 3}
   thinkingTextObject: {fileID: 7077611327079395189, guid: e22889e94fc1f324ab0ef00ea347a96e, type: 3}
   talkingSimulator: {fileID: 1241786140}
+--- !u!114 &462618948
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 462618942}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1438fe41595deda469b0ad2d335c6cb9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  BOX_ANIMATION_DURATION: 0.5
+  ARROW_ANIMATION_DURATION: 0.5
+  ANIMATION_EASE_TYPE: 9
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
