@@ -24,6 +24,7 @@ public class TextResponseController : MonoBehaviour
 
     [SerializeField] private GameObject textResponseObject, clickCaptureObject, thinkingTextObject;
     [SerializeField] private TalkingSimulator talkingSimulator;
+    // [SerializeField] private TextAnimation responseTextAnimation;
     private GameObject responseObject, clickForwader, thinkingText;
     private Coroutine responseCoroutine;
     private bool responsePieceConcluded = false, responseConcluded = true;
@@ -63,13 +64,13 @@ public class TextResponseController : MonoBehaviour
     {
         if (thinkingText != null)
         {
-            thinkingText.GetComponent<TextAnimation>().StopAllCoroutines();
+            thinkingText.GetComponent<TextAnimator>().StopAllCoroutines();
             Destroy(thinkingText);
             thinkingText = null;
         }
 
         thinkingText = Instantiate(thinkingTextObject, transform);
-        StartCoroutine(thinkingText.GetComponent<TextAnimation>().AnimateTextLoop());
+        StartCoroutine(thinkingText.GetComponent<TextAnimator>().AnimateTextLoop());
     }
 
 
@@ -83,7 +84,7 @@ public class TextResponseController : MonoBehaviour
 
         if (thinkingText != null)
         {
-            thinkingText.GetComponent<TextAnimation>().StopAllCoroutines();
+            thinkingText.GetComponent<TextAnimator>().StopAllCoroutines();
             Destroy(thinkingText);
             thinkingText = null;
         }
@@ -176,6 +177,7 @@ public class TextResponseController : MonoBehaviour
     private IEnumerator RespondPiece(string responsePiece)
     {
         TMP_Text textComponent = responseObject.GetComponentInChildren<TMP_Text>();
+        TextAnimator responseTextAnimation = textComponent.GetComponent<TextAnimator>();
 
         if (textComponent == null)
         {
@@ -195,8 +197,8 @@ public class TextResponseController : MonoBehaviour
         float totalTime = TEXT_TO_SPEECH_AUDIO_DURATION > 0 ? TEXT_TO_SPEECH_AUDIO_DURATION : wordCount * RESPONSE_DURATION_PER_WORD;
         float textAnimationTime = totalTime * TEXT_ANIMATION_SPEED_MULTIPLIER;
         // This makes the animation duration be totalTime
-        textComponent.GetComponent<TextAnimation>().delayBetweenJumps = (textAnimationTime - textComponent.GetComponent<TextAnimation>().jumpDuration) / (textComponent.GetComponent<TextAnimation>().TmpCharCount - 1);
-        StartCoroutine(textComponent.GetComponent<TextAnimation>().AnimateTextOnce());
+        responseTextAnimation.delayBetweenJumps = (textAnimationTime - responseTextAnimation.jumpDuration) / (responseTextAnimation.TmpCharCount - 1);
+        StartCoroutine(responseTextAnimation.AnimateTextOnce());
         yield return new WaitForSeconds(textAnimationTime);
         StartCoroutine(WaitForUserClick());
         yield return new WaitForSeconds(totalTime - textAnimationTime); //Wait for the rest of the time

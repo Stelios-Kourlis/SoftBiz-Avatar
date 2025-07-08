@@ -4,13 +4,13 @@ using TMPro;
 using System.Linq;
 
 [RequireComponent(typeof(TMP_Text))]
-public class TextAnimation : MonoBehaviour
+public class TextAnimator : MonoBehaviour
 {
     private TMP_Text tmpText;
     private TMP_TextInfo textInfo;
     public float TmpCharCount => tmpText.textInfo.characterCount;
-    public float jumpHeight = 10f;
-    public float jumpDuration = 0.5f;
+    public float jumpHeight = 2f;
+    public float jumpDuration = 0.25f;
     public float delayBetweenJumps = 0.1f;
     public float delayBetweenLoops = 0.5f;
 
