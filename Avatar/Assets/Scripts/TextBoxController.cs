@@ -67,6 +67,17 @@ public class TextBoxController : MonoBehaviour
         responseObject.GetComponentInChildren<TMP_Text>().text = string.Empty; //Clear the text initially
         yield return Animator.AnimateTextBoxAppearance(responseObject);
     }
+    public void ClearResponse()
+    {
+        if (responseObject != null)
+        {
+            TMP_Text textComponent = responseObject.GetComponentInChildren<TMP_Text>();
+            if (textComponent != null)
+            {
+                textComponent.text = "";
+            }
+        }
+    }
     public void AddToResponse(string nextSentense)
     {
         Debug.Log($"[AddToResponse] Adding: {nextSentense}");

@@ -1,6 +1,6 @@
 
 const geminiApiKey = "AIzaSyC2YV4tiwz6vJ6oc5pwt-w82itmvBV_ASs"; // Replace with your Gemini key
-const elevenLabsApiKey = "sk_48db9614c3e60f815f5aaa1b8f930a222519597bec8f01ad"; // Replace with your ElevenLabs key
+const elevenLabsApiKey = "sk_cf911377d70e13c64ba2f17dade6caa87e91f2648eeea224"; // Replace with your ElevenLabs key
 const voiceId = "21m00Tcm4TlvDq8ikWAM";
 // Globals
 let unityInstance = null;
@@ -121,6 +121,7 @@ function skipLine() {
   currentLineIndex++;
 
   if (currentLineIndex < responseLines.length) {
+    unityInstance.SendMessage("Canvas", "ClearResponse");  // Clear canvas before sending
     console.log("Sending line:", responseLines[currentLineIndex]);
     sendLineToUnityAndTTS(responseLines[currentLineIndex]);
   } else {
@@ -136,11 +137,11 @@ function prevLine() {
   }
 
   currentLineIndex--;
-
   if (currentLineIndex < 0) {
     currentLineIndex = 0;
   }
 
+  unityInstance.SendMessage("Canvas", "ClearResponse");  // Clear canvas before sending
   sendLineToUnityAndTTS(responseLines[currentLineIndex]);
 }
 
