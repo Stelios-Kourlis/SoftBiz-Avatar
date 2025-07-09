@@ -345,6 +345,8 @@ MonoBehaviour:
   jumpDuration: 0.25
   delayBetweenJumps: 0.1
   delayBetweenLoops: 0.5
+  fadeInDuration: 0.5
+  delayBetweenFades: 0.3
 --- !u!1 &3078639083390082809
 GameObject:
   m_ObjectHideFlags: 0

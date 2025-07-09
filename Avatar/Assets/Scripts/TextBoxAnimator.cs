@@ -7,6 +7,10 @@ public class TextBoxAnimator : MonoBehaviour
     [SerializeField] private float BOX_ANIMATION_DURATION = 0.5f;
     [SerializeField] private float ARROW_ANIMATION_DURATION = 0.5f;
     [SerializeField] private Ease ANIMATION_EASE_TYPE = Ease.OutCubic;
+    [SerializeField] private float TRIANGLE_JUMP_HEIGHT = 30f;
+    [SerializeField] private float TRIANGLE_JUMP_DURATION = 2f;
+
+    private Coroutine awaitInputCor;
 
     public IEnumerator AnimateTextBoxAppearance(GameObject responseObject)
     {
@@ -47,5 +51,50 @@ public class TextBoxAnimator : MonoBehaviour
 
         Destroy(responseObject);
 
+    }
+
+    public void StartWaitForUserInput(GameObject responseObject)
+    {
+        if (awaitInputCor != null)
+        {
+            StopCoroutine(awaitInputCor);
+        }
+        responseObject.transform.Find("Triangle").gameObject.SetActive(true);
+        awaitInputCor = StartCoroutine(WaitForUserInput(responseObject));
+    }
+
+    public void StopWaitForUserInput(GameObject responseObject)
+    {
+        if (awaitInputCor != null)
+        {
+            StopCoroutine(awaitInputCor);
+            responseObject.transform.Find("Triangle").gameObject.SetActive(false);
+            awaitInputCor = null;
+        }
+    }
+
+    public IEnumerator WaitForUserInput(GameObject responseObject)
+    {
+        Debug.Log("[WaitForUserInput] Waiting for user input...");
+        RectTransform triangleRectTransform = responseObject.transform.Find("Triangle").GetComponent<RectTransform>();
+        Vector2 originalPosition = triangleRectTransform.anchoredPosition;
+        Tween tween = null;
+
+        try
+        {
+            while (true)
+            {
+                tween = triangleRectTransform.DOAnchorPosY(originalPosition.y + TRIANGLE_JUMP_HEIGHT, TRIANGLE_JUMP_DURATION / 2).SetEase(Ease.OutQuad);
+                yield return tween.WaitForCompletion();
+                tween = triangleRectTransform.DOAnchorPosY(originalPosition.y, TRIANGLE_JUMP_DURATION / 2).SetEase(Ease.InQuad);
+                yield return tween.WaitForCompletion();
+            }
+        }
+        finally
+        {
+            tween.Kill();
+            triangleRectTransform.anchoredPosition = originalPosition;
+            Debug.Log("Wait for input killed");
+        }
     }
 }

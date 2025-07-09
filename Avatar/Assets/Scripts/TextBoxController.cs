@@ -83,6 +83,7 @@ public class TextBoxController : MonoBehaviour
         {
             textComponent.text = "";
         }
+        Animator.StopWaitForUserInput(responseObject);
     }
     public void AddToResponse(string nextSentense)
     {
@@ -136,6 +137,7 @@ public class TextBoxController : MonoBehaviour
 
         TMP_Text textComponent = responseObject.GetComponentInChildren<TMP_Text>();
         TextAnimator responseTextAnimation = textComponent.GetComponent<TextAnimator>();
+        Animator.StopWaitForUserInput(responseObject);
 
         if (textComponent == null)
         {
@@ -161,10 +163,13 @@ public class TextBoxController : MonoBehaviour
         if (responseTextAnimation.delayBetweenJumps < 0) responseTextAnimation.delayBetweenJumps = 0.05f;
         Debug.Log("Animating text for " + textAnimationTime);
         StartCoroutine(responseTextAnimation.AnimateTextBounce(oldCharCount));
-        // StartCoroutine(WaitForUserClick());
-        yield return new WaitForSeconds(totalTime); //Wait for the rest of the time
+        yield return new WaitForSeconds(textAnimationTime);
+        Animator.StartWaitForUserInput(responseObject);
+        yield return new WaitForSeconds(totalTime - textAnimationTime); //Wait for the rest of the time
         talkingSimulator.StopTalking();
     }
+
+
 
     // #if !DEVELOPMENT_BUILD && !UNITY_EDITOR
     public void ForceMDTest()

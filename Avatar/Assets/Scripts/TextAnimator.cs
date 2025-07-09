@@ -14,6 +14,7 @@ public class TextAnimator : MonoBehaviour
     public float jumpHeight = 2f;
     public float jumpDuration = 0.25f;
     public float delayBetweenJumps = 0.1f;
+    // public float waveDuration = 2f;
     public float delayBetweenLoops = 0.5f;
     public float fadeInDuration = 0.5f;
     public float delayBetweenFades = 0.3f;

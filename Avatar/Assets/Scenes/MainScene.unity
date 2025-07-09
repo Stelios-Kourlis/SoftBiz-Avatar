@@ -797,6 +797,8 @@ MonoBehaviour:
   BOX_ANIMATION_DURATION: 0.5
   ARROW_ANIMATION_DURATION: 0.5
   ANIMATION_EASE_TYPE: 9
+  TRIANGLE_JUMP_HEIGHT: 30
+  TRIANGLE_JUMP_DURATION: 0.75
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -1858,7 +1860,7 @@ MonoBehaviour:
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: Small Piece
+          m_StringArgument: 'Small PieceSmall PieceSmall Piece '
           m_BoolArgument: 0
         m_CallState: 2
 --- !u!114 &2083628614
