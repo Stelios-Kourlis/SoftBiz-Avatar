@@ -7,6 +7,7 @@ let unityInstance = null;
 let responseLines = [];
 let currentLineIndex = 0;
 let audioPlayer = document.getElementById("audioPlayer");
+let ignoreTTS = false;
 
 function waitForUnity(callback) {
   const frame = document.getElementById("UnityFrame");
@@ -70,6 +71,12 @@ async function sendToGemini() {
 async function sendLineToUnityAndTTS(textLine) {
 
   console.log("Sending line to Unity and TTS (Start):", textLine);
+
+  if (ignoreTTS) {
+    console.log("Sending line to Unity and TTS (Call):", textLine);
+    unityInstance.SendMessage("Canvas", "AddToResponse", textLine);
+    return;
+  }
 
   try {
     const ttsRes = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
