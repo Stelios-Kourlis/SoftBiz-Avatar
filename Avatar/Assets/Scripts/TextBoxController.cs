@@ -175,7 +175,7 @@ public class TextBoxController : MonoBehaviour
     public void ForceMDTest()
     {
         string mdText = "This is a **bold** text with *italic* and ***both*** formatting.\n\n" +
-            "Here is a list:\n" +
+            "Here is a unordered list:\n" +
             "- Item 1.\n" +
             "- Item 2.\n" +
             "- Item 3.\n\n" +
@@ -184,6 +184,23 @@ public class TextBoxController : MonoBehaviour
             "###### And a heading 6.\n" +
             "> This is a block quote.\n" +
             ">> This is a nested block quote.\n";
+
+        AddToResponse(mdText);
+    }
+
+    public void ForceMDTest2()
+    {
+        string mdText = "# Starting Header.\n\n" +
+            "Here is a numbered list:\n" +
+            "1. Item 1.\n" +
+            "2. Item 2.\n" +
+            "Line:\n" +
+            "---\n" +
+            "Normal text.\n" +
+            "` unclosed single line code\n" +
+            "` * single line code` preserved\n" +
+            "``` multiline\n" +
+            "code block```\n";
 
         AddToResponse(mdText);
     }
