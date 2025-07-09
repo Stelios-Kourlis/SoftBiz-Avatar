@@ -132,7 +132,7 @@ public static class MarkdownToTMPConverter
             case "`":
                 if (mds.IsOpener)
                 {
-                    sb.Append("<font=\"Consola SDF\">");
+                    sb.Append("<font=\"Consolas SDF\">");
                     mds.Replaced = true;
                 }
                 else
