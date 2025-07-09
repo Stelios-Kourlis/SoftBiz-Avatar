@@ -10,7 +10,7 @@ public class TextAnimator : MonoBehaviour
 
     private TMP_Text tmpText;
     private TMP_TextInfo textInfo;
-    public int TmpCharCount => tmpText.textInfo.characterCount;
+    public int TmpCharCount => GetComponent<TMP_Text>().textInfo.characterCount;
     public float jumpHeight = 2f;
     public float jumpDuration = 0.25f;
     // public float delayBetweenJumps = 0.1f;
@@ -100,7 +100,7 @@ public class TextAnimator : MonoBehaviour
             originalVertices[i] = textInfo.meshInfo[i].vertices.Clone() as Vector3[];
 
         float delayBetweenJumps = (waveDuration - jumpDuration) / (textInfo.characterCount - 1);
-        if (delayBetweenJumps < 0) delayBetweenJumps = 0.01f;
+        if (delayBetweenJumps < 0) delayBetweenJumps = 0.05f;
         // waveDuration = jumpDuration + (textInfo.characterCount - 1) * delayBetweenJumps;
 
         float elapsedTime = 0f;

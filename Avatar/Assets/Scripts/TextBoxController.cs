@@ -72,11 +72,7 @@ public class TextBoxController : MonoBehaviour
         Debug.Log("[ClearResponse] Called");
 
         if (responseObject == null)
-        {
-            Debug.LogWarning("[ClearResponse] responseObject was null creating it.");
-            StartCoroutine(CreateResponseObject(forceCreate: true));
             return;
-        }
 
         TMP_Text textComponent = responseObject.GetComponentInChildren<TMP_Text>();
         if (textComponent != null)
@@ -157,6 +153,7 @@ public class TextBoxController : MonoBehaviour
         talkingSimulator.StartTalking();
         // yield return null;
         float totalTime = TEXT_TO_SPEECH_AUDIO_DURATION > 0 ? TEXT_TO_SPEECH_AUDIO_DURATION : wordCount * RESPONSE_DURATION_PER_WORD;
+        if (totalTime <= 0) totalTime = 0.1f;
         float textAnimationTime = totalTime * TEXT_ANIMATION_SPEED_MULTIPLIER;
         // This makes the animation duration be textAnimationTime
         // responseTextAnimation.delayBetweenJumps = (textAnimationTime - responseTextAnimation.jumpDuration) / (responseTextAnimation.TmpCharCount - 1);
