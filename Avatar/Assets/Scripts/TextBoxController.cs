@@ -125,7 +125,7 @@ public class TextBoxController : MonoBehaviour
         if (responseObject != null) ConcludeResponse();
 
         thinkingText = Instantiate(thinkingTextObject, transform);
-        StartCoroutine(thinkingText.GetComponent<TextAnimator>().AnimateTextLoop());
+        StartCoroutine(thinkingText.GetComponent<TextAnimator>().AnimateTextLoop(1));
     }
 
     private IEnumerator AddToResponseCor(string nextSentence)
@@ -155,14 +155,14 @@ public class TextBoxController : MonoBehaviour
         textComponent.text += nextSentence;
         int wordCount = nextSentence.Split(new char[] { ' ', '\n', '\t' }, System.StringSplitOptions.RemoveEmptyEntries).Length; //Get word count
         talkingSimulator.StartTalking();
-        yield return null;
+        // yield return null;
         float totalTime = TEXT_TO_SPEECH_AUDIO_DURATION > 0 ? TEXT_TO_SPEECH_AUDIO_DURATION : wordCount * RESPONSE_DURATION_PER_WORD;
         float textAnimationTime = totalTime * TEXT_ANIMATION_SPEED_MULTIPLIER;
         // This makes the animation duration be textAnimationTime
-        responseTextAnimation.delayBetweenJumps = (textAnimationTime - responseTextAnimation.jumpDuration) / (responseTextAnimation.TmpCharCount - 1);
-        if (responseTextAnimation.delayBetweenJumps < 0) responseTextAnimation.delayBetweenJumps = 0.05f;
+        // responseTextAnimation.delayBetweenJumps = (textAnimationTime - responseTextAnimation.jumpDuration) / (responseTextAnimation.TmpCharCount - 1);
+        // if (responseTextAnimation.delayBetweenJumps < 0) responseTextAnimation.delayBetweenJumps = 0.05f;
         Debug.Log("Animating text for " + textAnimationTime);
-        StartCoroutine(responseTextAnimation.AnimateTextBounce(oldCharCount));
+        StartCoroutine(responseTextAnimation.AnimateTextBounce(textAnimationTime, oldCharCount));
         yield return new WaitForSeconds(textAnimationTime);
         Animator.StartWaitForUserInput(responseObject);
         yield return new WaitForSeconds(totalTime - textAnimationTime); //Wait for the rest of the time

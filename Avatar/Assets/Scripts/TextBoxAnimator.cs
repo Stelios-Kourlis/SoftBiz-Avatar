@@ -15,7 +15,7 @@ public class TextBoxAnimator : MonoBehaviour
     public IEnumerator AnimateTextBoxAppearance(GameObject responseObject)
     {
         RectTransform boxRectTransform = responseObject.transform.Find("Box").GetComponent<RectTransform>();
-        RectTransform arrowRectTransform = responseObject.transform.Find("Arrow").GetComponent<RectTransform>();
+        RectTransform arrowRectTransform = boxRectTransform.Find("Arrow").GetComponent<RectTransform>();
 
         boxRectTransform.localScale = Vector3.zero;
         boxRectTransform.rotation = Quaternion.Euler(0, 0, 90);
@@ -23,13 +23,13 @@ public class TextBoxAnimator : MonoBehaviour
 
         Tween tween = boxRectTransform.DOScale(Vector3.one, BOX_ANIMATION_DURATION).SetEase(ANIMATION_EASE_TYPE);
         boxRectTransform.DORotate(Vector3.zero, BOX_ANIMATION_DURATION).SetEase(ANIMATION_EASE_TYPE);
-        yield return new WaitForSecondsRealtime(BOX_ANIMATION_DURATION / 2);
+        yield return new WaitForSecondsRealtime(BOX_ANIMATION_DURATION / 4);
 
         arrowRectTransform.gameObject.SetActive(true);
-        arrowRectTransform.rotation = Quaternion.Euler(0, 0, 180);
+        arrowRectTransform.rotation = Quaternion.Euler(0, 0, 360);
         arrowRectTransform.localScale = Vector3.zero;
 
-        arrowRectTransform.DORotate(new Vector3(0, 0, 270), ARROW_ANIMATION_DURATION).SetEase(ANIMATION_EASE_TYPE);
+        arrowRectTransform.DOLocalRotate(new Vector3(0, 0, 270), ARROW_ANIMATION_DURATION).SetEase(ANIMATION_EASE_TYPE);
         arrowRectTransform.DOScale(new Vector3(3, 3, 3), ARROW_ANIMATION_DURATION).SetEase(ANIMATION_EASE_TYPE);
         yield return tween.WaitForCompletion();
     }
@@ -37,13 +37,14 @@ public class TextBoxAnimator : MonoBehaviour
     public IEnumerator AnimateTextBoxDisappearance(GameObject responseObject)
     {
         responseObject.GetComponentInChildren<TMPro.TMP_Text>().text = string.Empty;
+        StopWaitForUserInput(responseObject);
         yield return null;
         RectTransform boxRectTransform = responseObject.transform.Find("Box").GetComponent<RectTransform>();
-        RectTransform arrowRectTransform = responseObject.transform.Find("Arrow").GetComponent<RectTransform>();
+        RectTransform arrowRectTransform = boxRectTransform.Find("Arrow").GetComponent<RectTransform>();
 
-        arrowRectTransform.DORotate(new Vector3(0, 0, 0), ARROW_ANIMATION_DURATION).SetEase(ANIMATION_EASE_TYPE);
+        arrowRectTransform.DOLocalRotate(new Vector3(0, 0, 360), ARROW_ANIMATION_DURATION).SetEase(ANIMATION_EASE_TYPE);
         arrowRectTransform.DOScale(Vector3.zero, ARROW_ANIMATION_DURATION).SetEase(ANIMATION_EASE_TYPE);
-        yield return new WaitForSecondsRealtime(ARROW_ANIMATION_DURATION / 2);
+        yield return new WaitForSecondsRealtime(ARROW_ANIMATION_DURATION / 4);
 
         Tween tween = boxRectTransform.DOScale(Vector3.zero, BOX_ANIMATION_DURATION).SetEase(ANIMATION_EASE_TYPE);
         boxRectTransform.DORotate(new Vector3(0, 0, 90), BOX_ANIMATION_DURATION).SetEase(ANIMATION_EASE_TYPE);

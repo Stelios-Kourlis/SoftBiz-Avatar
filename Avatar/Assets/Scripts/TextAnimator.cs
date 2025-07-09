@@ -13,7 +13,7 @@ public class TextAnimator : MonoBehaviour
     public int TmpCharCount => tmpText.textInfo.characterCount;
     public float jumpHeight = 2f;
     public float jumpDuration = 0.25f;
-    public float delayBetweenJumps = 0.1f;
+    // public float delayBetweenJumps = 0.1f;
     // public float waveDuration = 2f;
     public float delayBetweenLoops = 0.5f;
     public float fadeInDuration = 0.5f;
@@ -24,7 +24,7 @@ public class TextAnimator : MonoBehaviour
         tmpText = GetComponent<TMP_Text>();
     }
 
-    public IEnumerator AnimateTextLoop()
+    public IEnumerator AnimateTextLoop(float waveDuration)
     {
         tmpText.ForceMeshUpdate();
         textInfo = tmpText.textInfo;
@@ -33,7 +33,9 @@ public class TextAnimator : MonoBehaviour
         for (int i = 0; i < originalVertices.Length; i++)
             originalVertices[i] = textInfo.meshInfo[i].vertices.Clone() as Vector3[];
 
-        float waveDuration = jumpDuration + (textInfo.characterCount - 1) * delayBetweenJumps;
+        // float waveDuration = jumpDuration + (textInfo.characterCount - 1) * delayBetweenJumps;
+        float delayBetweenJumps = (waveDuration - jumpDuration) / (textInfo.characterCount - 1);
+        if (delayBetweenJumps < 0) delayBetweenJumps = 0.01f;
         Debug.Log($"Wave Duration: {waveDuration}");
 
         while (true)
@@ -88,7 +90,7 @@ public class TextAnimator : MonoBehaviour
         }
     }
 
-    public IEnumerator AnimateTextBounce(int startIndex = 0)
+    public IEnumerator AnimateTextBounce(float waveDuration, int startIndex = 0)
     {
         tmpText.ForceMeshUpdate();
         textInfo = tmpText.textInfo;
@@ -97,7 +99,10 @@ public class TextAnimator : MonoBehaviour
         for (int i = 0; i < originalVertices.Length; i++)
             originalVertices[i] = textInfo.meshInfo[i].vertices.Clone() as Vector3[];
 
-        float waveDuration = jumpDuration + (textInfo.characterCount - 1) * delayBetweenJumps;
+        float delayBetweenJumps = (waveDuration - jumpDuration) / (textInfo.characterCount - 1);
+        if (delayBetweenJumps < 0) delayBetweenJumps = 0.01f;
+        // waveDuration = jumpDuration + (textInfo.characterCount - 1) * delayBetweenJumps;
+
         float elapsedTime = 0f;
         Debug.Log($"Wave Duration: {waveDuration}");
 
