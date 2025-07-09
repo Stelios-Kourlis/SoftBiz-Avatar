@@ -73,7 +73,7 @@ public class TextBoxController : MonoBehaviour
 
         if (responseObject == null)
         {
-            Debug.LogWarning("[ClearResponse] responseObject was null — creating it.");
+            Debug.LogWarning("[ClearResponse] responseObject was null creating it.");
             StartCoroutine(CreateResponseObject(forceCreate: true));
             return;
         }
@@ -156,8 +156,10 @@ public class TextBoxController : MonoBehaviour
         yield return null;
         float totalTime = TEXT_TO_SPEECH_AUDIO_DURATION > 0 ? TEXT_TO_SPEECH_AUDIO_DURATION : wordCount * RESPONSE_DURATION_PER_WORD;
         float textAnimationTime = totalTime * TEXT_ANIMATION_SPEED_MULTIPLIER;
-        // This makes the animation duration be totalTime
+        // This makes the animation duration be textAnimationTime
         responseTextAnimation.delayBetweenJumps = (textAnimationTime - responseTextAnimation.jumpDuration) / (responseTextAnimation.TmpCharCount - 1);
+        if (responseTextAnimation.delayBetweenJumps < 0) responseTextAnimation.delayBetweenJumps = 0.05f;
+        Debug.Log("Animating text for " + textAnimationTime);
         StartCoroutine(responseTextAnimation.AnimateTextBounce(oldCharCount));
         // StartCoroutine(WaitForUserClick());
         yield return new WaitForSeconds(totalTime); //Wait for the rest of the time

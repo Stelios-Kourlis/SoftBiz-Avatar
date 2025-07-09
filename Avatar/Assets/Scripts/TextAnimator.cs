@@ -32,9 +32,11 @@ public class TextAnimator : MonoBehaviour
         for (int i = 0; i < originalVertices.Length; i++)
             originalVertices[i] = textInfo.meshInfo[i].vertices.Clone() as Vector3[];
 
+        float waveDuration = jumpDuration + (textInfo.characterCount - 1) * delayBetweenJumps;
+        Debug.Log($"Wave Duration: {waveDuration}");
+
         while (true)
         {
-            float waveDuration = jumpDuration + (textInfo.characterCount - 1) * delayBetweenJumps;
             float elapsedTime = 0f;
 
             while (elapsedTime < waveDuration)
@@ -96,6 +98,7 @@ public class TextAnimator : MonoBehaviour
 
         float waveDuration = jumpDuration + (textInfo.characterCount - 1) * delayBetweenJumps;
         float elapsedTime = 0f;
+        Debug.Log($"Wave Duration: {waveDuration}");
 
         while (elapsedTime < waveDuration)
         {
