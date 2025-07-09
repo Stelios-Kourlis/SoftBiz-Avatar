@@ -87,7 +87,8 @@ iframe#UnityFrame {
 }
 
 #response-movement {
-  display: flex;
+  display: none;
   justify-content: space-between;
+  
   gap: 10px;
 }
