@@ -1,4 +1,6 @@
 
+import { marked } from 'https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js';;
+
 const geminiApiKey = "AIzaSyC2YV4tiwz6vJ6oc5pwt-w82itmvBV_ASs"; // Replace with your Gemini key
 const elevenLabsApiKey = "sk_cf911377d70e13c64ba2f17dade6caa87e91f2648eeea224"; // Replace with your ElevenLabs key
 const voiceId = "21m00Tcm4TlvDq8ikWAM";
@@ -52,7 +54,7 @@ async function sendToGemini() {
 
       console.log("Response text:", responseText);
       // document.getElementById("resBox").textContent = responseText;
-      addMessage(responseText, "AI")
+      addMessage(marked(responseText), "AI")
 
     } catch (error) {
       console.error("Network error:", error);
@@ -126,7 +128,7 @@ async function addMessage(text, sender) {
   const bubbleEl = temp.firstChild;
 
   // Add message text
-  bubbleEl.querySelector('p').textContent = text;
+  bubbleEl.querySelector('p').innerHTML = text;
 
   // Add sender style
   bubbleEl.classList.add(sender === 'me' ? 'right' : 'left');
@@ -139,3 +141,5 @@ function UpdateButtonsBasedOnIndex({ index, total }) {
   // updatePrevButtonVisibility(index, total);
   // updateNextButtonLabel(index, total);
 }
+
+window.sendToGemini = sendToGemini;

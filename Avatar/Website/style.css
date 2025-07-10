@@ -99,6 +99,7 @@ iframe#UnityFrame {
   background: royalblue;
   display: flex;
   flex-direction: column;
+  overflow: scroll;
 }
 
 .chat-bubble {
@@ -107,6 +108,10 @@ iframe#UnityFrame {
   padding: 10px;
   border-radius: 12px;
   background: #eee;
+  max-width: 60%;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
 }
 
 .chat-bubble.left {
