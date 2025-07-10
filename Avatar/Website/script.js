@@ -25,10 +25,11 @@ function waitForUnity(callback) {
 
 async function sendToGemini() {
   const userInput = document.getElementById("userInput").value;
+  addMessage(userInput, "me")
   document.getElementById("userInput").value = "";
 
   waitForUnity(async () => {
-    unityInstance.SendMessage("Canvas", "Think");
+    // unityInstance.SendMessage("Canvas", "Think");
 
     const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiApiKey}`;
     const requestBody = {
@@ -49,9 +50,9 @@ async function sendToGemini() {
         return;
       }
 
-      document.getElementById("response-movement").style.display = "flex";
       console.log("Response text:", responseText);
-      unityInstance.SendMessage("Canvas", "AddToResponse", responseText);
+      // document.getElementById("resBox").textContent = responseText;
+      addMessage(responseText, "AI")
 
     } catch (error) {
       console.error("Network error:", error);
@@ -59,46 +60,6 @@ async function sendToGemini() {
   });
 }
 
-
-// Skip button handler
-function skipLine() {
-  if (audioPlayer && !audioPlayer.paused) {
-    audioPlayer.pause();
-  }
-
-  unityInstance.SendMessage("Canvas", "ShowNextPart");
-  hasUsedNext = true;
-}
-
-function prevLine() {
-  if (audioPlayer && !audioPlayer.paused) {
-    audioPlayer.pause();
-  }
-
-  unityInstance.SendMessage("Canvas", "ShowPreviousPart");
-}
-
-function updatePrevButtonVisibility(index, total) {
-  const prevButton = document.getElementById("prevButton");
-  if (index == total) {
-    prevButton.style.display = "none";
-  } else if (index > 0) {
-    prevButton.style.display = "inline-block";
-  } else {
-    prevButton.style.display = "none";
-  }
-}
-function updateNextButtonLabel(index, total) {
-  const nextButton = document.getElementById("nextButton");
-  if (index == total - 1) {
-    nextButton.textContent = "Finish";
-  }
-  else if (index == total) {
-    nextButton.style.display = "none";
-  } else {
-    nextButton.textContent = "Next";
-  }
-}
 
 async function sendToTTS(text) {
   try {
@@ -155,8 +116,26 @@ function HandleUnityMessage(plainTextString) {
   // skipLine();
 }
 
+async function addMessage(text, sender) {
+  const res = await fetch('chatBubble.html');
+  let bubble = await res.text();
+
+  // Create a temp div to modify the fetched HTML
+  const temp = document.createElement('div');
+  temp.innerHTML = bubble.trim();
+  const bubbleEl = temp.firstChild;
+
+  // Add message text
+  bubbleEl.querySelector('p').textContent = text;
+
+  // Add sender style
+  bubbleEl.classList.add(sender === 'me' ? 'right' : 'left');
+
+  document.getElementById('resBox').appendChild(bubbleEl);
+}
+
 function UpdateButtonsBasedOnIndex({ index, total }) {
   console.log("JS received index:", index, "of", total);
-  updatePrevButtonVisibility(index, total);
-  updateNextButtonLabel(index, total);
+  // updatePrevButtonVisibility(index, total);
+  // updateNextButtonLabel(index, total);
 }

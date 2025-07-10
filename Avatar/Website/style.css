@@ -8,32 +8,29 @@ body {
 
 .container {
   position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 90%;
-  max-width: 600px;
+  display: flex;
+  flex-direction: column;
+  align-content: space-evenly;
+  justify-content: center;
+  align-items: center;
+  bottom: 50%;
+  right: 20px;
+  width: 60vw;
+  height: 90vh;
+  transform: translateY(50%);
+}
+
+.userControls {
   padding: 20px;
   background: rgba(255, 255, 255, 0.8);
-  /* Semi-transparent white */
+  max-width: 600px;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   backdrop-filter: blur(8px);
   display: flex;
   flex-direction: column;
   height: auto;
-  /* Optional: Glassmorphism effect */
-}
-
-textarea {
-  width: 100%;
-  font-size: 16px;
-  padding: 12px;
-  resize: none;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  box-sizing: border-box;
-  min-height: 80px;
+  width: 70%;
 }
 
 button {
@@ -65,8 +62,7 @@ button:hover {
 /* 🔁 Make iframe responsive */
 iframe#UnityFrame {
   aspect-ratio: 1/1;
-  width: 100vw;
-  height: 67vh;
+  width: 700px;
   border: none;
   display: block;
   margin: 0 auto;
@@ -75,7 +71,7 @@ iframe#UnityFrame {
 
 /* ✅ Responsive container on smaller screens */
 @media (max-width: 480px) {
-  .container {
+  .userControls {
     width: 95%;
     padding: 15px;
     bottom: 10px;
@@ -83,7 +79,7 @@ iframe#UnityFrame {
 
   textarea,
   button {
-    font-size: 14px;
+    font-size: 20px;
   }
 }
 
@@ -91,4 +87,36 @@ iframe#UnityFrame {
   display: none;
   justify-content: space-between;
   gap: 10px;
+}
+
+.responseContainer {
+  height: 90vh;
+  width: 30vw;
+  position: fixed;
+  left: 10px;
+  bottom: 50%;
+  transform: translateY(50%);
+  background: royalblue;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-bubble {
+  max-width: 60%;
+  margin: 5px;
+  padding: 10px;
+  border-radius: 12px;
+  background: #eee;
+}
+
+.chat-bubble.left {
+  text-align: left;
+  background: #ddd;
+}
+
+.chat-bubble.right {
+  text-align: right;
+  background: #0cf;
+  color: #fff;
+  margin-left: auto;
 }

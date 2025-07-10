@@ -10,14 +10,13 @@
 
 <body>
 
-  <h1 style="text-align: center;">Chat with Poppy</h1>
-  <iframe id="UnityFrame" src="UnityWebGL/index.html"></iframe>
+  <div class="responseContainer" id="resBox"></div>
   <div class="container">
-    <textarea id="userInput" placeholder="Type your question..."></textarea>
-    <button onclick="sendToGemini()">Send</button>
-    <div id="response-movement">
-      <button id="prevButton" onclick="prevLine()">Previous</button>
-      <button id="nextButton" onclick="skipLine()">Next</button>
+    <h1 style="text-align: center;">Chat with Poppy</h1>
+    <iframe id="UnityFrame" src="UnityWebGL/index.html"></iframe>
+    <div class="userControls">
+      <textarea id="userInput" placeholder="Type your question..."></textarea>
+      <button onclick="sendToGemini()">Send</button>
     </div>
   </div>
 
