@@ -27,6 +27,7 @@ public static class MarkdownToTMPConverter
             if (index != -1)
                 list.RemoveAt(index);
         }
+        ReplaceLatestSymbol(list, sb);
     }
 
     private static void ReplaceLatestSymbol(List<MarkdownSymbol> list, StringBuilder sb)
@@ -204,7 +205,7 @@ public static class MarkdownToTMPConverter
                         last.Symbol += " ";
                     else if (last.Symbol.Contains(">"))
                         last.Symbol += " ";
-                    else
+                    else if (last.Symbol != "\n")
                         ReplaceLatestSymbol(symbolList, sb);
                     break;
                 case '_':
