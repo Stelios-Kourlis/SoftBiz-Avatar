@@ -4,11 +4,10 @@ const elevenLabsApiKey = "sk_cf911377d70e13c64ba2f17dade6caa87e91f2648eeea224"; 
 const voiceId = "21m00Tcm4TlvDq8ikWAM";
 // Globals
 let unityInstance = null;
-let responseLines = [];
-let currentLineIndex = 0;
+// let currentLineIndex = 0;
 let audioPlayer = document.getElementById("audioPlayer");
 let hasUsedNext = false;
-let ignoreTTS = false; // Set to true to skip TTS
+let ignoreTTS = true; // Set to true to skip TTS
 
 function waitForUnity(callback) {
   const frame = document.getElementById("UnityFrame");
@@ -47,79 +46,19 @@ async function sendToGemini() {
       const responseText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
 
       if (!responseText) {
-        // unityInstance.SendMessage("Canvas", "AddToResponse", "No valid response from Gemini.");
         return;
       }
 
-      // Break response into sentences instead of lines
-      responseLines = responseText.match(/[^.!?]+[.!?]+/g) || [responseText];
-      responseLines = responseLines.map(line => line.trim());
-
-      currentLineIndex = -1;
       document.getElementById("response-movement").style.display = "flex";
-      // document.getElementById("prevButton").style.display = "inline-block";
-      console.log("Response lines:", responseLines);
+      console.log("Response text:", responseText);
       unityInstance.SendMessage("Canvas", "AddToResponse", responseText);
-      // skipLine();
-      // console.log("Sending line:", responseLines[currentLineIndex]);
-      // await sendLineToUnityAndTTS(responseLines[currentLineIndex]);
+
     } catch (error) {
       console.error("Network error:", error);
-      // unityInstance.SendMessage("Canvas", "AddToResponse", "Network error: " + error.message);
     }
   });
 }
 
-async function sendLineToUnityAndTTS(textLine) {
-
-  console.log("Sending line to Unity and TTS (Start):", textLine);
-
-  if (ignoreTTS) {
-    console.log("Sending line to Unity and TTS (Call):", textLine);
-    unityInstance.SendMessage("Canvas", "AddToResponse", textLine);
-    return;
-  }
-
-  try {
-    const ttsRes = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "xi-api-key": elevenLabsApiKey
-      },
-      body: JSON.stringify({
-        text: textLine,
-        model_id: "eleven_monolingual_v1",
-        voice_settings: {
-          stability: 0.5,
-          similarity_boost: 0.5
-        }
-      })
-    });
-
-    if (!ttsRes.ok) {
-      const errText = await ttsRes.text();
-      console.error("TTS error:", errText);
-      // unityInstance.SendMessage("Canvas", "AddToResponse", "TTS Error: " + errText);
-      return;
-    }
-
-    const audioBlob = await ttsRes.blob();
-    const audioUrl = URL.createObjectURL(audioBlob);
-    audioPlayer.src = audioUrl;
-
-    audioPlayer.addEventListener('loadedmetadata', () => {
-      console.log("Sending line to Unity and TTS (Call):", textLine);
-      unityInstance.SendMessage("Canvas", "SetTTSAudioDuration", audioPlayer.duration);
-      unityInstance.SendMessage("Canvas", "AddToResponse", textLine);
-      audioPlayer.play().catch(e => console.error("Audio play failed:", e));
-    }, { once: true });
-
-  } catch (error) {
-    console.error("TTS or Unity error:", error);
-    // unityInstance.SendMessage("Canvas", "AddToResponse", "TTS Error: " + error.message);
-  }
-}
 
 // Skip button handler
 function skipLine() {
@@ -128,20 +67,7 @@ function skipLine() {
   }
 
   unityInstance.SendMessage("Canvas", "ShowNextPart");
-
-  // currentLineIndex++;
-  // hasUsedNext = true;
-  // if (currentLineIndex < responseLines.length) {
-  //   unityInstance.SendMessage("Canvas", "ClearResponse");  // Clear canvas before sending
-  //   console.log("Sending line:", responseLines[currentLineIndex]);
-  //   sendLineToUnityAndTTS(responseLines[currentLineIndex]);
-  // } else {
-  //   unityInstance.SendMessage("Canvas", "ConcludeResponse");
-  //   document.getElementById("response-movement").style.display = "none";
-  //   // document.getElementById("prevButton").style.display = "none";
-  // }
-  // updatePrevButtonVisibility();
-  // updateNextButtonLabel();
+  hasUsedNext = true;
 }
 
 function prevLine() {
@@ -150,30 +76,25 @@ function prevLine() {
   }
 
   unityInstance.SendMessage("Canvas", "ShowPreviousPart");
-
-  // currentLineIndex--;
-  // if (currentLineIndex < 0) {
-  //   currentLineIndex = 0;
-  // }
-
-  // // unityInstance.SendMessage("Canvas", "ClearResponse");  // Clear canvas before sending
-  // sendLineToUnityAndTTS(responseLines[currentLineIndex]);
-  // updatePrevButtonVisibility();
-  // updateNextButtonLabel();
 }
 
-function updatePrevButtonVisibility() {
+function updatePrevButtonVisibility(index, total) {
   const prevButton = document.getElementById("prevButton");
-  if (hasUsedNext && currentLineIndex > 0) {
+  if (index == total) {
+    prevButton.style.display = "none";
+  } else if (index > 0) {
     prevButton.style.display = "inline-block";
   } else {
     prevButton.style.display = "none";
   }
 }
-function updateNextButtonLabel() {
+function updateNextButtonLabel(index, total) {
   const nextButton = document.getElementById("nextButton");
-  if (currentLineIndex >= responseLines.length - 1) {
+  if (index == total - 1) {
     nextButton.textContent = "Finish";
+  }
+  else if (index == total) {
+    nextButton.style.display = "none";
   } else {
     nextButton.textContent = "Next";
   }
@@ -226,9 +147,16 @@ async function sendToTTS(text) {
 function HandleUnityMessage(plainTextString) {
   console.log("JS received message: ", plainTextString);
   if (ignoreTTS) {
+    console.log("Ignoring TTS, sending to Unity only.");
     unityInstance.SendMessage("Canvas", "SetTTSAsLoaded");
     return;
   }
   sendToTTS(plainTextString);
   // skipLine();
+}
+
+function UpdateButtonsBasedOnIndex({ index, total }) {
+  console.log("JS received index:", index, "of", total);
+  updatePrevButtonVisibility(index, total);
+  updateNextButtonLabel(index, total);
 }

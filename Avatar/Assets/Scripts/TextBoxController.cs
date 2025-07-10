@@ -15,6 +15,8 @@ public class TextBoxController : MonoBehaviour
 #if UNITY_WEBGL && !UNITY_EDITOR
         [DllImport("__Internal")]
         private static extern void ReceiveMessageFromUnity(string str);
+        [DllImport("__Internal")]
+        private static extern void SendCurrentIndexOutOfTotal(int index, int total);
 #endif
 
 
@@ -143,6 +145,7 @@ public class TextBoxController : MonoBehaviour
 #if UNITY_WEBGL && !UNITY_EDITOR
             ReceiveMessageFromUnity(MarkdownToTMPConverter.RemoveAllRichTextTags(piece)); //Send TTS ready script
             yield return new WaitUntil(() => TTSLoaded);
+            SendCurrentIndexOutOfTotal(pieceIndex, responseSentences.Count);
             Debug.Log("Unity TTS Loaded");
             TTSLoaded = false;
 #endif
@@ -181,6 +184,9 @@ public class TextBoxController : MonoBehaviour
                 pieceIndex++;
                 if (pieceIndex >= responseSentences.Count)
                 {
+#if UNITY_WEBGL && !UNITY_EDITOR
+                    SendCurrentIndexOutOfTotal(pieceIndex, responseSentences.Count);
+#endif
                     StartCoroutine(Animator.AnimateTextBoxDisappearance(responseObject));
                     yield break;
                 }

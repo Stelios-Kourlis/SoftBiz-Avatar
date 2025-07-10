@@ -29,6 +29,9 @@
       if (event.data?.type === "UnityMessage") {
         HandleUnityMessage(event.data.payload);
       }
+      if (event.data?.type === "UnityIndex") {
+        UpdateButtonsBasedOnIndex(event.data.payload);
+      }
     });
   </script>
 </body>
