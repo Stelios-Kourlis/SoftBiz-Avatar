@@ -149,6 +149,7 @@ public class TextBoxController : MonoBehaviour
             Debug.Log("Unity TTS Loaded");
             TTSLoaded = false;
 #endif
+            responseObject.transform.Find("Progress").GetComponent<TMP_Text>().text = $"{pieceIndex + 1}/{responseSentences.Count}";
             if (responseCoroutine != null) StopCoroutine(responseCoroutine);
             responseCoroutine = StartCoroutine(AddToResponseCor(piece));
             yield return new WaitUntil(() => showNextPart || showPreviousPart);

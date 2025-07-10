@@ -11,6 +11,7 @@ public class TextBoxAnimator : MonoBehaviour
     [SerializeField] private float TRIANGLE_JUMP_DURATION = 2f;
 
     private Coroutine awaitInputCor;
+    // private Vector2 originalTrianglePosition;
 
     public IEnumerator AnimateTextBoxAppearance(GameObject responseObject)
     {
@@ -78,8 +79,9 @@ public class TextBoxAnimator : MonoBehaviour
     {
         Debug.Log("[WaitForUserInput] Waiting for user input...");
         RectTransform triangleRectTransform = responseObject.transform.Find("Triangle").GetComponent<RectTransform>();
-        Vector2 originalPosition = triangleRectTransform.anchoredPosition;
+        Vector2 originalPosition = new(-28, 48);
         Tween tween = null;
+        triangleRectTransform.anchoredPosition = originalPosition;
 
         try
         {
