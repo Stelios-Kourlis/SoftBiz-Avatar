@@ -8,7 +8,7 @@ let responseLines = [];
 let currentLineIndex = 0;
 let audioPlayer = document.getElementById("audioPlayer");
 let hasUsedNext = false;
-let ignoreTTS = true;
+let ignoreTTS = false; // Set to true to skip TTS
 
 function waitForUnity(callback) {
   const frame = document.getElementById("UnityFrame");
@@ -188,7 +188,7 @@ async function sendToTTS(text) {
         "xi-api-key": elevenLabsApiKey
       },
       body: JSON.stringify({
-        text: textLine,
+        text: text,
         model_id: "eleven_monolingual_v1",
         voice_settings: {
           stability: 0.5,
@@ -210,8 +210,9 @@ async function sendToTTS(text) {
 
     audioPlayer.addEventListener('loadedmetadata', () => {
       // console.log("Sending line to Unity and TTS (Call):", textLine);
-      // unityInstance.SendMessage("Canvas", "SetTTSAudioDuration", audioPlayer.duration);
-      // unityInstance.SendMessage("Canvas", "AddToResponse", textLine);
+      unityInstance.SendMessage("Canvas", "SetTTSAudioDuration", audioPlayer.duration);
+      unityInstance.SendMessage("Canvas", "SetTTSAsLoaded");
+      console.log("JS TTS Loaded:");
       audioPlayer.play().catch(e => console.error("Audio play failed:", e));
     }, { once: true });
 
@@ -222,7 +223,12 @@ async function sendToTTS(text) {
 }
 
 // Called from Unity
-function HandleUnityMessage(jsonString) {
-  console.log("JS received message: ", jsonString);
+function HandleUnityMessage(plainTextString) {
+  console.log("JS received message: ", plainTextString);
+  if (ignoreTTS) {
+    unityInstance.SendMessage("Canvas", "SetTTSAsLoaded");
+    return;
+  }
+  sendToTTS(plainTextString);
   // skipLine();
 }

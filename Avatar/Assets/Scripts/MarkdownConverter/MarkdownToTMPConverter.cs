@@ -262,5 +262,27 @@ public static class MarkdownToTMPConverter
         return sb.ToString();
     }
 
+    public static string RemoveAllRichTextTags(string text)
+    {
+        text = Regex.Replace(text, "•", "", RegexOptions.Multiline);
+        // text = Regex.Replace(text, "<.*?>", string.Empty);
+        text = Regex.Replace(text, "<b>", "", RegexOptions.Multiline);
+        text = Regex.Replace(text, "</b>", "", RegexOptions.Multiline);
+        text = Regex.Replace(text, "<i>", "", RegexOptions.Multiline);
+        text = Regex.Replace(text, "</i>", "", RegexOptions.Multiline);
+        text = Regex.Replace(text, "<size=160%>", "", RegexOptions.Multiline);
+        text = Regex.Replace(text, "<size=150%>", "", RegexOptions.Multiline);
+        text = Regex.Replace(text, "<size=140%>", "", RegexOptions.Multiline);
+        text = Regex.Replace(text, "<size=130%>", "", RegexOptions.Multiline);
+        text = Regex.Replace(text, "<size=120%>", "", RegexOptions.Multiline);
+        text = Regex.Replace(text, "<size=110%>", "", RegexOptions.Multiline);
+        text = Regex.Replace(text, "</size>", "", RegexOptions.Multiline);
+        text = Regex.Replace(text, "|", "", RegexOptions.Multiline);
+        text = Regex.Replace(text, "<font=\"Consolas SDF\">", "", RegexOptions.Multiline);
+        text = Regex.Replace(text, "</font>", "", RegexOptions.Multiline);
+        return text;
+    }
+
+
 
 }

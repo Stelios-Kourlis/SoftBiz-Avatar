@@ -28,7 +28,7 @@ public class TextBoxController : MonoBehaviour
     private TextBoxAnimator Animator => gameObject.GetComponent<TextBoxAnimator>();
     private GameObject responseObject, thinkingText;
     private Coroutine responseCoroutine;
-    private bool showNextPart = false, showPreviousPart = false;
+    private bool showNextPart = false, showPreviousPart = false, TTSLoaded = false;
     List<string> responseSentences;
 
     public void Start()
@@ -64,6 +64,11 @@ public class TextBoxController : MonoBehaviour
     public void ShowPreviousPart()
     {
         showPreviousPart = true;
+    }
+
+    public void SetTTSAsLoaded()
+    {
+        TTSLoaded = true;
     }
 
     private void BreakResponseIntoSentences(string responseText)
@@ -135,11 +140,14 @@ public class TextBoxController : MonoBehaviour
         {
             string piece = responseSentences[pieceIndex];
             Debug.Log("Showing next part: " + piece);
+#if UNITY_WEBGL && !UNITY_EDITOR
+            ReceiveMessageFromUnity(MarkdownToTMPConverter.RemoveAllRichTextTags(piece)); //Send TTS ready script
+            yield return new WaitUntil(() => TTSLoaded);
+            Debug.Log("Unity TTS Loaded");
+            TTSLoaded = false;
+#endif
             if (responseCoroutine != null) StopCoroutine(responseCoroutine);
             responseCoroutine = StartCoroutine(AddToResponseCor(piece));
-#if UNITY_WEBGL && !UNITY_EDITOR
-            ReceiveMessageFromUnity(piece);
-#endif
             yield return new WaitUntil(() => showNextPart || showPreviousPart);
             TMP_Text textComponent = responseObject.GetComponentInChildren<TMP_Text>();
             TextAnimator responseTextAnimation = textComponent.GetComponent<TextAnimator>();
