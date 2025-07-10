@@ -1,5 +1,7 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using DG.Tweening;
 using TMPro;
 using UnityEngine;
@@ -9,6 +11,13 @@ using UnityEngine.EventSystems;
 
 public class TextBoxController : MonoBehaviour
 {
+
+#if UNITY_WEBGL && !UNITY_EDITOR
+        [DllImport("__Internal")]
+        private static extern void ReceiveMessageFromUnity(string str);
+#endif
+
+
     [SerializeField, Range(0.1f, 2f)] private float TEXT_ANIMATION_SPEED_MULTIPLIER = 0.5f;
     [SerializeField] private float RESPONSE_DURATION_PER_WORD = 0.3f;
     private float TEXT_TO_SPEECH_AUDIO_DURATION = -1f;
@@ -19,6 +28,8 @@ public class TextBoxController : MonoBehaviour
     private TextBoxAnimator Animator => gameObject.GetComponent<TextBoxAnimator>();
     private GameObject responseObject, thinkingText;
     private Coroutine responseCoroutine;
+    private bool showNextPart = false, showPreviousPart = false;
+    List<string> responseSentences;
 
     public void Start()
     {
@@ -45,6 +56,29 @@ public class TextBoxController : MonoBehaviour
         Debug.Log($"[SetTTSAudioDuration] Duration set to: {TEXT_TO_SPEECH_AUDIO_DURATION}");
     }
 
+    public void ShowNextPart()
+    {
+        showNextPart = true;
+    }
+
+    public void ShowPreviousPart()
+    {
+        showPreviousPart = true;
+    }
+
+    private void BreakResponseIntoSentences(string responseText)
+    {
+        string piece = GetMaxTextBeforeOverflow(responseText, out string remainingText);
+        responseSentences = new List<string>();
+        while (piece != string.Empty)
+        {
+            Debug.Log("Showing next part: " + piece + "\n[Remaining]: " + remainingText);
+            responseSentences.Add(piece);
+            responseText = remainingText;
+            piece = GetMaxTextBeforeOverflow(responseText, out remainingText);
+        }
+    }
+
 
     private IEnumerator CreateResponseObject(bool forceCreate = false)
     {
@@ -67,6 +101,7 @@ public class TextBoxController : MonoBehaviour
         responseObject.GetComponentInChildren<TMP_Text>().text = string.Empty; //Clear the text initially
         yield return Animator.AnimateTextBoxAppearance(responseObject);
     }
+
     public void ClearResponse()
     {
         Debug.Log("[ClearResponse] Called");
@@ -81,12 +116,74 @@ public class TextBoxController : MonoBehaviour
         }
         Animator.StopWaitForUserInput(responseObject);
     }
-    public void AddToResponse(string nextSentense)
+    public void AddToResponse(string allText)
     {
-        Debug.Log($"[AddToResponse] Adding: {nextSentense}");
+        Debug.Log($"[AddToResponse] Adding: {allText}");
+        allText = MarkdownToTMPConverter.ConvertToTMPCompatibleText(allText);
         talkingSimulator.StopTalking();
-        if (responseCoroutine != null) StopCoroutine(responseCoroutine);
-        responseCoroutine = StartCoroutine(AddToResponseCor(MarkdownToTMPConverter.ConvertToTMPCompatibleText(nextSentense)));
+        StartCoroutine(RespondAndWaitForInput(allText));
+        // if (responseCoroutine != null) StopCoroutine(responseCoroutine);
+        // responseCoroutine = StartCoroutine(AddToResponseCor(allText));
+    }
+
+    private IEnumerator RespondAndWaitForInput(string allText)
+    {
+        if (responseObject == null) yield return CreateResponseObject();
+        BreakResponseIntoSentences(allText);
+        int pieceIndex = 0;
+        while (true)
+        {
+            string piece = responseSentences[pieceIndex];
+            Debug.Log("Showing next part: " + piece);
+            if (responseCoroutine != null) StopCoroutine(responseCoroutine);
+            responseCoroutine = StartCoroutine(AddToResponseCor(piece));
+#if UNITY_WEBGL && !UNITY_EDITOR
+            ReceiveMessageFromUnity(piece);
+#endif
+            yield return new WaitUntil(() => showNextPart || showPreviousPart);
+            TMP_Text textComponent = responseObject.GetComponentInChildren<TMP_Text>();
+            TextAnimator responseTextAnimation = textComponent.GetComponent<TextAnimator>();
+            // if (showPreviousPart)
+            // {
+            //     pieceIndex--;
+            //     if (pieceIndex < 0) pieceIndex = 0;
+            //     if (responseTextAnimation.isAnimationRunning)
+            //     {
+            //         responseTextAnimation.StopAnimatingTextBounce(); //If next mid sentence finish that sentence
+            //         showNextPart = false;
+            //         showPreviousPart = false;
+            //     }
+            //     continue;
+            // }
+            if (responseTextAnimation.isAnimationRunning)
+            {
+                responseTextAnimation.StopAnimatingTextBounce(); //If next mid sentence finish that sentence
+                showNextPart = false;
+                showPreviousPart = false;
+                yield return new WaitUntil(() => showNextPart || showPreviousPart);
+            }
+            ClearResponse();
+            if (showPreviousPart)
+            {
+                pieceIndex--;
+                if (pieceIndex < 0) pieceIndex = 0;
+            }
+            else
+            {
+                pieceIndex++;
+                if (pieceIndex >= responseSentences.Count)
+                {
+                    StartCoroutine(Animator.AnimateTextBoxDisappearance(responseObject));
+                    yield break;
+                }
+            }
+            Debug.Log("Showing next piece");
+            showNextPart = false;
+            showPreviousPart = false;
+            yield return null;
+        }
+
+
     }
 
     public void ConcludeResponse()
@@ -106,6 +203,27 @@ public class TextBoxController : MonoBehaviour
         bool fitsHeight = sizeRestraints.y <= tmpRectTransform.rect.height;
 
         return fitsHeight && fitsWidth;
+    }
+
+    private string GetMaxTextBeforeOverflow(string allText, out string remainingText)
+    {
+        string currentText = string.Empty;
+        string[] responseSentences = allText.Split(new char[] { '.', '!', '?' }, System.StringSplitOptions.RemoveEmptyEntries);
+        int index = 0;
+
+        while (index < responseSentences.Length)
+        {
+            string testPiece = currentText + responseSentences[index] + ". ";
+            if (!TextFitsInTextBox(testPiece))
+            {
+                remainingText = string.Join(". ", responseSentences, index, responseSentences.Length - index);
+                return currentText;
+            }
+            else currentText = testPiece;
+            index++;
+        }
+        remainingText = string.Join(". ", responseSentences, index, responseSentences.Length - index);
+        return currentText;
 
     }
 
@@ -126,10 +244,10 @@ public class TextBoxController : MonoBehaviour
 
     private IEnumerator AddToResponseCor(string nextSentence)
     {
-        if (responseObject == null)
-        {
-            yield return CreateResponseObject();
-        }
+        // if (responseObject == null)
+        // {
+        //     yield return CreateResponseObject();
+        // }
 
         TMP_Text textComponent = responseObject.GetComponentInChildren<TMP_Text>();
         TextAnimator responseTextAnimation = textComponent.GetComponent<TextAnimator>();
@@ -143,23 +261,16 @@ public class TextBoxController : MonoBehaviour
         }
 
         int oldCharCount = responseTextAnimation.TmpCharCount;
-        if (!TextFitsInTextBox(textComponent.text + nextSentence))
-        {
-            textComponent.text = string.Empty;
-        }
 
-        textComponent.text += nextSentence;
+        textComponent.text = nextSentence;
         int wordCount = nextSentence.Split(new char[] { ' ', '\n', '\t' }, System.StringSplitOptions.RemoveEmptyEntries).Length; //Get word count
         talkingSimulator.StartTalking();
         // yield return null;
         float totalTime = TEXT_TO_SPEECH_AUDIO_DURATION > 0 ? TEXT_TO_SPEECH_AUDIO_DURATION : wordCount * RESPONSE_DURATION_PER_WORD;
         if (totalTime <= 0) totalTime = 0.1f;
         float textAnimationTime = totalTime * TEXT_ANIMATION_SPEED_MULTIPLIER;
-        // This makes the animation duration be textAnimationTime
-        // responseTextAnimation.delayBetweenJumps = (textAnimationTime - responseTextAnimation.jumpDuration) / (responseTextAnimation.TmpCharCount - 1);
-        // if (responseTextAnimation.delayBetweenJumps < 0) responseTextAnimation.delayBetweenJumps = 0.05f;
-        Debug.Log("Animating text for " + textAnimationTime);
-        StartCoroutine(responseTextAnimation.AnimateTextBounce(textAnimationTime, oldCharCount));
+        Debug.Log("Animating text for " + textAnimationTime + "[TEXT:] " + nextSentence);
+        responseTextAnimation.AnimateTextBouncing(textAnimationTime, oldCharCount);
         yield return new WaitForSeconds(textAnimationTime);
         Animator.StartWaitForUserInput(responseObject);
         yield return new WaitForSeconds(totalTime - textAnimationTime); //Wait for the rest of the time
@@ -188,11 +299,7 @@ public class TextBoxController : MonoBehaviour
     public void ForceMDTest2()
     {
         string mdText = "# Starting Header.\n\n" +
-            "Here is a numbered list:\n" +
-            "1. Item 1.\n" +
-            "2. Item 2.\n" +
-            "Line:\n" +
-            "---\n" +
+            "*   **Properties:**\n    *   **High Strength:** Very strong for its weight, especially tensile strength (resistance to being pulled apart).\n" +
             "Normal text.\n" +
             "` unclosed single line code\n" +
             "` * single line code` preserved\n" +

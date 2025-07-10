@@ -190,6 +190,8 @@ public static class MarkdownToTMPConverter
                 case '-':
                     if (last.Symbol == "\n")
                         symbolList.AddOrJoin(new MarkdownSymbol("^-", index));
+                    else
+                        sb.Append("-");
                     break;
                 case '`':
                     symbolList.AddOrJoin(new MarkdownSymbol("`", index), 3);

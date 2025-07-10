@@ -24,6 +24,13 @@
   <audio id="audioPlayer" style="display: none;"></audio>
 
   <script src="./script.js"></script>
+  <script>
+    window.addEventListener("message", (event) => {
+      if (event.data?.type === "UnityMessage") {
+        HandleUnityMessage(event.data.payload);
+      }
+    });
+  </script>
 </body>
 
 </html>
