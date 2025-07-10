@@ -8,6 +8,7 @@ let responseLines = [];
 let currentLineIndex = 0;
 let audioPlayer = document.getElementById("audioPlayer");
 let ignoreTTS = false;
+let hasUsedNext = false;
 
 function waitForUnity(callback) {
   const frame = document.getElementById("UnityFrame");
@@ -126,7 +127,7 @@ function skipLine() {
   }
 
   currentLineIndex++;
-
+  hasUsedNext = true;
   if (currentLineIndex < responseLines.length) {
     unityInstance.SendMessage("Canvas", "ClearResponse");  // Clear canvas before sending
     console.log("Sending line:", responseLines[currentLineIndex]);
@@ -136,6 +137,8 @@ function skipLine() {
     document.getElementById("response-movement").style.display = "none";
     // document.getElementById("prevButton").style.display = "none";
   }
+  updatePrevButtonVisibility();
+  updateNextButtonLabel();
 }
 
 function prevLine() {
@@ -150,8 +153,26 @@ function prevLine() {
 
   unityInstance.SendMessage("Canvas", "ClearResponse");  // Clear canvas before sending
   sendLineToUnityAndTTS(responseLines[currentLineIndex]);
+  updatePrevButtonVisibility(); 
+  updateNextButtonLabel();
 }
 
+function updatePrevButtonVisibility() {
+  const prevButton = document.getElementById("prevButton");
+  if (hasUsedNext && currentLineIndex > 0) {
+    prevButton.style.display = "inline-block";
+  } else {
+    prevButton.style.display = "none";
+  }
+}
+function updateNextButtonLabel() {
+  const nextButton = document.getElementById("nextButton");
+  if (currentLineIndex >= responseLines.length - 1) {
+    nextButton.textContent = "Finish";
+  } else {
+    nextButton.textContent = "Next";
+  }
+}
 
 // Called from Unity
 function ReceiveMessageFromUnity(jsonString) {

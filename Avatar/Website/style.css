@@ -64,8 +64,9 @@ button:hover {
 
 /* 🔁 Make iframe responsive */
 iframe#UnityFrame {
+  aspect-ratio: 1/1;
   width: 100vw;
-  height: 60vh;
+  height: 67vh;
   border: none;
   display: block;
   margin: 0 auto;
@@ -89,6 +90,5 @@ iframe#UnityFrame {
 #response-movement {
   display: none;
   justify-content: space-between;
-  
   gap: 10px;
 }
