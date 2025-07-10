@@ -61,8 +61,11 @@ public class TextBoxAnimator : MonoBehaviour
         {
             StopCoroutine(awaitInputCor);
         }
-        responseObject.transform.Find("Triangle").gameObject.SetActive(true);
-        awaitInputCor = StartCoroutine(WaitForUserInput(responseObject));
+        if (responseObject != null)
+        {
+            responseObject.transform.Find("Triangle").gameObject.SetActive(true);
+            awaitInputCor = StartCoroutine(WaitForUserInput(responseObject));
+        }
     }
 
     public void StopWaitForUserInput(GameObject responseObject)

@@ -155,22 +155,11 @@ public class TextBoxController : MonoBehaviour
             yield return new WaitUntil(() => showNextPart || showPreviousPart);
             TMP_Text textComponent = responseObject.GetComponentInChildren<TMP_Text>();
             TextAnimator responseTextAnimation = textComponent.GetComponent<TextAnimator>();
-            // if (showPreviousPart)
-            // {
-            //     pieceIndex--;
-            //     if (pieceIndex < 0) pieceIndex = 0;
-            //     if (responseTextAnimation.isAnimationRunning)
-            //     {
-            //         responseTextAnimation.StopAnimatingTextBounce(); //If next mid sentence finish that sentence
-            //         showNextPart = false;
-            //         showPreviousPart = false;
-            //     }
-            //     continue;
-            // }
             if (responseTextAnimation.isAnimationRunning)
             {
                 responseTextAnimation.StopAnimatingTextBounce(); //If next mid sentence finish that sentence
                 showNextPart = false;
+                talkingSimulator.StopTalking();
                 showPreviousPart = false;
                 yield return new WaitUntil(() => showNextPart || showPreviousPart);
             }
@@ -188,6 +177,7 @@ public class TextBoxController : MonoBehaviour
 #if UNITY_WEBGL && !UNITY_EDITOR
                     SendCurrentIndexOutOfTotal(pieceIndex, responseSentences.Count);
 #endif
+                    talkingSimulator.StopTalking();
                     StartCoroutine(Animator.AnimateTextBoxDisappearance(responseObject));
                     yield break;
                 }
@@ -228,7 +218,7 @@ public class TextBoxController : MonoBehaviour
 
         while (index < responseSentences.Length)
         {
-            string testPiece = currentText + responseSentences[index] + ". ";
+            string testPiece = currentText + responseSentences[index] + " ";
             if (!TextFitsInTextBox(testPiece))
             {
                 remainingText = string.Join(". ", responseSentences, index, responseSentences.Length - index);
@@ -288,8 +278,16 @@ public class TextBoxController : MonoBehaviour
         responseTextAnimation.AnimateTextBouncing(textAnimationTime, oldCharCount);
         yield return new WaitForSeconds(textAnimationTime);
         Animator.StartWaitForUserInput(responseObject);
-        yield return new WaitForSeconds(totalTime - textAnimationTime); //Wait for the rest of the time
-        talkingSimulator.StopTalking();
+        if (TEXT_TO_SPEECH_AUDIO_DURATION > 0)
+        {   //Has TTS, sync talking with audio
+            yield return new WaitForSeconds(totalTime - textAnimationTime); //Wait for the rest of the time
+            talkingSimulator.StopTalking();
+        }
+        else
+        {   //No TTS, so end talking after the text animation
+            talkingSimulator.StopTalking();
+            yield return new WaitForSeconds(totalTime - textAnimationTime);
+        }
     }
 
 

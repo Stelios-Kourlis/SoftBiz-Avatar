@@ -171,5 +171,6 @@ public class TalkingSimulator : MonoBehaviour
         if (talkingCoroutine != null) StopCoroutine(talkingCoroutine);
         bodySkinnedMeshRenderer.SetBlendShapeWeight((int)BodyBlendSpapes.Laugh, 0);
         isTalking = false;
+        talkingCoroutine = null;
     }
 }
