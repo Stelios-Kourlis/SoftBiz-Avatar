@@ -13,23 +13,42 @@ public class TextAnimator : MonoBehaviour
     public int TmpCharCount => GetComponent<TMP_Text>().textInfo.characterCount;
     public float jumpHeight = 2f;
     public float jumpDuration = 0.25f;
-    // public float delayBetweenJumps = 0.1f;
-    // public float waveDuration = 2f;
     public float delayBetweenLoops = 0.5f;
     public float fadeInDuration = 0.5f;
     public float delayBetweenFades = 0.3f;
+    Vector3[][] originalVertices;
+    public bool isAnimationRunning = false;
+    private Coroutine textBounceCoroutine;
 
     void Awake()
     {
         tmpText = GetComponent<TMP_Text>();
     }
 
+    public void AnimateTextBouncing(float waveDuration, int startIndex = 0)
+    {
+        textBounceCoroutine = StartCoroutine(AnimateTextBounce(waveDuration, startIndex));
+    }
+
+    public void StopAnimatingTextBounce()
+    {
+        if (textBounceCoroutine != null) StopCoroutine(textBounceCoroutine);
+        isAnimationRunning = false;
+        tmpText.ForceMeshUpdate();
+        for (int i = 0; i < textInfo.meshInfo.Length; i++)
+        {
+            textInfo.meshInfo[i].mesh.vertices = originalVertices[i];
+            tmpText.UpdateGeometry(textInfo.meshInfo[i].mesh, i);
+        }
+    }
+
     public IEnumerator AnimateTextLoop(float waveDuration)
     {
+        isAnimationRunning = true;
         tmpText.ForceMeshUpdate();
         textInfo = tmpText.textInfo;
 
-        Vector3[][] originalVertices = new Vector3[textInfo.meshInfo.Length][];
+        originalVertices = new Vector3[textInfo.meshInfo.Length][];
         for (int i = 0; i < originalVertices.Length; i++)
             originalVertices[i] = textInfo.meshInfo[i].vertices.Clone() as Vector3[];
 
@@ -90,12 +109,13 @@ public class TextAnimator : MonoBehaviour
         }
     }
 
-    public IEnumerator AnimateTextBounce(float waveDuration, int startIndex = 0)
+    private IEnumerator AnimateTextBounce(float waveDuration, int startIndex = 0)
     {
+        isAnimationRunning = true;
         tmpText.ForceMeshUpdate();
         textInfo = tmpText.textInfo;
 
-        Vector3[][] originalVertices = new Vector3[textInfo.meshInfo.Length][];
+        originalVertices = new Vector3[textInfo.meshInfo.Length][];
         for (int i = 0; i < originalVertices.Length; i++)
             originalVertices[i] = textInfo.meshInfo[i].vertices.Clone() as Vector3[];
 
@@ -176,7 +196,7 @@ public class TextAnimator : MonoBehaviour
             tmpText.UpdateGeometry(textInfo.meshInfo[i].mesh, i);
         }
 
-        yield break; // done!
+        isAnimationRunning = false;
     }
 
 }

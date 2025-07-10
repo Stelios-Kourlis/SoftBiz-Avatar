@@ -4,11 +4,10 @@ const elevenLabsApiKey = "sk_cf911377d70e13c64ba2f17dade6caa87e91f2648eeea224"; 
 const voiceId = "21m00Tcm4TlvDq8ikWAM";
 // Globals
 let unityInstance = null;
-let responseLines = [];
-let currentLineIndex = 0;
+// let currentLineIndex = 0;
 let audioPlayer = document.getElementById("audioPlayer");
-let ignoreTTS = false;
 let hasUsedNext = false;
+let ignoreTTS = true; // Set to true to skip TTS
 
 function waitForUnity(callback) {
   const frame = document.getElementById("UnityFrame");
@@ -47,38 +46,61 @@ async function sendToGemini() {
       const responseText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
 
       if (!responseText) {
-        // unityInstance.SendMessage("Canvas", "AddToResponse", "No valid response from Gemini.");
         return;
       }
 
-      // Break response into sentences instead of lines
-      responseLines = responseText.match(/[^.!?]+[.!?]+/g) || [responseText];
-      responseLines = responseLines.map(line => line.trim());
-
-      currentLineIndex = -1;
       document.getElementById("response-movement").style.display = "flex";
-      // document.getElementById("prevButton").style.display = "inline-block";
-      console.log("Response lines:", responseLines);
-      skipLine();
-      // console.log("Sending line:", responseLines[currentLineIndex]);
-      // await sendLineToUnityAndTTS(responseLines[currentLineIndex]);
+      console.log("Response text:", responseText);
+      unityInstance.SendMessage("Canvas", "AddToResponse", responseText);
+
     } catch (error) {
       console.error("Network error:", error);
-      // unityInstance.SendMessage("Canvas", "AddToResponse", "Network error: " + error.message);
     }
   });
 }
 
-async function sendLineToUnityAndTTS(textLine) {
 
-  console.log("Sending line to Unity and TTS (Start):", textLine);
-
-  if (ignoreTTS) {
-    console.log("Sending line to Unity and TTS (Call):", textLine);
-    unityInstance.SendMessage("Canvas", "AddToResponse", textLine);
-    return;
+// Skip button handler
+function skipLine() {
+  if (audioPlayer && !audioPlayer.paused) {
+    audioPlayer.pause();
   }
 
+  unityInstance.SendMessage("Canvas", "ShowNextPart");
+  hasUsedNext = true;
+}
+
+function prevLine() {
+  if (audioPlayer && !audioPlayer.paused) {
+    audioPlayer.pause();
+  }
+
+  unityInstance.SendMessage("Canvas", "ShowPreviousPart");
+}
+
+function updatePrevButtonVisibility(index, total) {
+  const prevButton = document.getElementById("prevButton");
+  if (index == total) {
+    prevButton.style.display = "none";
+  } else if (index > 0) {
+    prevButton.style.display = "inline-block";
+  } else {
+    prevButton.style.display = "none";
+  }
+}
+function updateNextButtonLabel(index, total) {
+  const nextButton = document.getElementById("nextButton");
+  if (index == total - 1) {
+    nextButton.textContent = "Finish";
+  }
+  else if (index == total) {
+    nextButton.style.display = "none";
+  } else {
+    nextButton.textContent = "Next";
+  }
+}
+
+async function sendToTTS(text) {
   try {
     const ttsRes = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
       method: "POST",
@@ -87,7 +109,7 @@ async function sendLineToUnityAndTTS(textLine) {
         "xi-api-key": elevenLabsApiKey
       },
       body: JSON.stringify({
-        text: textLine,
+        text: text,
         model_id: "eleven_monolingual_v1",
         voice_settings: {
           stability: 0.5,
@@ -108,9 +130,10 @@ async function sendLineToUnityAndTTS(textLine) {
     audioPlayer.src = audioUrl;
 
     audioPlayer.addEventListener('loadedmetadata', () => {
-      console.log("Sending line to Unity and TTS (Call):", textLine);
+      // console.log("Sending line to Unity and TTS (Call):", textLine);
       unityInstance.SendMessage("Canvas", "SetTTSAudioDuration", audioPlayer.duration);
-      unityInstance.SendMessage("Canvas", "AddToResponse", textLine);
+      unityInstance.SendMessage("Canvas", "SetTTSAsLoaded");
+      console.log("JS TTS Loaded:");
       audioPlayer.play().catch(e => console.error("Audio play failed:", e));
     }, { once: true });
 
@@ -120,62 +143,20 @@ async function sendLineToUnityAndTTS(textLine) {
   }
 }
 
-// Skip button handler
-function skipLine() {
-  if (audioPlayer && !audioPlayer.paused) {
-    audioPlayer.pause();
-  }
-
-  currentLineIndex++;
-  hasUsedNext = true;
-  if (currentLineIndex < responseLines.length) {
-    unityInstance.SendMessage("Canvas", "ClearResponse");  // Clear canvas before sending
-    console.log("Sending line:", responseLines[currentLineIndex]);
-    sendLineToUnityAndTTS(responseLines[currentLineIndex]);
-  } else {
-    unityInstance.SendMessage("Canvas", "ConcludeResponse");
-    document.getElementById("response-movement").style.display = "none";
-    // document.getElementById("prevButton").style.display = "none";
-  }
-  updatePrevButtonVisibility();
-  updateNextButtonLabel();
-}
-
-function prevLine() {
-  if (audioPlayer && !audioPlayer.paused) {
-    audioPlayer.pause();
-  }
-
-  currentLineIndex--;
-  if (currentLineIndex < 0) {
-    currentLineIndex = 0;
-  }
-
-  unityInstance.SendMessage("Canvas", "ClearResponse");  // Clear canvas before sending
-  sendLineToUnityAndTTS(responseLines[currentLineIndex]);
-  updatePrevButtonVisibility(); 
-  updateNextButtonLabel();
-}
-
-function updatePrevButtonVisibility() {
-  const prevButton = document.getElementById("prevButton");
-  if (hasUsedNext && currentLineIndex > 0) {
-    prevButton.style.display = "inline-block";
-  } else {
-    prevButton.style.display = "none";
-  }
-}
-function updateNextButtonLabel() {
-  const nextButton = document.getElementById("nextButton");
-  if (currentLineIndex >= responseLines.length - 1) {
-    nextButton.textContent = "Finish";
-  } else {
-    nextButton.textContent = "Next";
-  }
-}
-
 // Called from Unity
-function ReceiveMessageFromUnity(jsonString) {
-  console.log("JS received message: ", jsonString);
+function HandleUnityMessage(plainTextString) {
+  console.log("JS received message: ", plainTextString);
+  if (ignoreTTS) {
+    console.log("Ignoring TTS, sending to Unity only.");
+    unityInstance.SendMessage("Canvas", "SetTTSAsLoaded");
+    return;
+  }
+  sendToTTS(plainTextString);
   // skipLine();
+}
+
+function UpdateButtonsBasedOnIndex({ index, total }) {
+  console.log("JS received index:", index, "of", total);
+  updatePrevButtonVisibility(index, total);
+  updateNextButtonLabel(index, total);
 }
