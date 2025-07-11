@@ -37,8 +37,9 @@ async function sendToTTS(text) {
 
       if (!ttsRes.ok) {
         const errText = await ttsRes.text();
-        console.error("TTS error:", errText);
-        return reject(errText);
+        console.error("TTS error (Not OK):", errText);
+        resolve(-1);
+        return;
       }
 
       const audioBlob = await ttsRes.blob();
@@ -51,7 +52,7 @@ async function sendToTTS(text) {
 
       audioPlayer.addEventListener("playing", () => resolve(audioPlayer.duration), { once: true });
     } catch (error) {
-      console.error("TTS error:", error);
+      console.error("TTS error (Exception):", error);
       reject(error);
     }
   });
@@ -94,7 +95,7 @@ async function sendToGemini() {
     });
 
     if (ignoreTTS) {
-      addMessage(replyText, "AI");
+      addMessage(marked(replyText), "AI");
     } else {
       const bubbleEl = await addMessage("", "AI", true);   // placeholder
 
@@ -102,8 +103,9 @@ async function sendToGemini() {
       const duration = await sendToTTS(replyText);
 
       // Compute speed so animation finishes with the audio
-      const msPerChar = (duration * 1000) / replyText.length;
-      animateBubbleText(bubbleEl, replyText, msPerChar);
+      const msPerChar = duration == -1 ? 25 : (duration * 1000) / replyText.length;
+      console.log("Duration:", duration, "msPerChar:", msPerChar);
+      animateBubbleText(bubbleEl, marked(replyText), msPerChar);
     }
   } catch (err) {
     console.error("Gemini fetch error:", err);
@@ -115,7 +117,7 @@ function animateBubbleText(bubbleEl, fullText, msPerChar = 25) {
   let i = 0;
   unityInstance.SendMessage("poppy_v1_prefab", "StartTalking")
   const interval = setInterval(() => {
-    bubbleEl.querySelector("p").textContent = fullText.slice(0, i++);
+    bubbleEl.querySelector("p").innerHTML = fullText.slice(0, i++);
     if (i > fullText.length) {
       clearInterval(interval);
       unityInstance.SendMessage("poppy_v1_prefab", "StopTalking");
@@ -136,10 +138,10 @@ async function addMessage(text, sender, animated = false) {
   document.getElementById("resBox").appendChild(bubbleEl);
 
   if (animated) {
-    bubbleEl.querySelector("p").textContent = "";
+    bubbleEl.querySelector("p").innerHTML = "";
     return bubbleEl;
   } else {
-    bubbleEl.querySelector("p").textContent = text;
+    bubbleEl.querySelector("p").innerHTML = text;
   }
 }
 
