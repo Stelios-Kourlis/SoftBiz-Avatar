@@ -6,7 +6,7 @@ const voiceId = "21m00Tcm4TlvDq8ikWAM";
 
 let unityInstance = null;
 let audioPlayer = document.getElementById("audioPlayer");
-let ignoreTTS = false;
+let ignoreTTS = true;
 let conversationHistory = [];
 
 window.addEventListener("DOMContentLoaded", () => {
@@ -95,7 +95,10 @@ async function sendToGemini() {
     });
 
     if (ignoreTTS) {
-      addMessage(marked(replyText), "AI");
+      const bubbleEl = await addMessage("", "AI", true);   // placeholder
+
+      // Compute speed so animation finishes with the audio
+      animateBubbleText(bubbleEl, replyText);
     } else {
       const bubbleEl = await addMessage("", "AI", true);   // placeholder
 
