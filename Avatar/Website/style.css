@@ -6,16 +6,15 @@ body {
   display: flex;
   height: 100vh;
   overflow: hidden;
+  align-content: center;
+  align-items: center;
+  justify-content: space-evenly;
 }
 
 /* Chat bubbles on the left */
 .responseContainer {
   width: 30%;
   height: 90%;
-  position: fixed;
-  left: 20px;
-  top: 50%;
-  transform: translateY(-50%);
   background: #282c34;
   display: flex;
   flex-direction: column;
@@ -33,10 +32,12 @@ body {
   background: #eee;
   word-wrap: break-word;
 }
+
 .chat-bubble.left {
   text-align: left;
   background: #ccc;
 }
+
 .chat-bubble.right {
   text-align: right;
   background: #0cf;
@@ -46,8 +47,8 @@ body {
 
 /* Right panel (model + input) */
 .container {
-  margin-left: 65%;
-  flex: 1;
+  /* margin-left: 65%; */
+  /* flex: 1; */
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -67,28 +68,29 @@ body {
   justify-content: center;
   width: 800px;
 }
+
 iframe#UnityFrame {
   width: 700px;
-  height: 650px;
+  height: 700px;
   border: none;
 }
 
 /* Input area */
 .userControls {
   background: rgba(255, 255, 255, 0.9);
-  padding: 16px;
+  margin: 16px;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   width: 100%;
-  max-width: 500px;
   display: flex;
   flex-direction: column;
+  align-items: center;
 }
 
 textarea {
   width: 95%;
   height: 80px;
-  padding: 10px;
+  margin: 10px;
   font-size: 16px;
   resize: none;
   border-radius: 6px;
@@ -96,7 +98,7 @@ textarea {
 }
 
 button {
-  margin-top: 12px;
+  margin: 10px;
   padding: 12px;
   font-size: 16px;
   background-color: #4285f4;
@@ -105,7 +107,9 @@ button {
   border-radius: 6px;
   cursor: pointer;
   transition: background-color 0.3s ease;
+  width: 95%;
 }
+
 button:hover {
   background-color: #3367d6;
 }
