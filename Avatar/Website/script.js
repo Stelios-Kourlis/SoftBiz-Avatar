@@ -11,10 +11,12 @@ let conversationHistory = [];
 
 window.addEventListener("DOMContentLoaded", () => {
   document.getElementById("sendBtn").addEventListener("click", sendToGemini);
+  waitForUnity();
 });
 
 // === TTS ===
 async function sendToTTS(text) {
+  // waitForUnity();
   return new Promise(async (resolve, reject) => {
     try {
       const ttsRes = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}/stream`, {
@@ -44,8 +46,6 @@ async function sendToTTS(text) {
       audioPlayer.src = audioUrl;
 
       audioPlayer.addEventListener("loadedmetadata", () => {
-        unityInstance?.SendMessage("Canvas", "SetTTSAudioDuration", audioPlayer.duration);
-        unityInstance?.SendMessage("Canvas", "SetTTSAsLoaded");
         audioPlayer.play().catch(reject);
       }, { once: true });
 
@@ -93,18 +93,18 @@ async function sendToGemini() {
       parts: [{ text: replyText }]
     });
 
-   if (ignoreTTS) {
-  addMessage(replyText, "AI");
-} else {
-  const bubbleEl = await addMessage("", "AI", true);   // placeholder
+    if (ignoreTTS) {
+      addMessage(replyText, "AI");
+    } else {
+      const bubbleEl = await addMessage("", "AI", true);   // placeholder
 
-  // Kick off TTS and wait for “playing”
-  const duration = await sendToTTS(replyText);
+      // Kick off TTS and wait for “playing”
+      const duration = await sendToTTS(replyText);
 
-  // Compute speed so animation finishes with the audio
-  const msPerChar = (duration * 1000) / replyText.length;
-  animateBubbleText(bubbleEl, replyText, msPerChar);
-}
+      // Compute speed so animation finishes with the audio
+      const msPerChar = (duration * 1000) / replyText.length;
+      animateBubbleText(bubbleEl, replyText, msPerChar);
+    }
   } catch (err) {
     console.error("Gemini fetch error:", err);
   }
@@ -113,9 +113,13 @@ async function sendToGemini() {
 // === Animate Text Bubble ===
 function animateBubbleText(bubbleEl, fullText, msPerChar = 25) {
   let i = 0;
+  unityInstance.SendMessage("poppy_v1_prefab", "StartTalking")
   const interval = setInterval(() => {
     bubbleEl.querySelector("p").textContent = fullText.slice(0, i++);
-    if (i > fullText.length) clearInterval(interval);
+    if (i > fullText.length) {
+      clearInterval(interval);
+      unityInstance.SendMessage("poppy_v1_prefab", "StopTalking");
+    }
   }, msPerChar);
 }
 
@@ -144,7 +148,7 @@ function waitForUnity(callback) {
   const frame = document.getElementById("UnityFrame");
   if (frame?.contentWindow?.unityInstance) {
     unityInstance = frame.contentWindow.unityInstance;
-    callback();
+    // callback();
   } else {
     setTimeout(() => waitForUnity(callback), 500);
   }
