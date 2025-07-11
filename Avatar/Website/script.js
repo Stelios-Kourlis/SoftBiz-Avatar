@@ -10,8 +10,14 @@ let ignoreTTS = true;
 let conversationHistory = [];
 
 window.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("sendBtn").addEventListener("click", sendToGemini);
   waitForUnity();
+  document.getElementById("sendBtn").addEventListener("click", sendToGemini);
+});
+
+window.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") {
+    sendToGemini();
+  }
 });
 
 // === TTS ===
