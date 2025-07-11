@@ -4,6 +4,12 @@ body {
   /* Use a valid color instead of 'none' */
   margin: 0;
   padding: 0;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+
 }
 
 .container {
@@ -15,8 +21,8 @@ body {
   align-items: center;
   bottom: 50%;
   right: 20px;
-  width: 60vw;
-  height: 90vh;
+  width: 60%;
+  height: 90%;
   transform: translateY(50%);
 }
 
@@ -90,16 +96,21 @@ iframe#UnityFrame {
 }
 
 .responseContainer {
-  height: 90vh;
-  width: 30vw;
+  height: 90%;
+  width: 30%;
   position: fixed;
   left: 10px;
   bottom: 50%;
   transform: translateY(50%);
-  background: royalblue;
+  background: #282c34;
   display: flex;
   flex-direction: column;
-  overflow: scroll;
+  overflow-y: auto;
+  overflow-x: hidden;
+  border-radius: 20px;
+  border-width: 10px;
+  border-style: solid;
+  border-color: #282c34;
 }
 
 .chat-bubble {
@@ -111,7 +122,6 @@ iframe#UnityFrame {
   max-width: 60%;
   word-wrap: break-word;
   overflow-wrap: break-word;
-  white-space: pre-wrap;
 }
 
 .chat-bubble.left {
