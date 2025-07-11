@@ -14,6 +14,8 @@ window.addEventListener("DOMContentLoaded", () => {
   document.getElementById("sendBtn").addEventListener("click", sendToGemini);
 });
 
+
+
 window.addEventListener("keydown", (event) => {
   if (event.key === "Enter") {
     sendToGemini();
@@ -69,6 +71,9 @@ async function sendToGemini() {
   const userInput = document.getElementById("userInput").value;
   if (!userInput.trim()) return;
 
+  document.getElementById("sendBtn").disabled = true;
+  document.getElementById("sendBtn").innerHTML = "Thinking...";
+
   addMessage(userInput, "me");
   document.getElementById("userInput").value = "";
 
@@ -100,6 +105,9 @@ async function sendToGemini() {
       parts: [{ text: replyText }]
     });
 
+    document.getElementById("sendBtn").disabled = false;
+    document.getElementById("sendBtn").innerHTML = "Send";
+
     if (ignoreTTS) {
       const bubbleEl = await addMessage("", "AI", true);   // placeholder
 
@@ -123,15 +131,29 @@ async function sendToGemini() {
 
 // === Animate Text Bubble ===
 function animateBubbleText(bubbleEl, fullText, msPerChar = 25) {
+  function finishAnimation() {
+    clearInterval(interval);
+    bubbleEl.querySelector("p").innerHTML = fullText;
+    unityInstance.SendMessage("poppy_v1_prefab", "StopTalking");
+    document.getElementById("sendBtn").style.display = "inline-block";
+    document.getElementById("stopBtn").style.display = "none";
+    document.getElementById("stopBtn").removeEventListener("click", finishAnimation);
+  };
+
   let i = 0;
+  document.getElementById("stopBtn").addEventListener("click", finishAnimation)
   unityInstance.SendMessage("poppy_v1_prefab", "StartTalking")
+  document.getElementById("sendBtn").style.display = "none";
+  document.getElementById("stopBtn").style.display = "inline-block";
   const interval = setInterval(() => {
     bubbleEl.querySelector("p").innerHTML = fullText.slice(0, i++);
     if (i > fullText.length) {
       clearInterval(interval);
-      unityInstance.SendMessage("poppy_v1_prefab", "StopTalking");
+      finishAnimation()
     }
   }, msPerChar);
+
+
 }
 
 // === Chat UI ===
