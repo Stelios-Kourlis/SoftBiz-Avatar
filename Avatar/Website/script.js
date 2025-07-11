@@ -98,7 +98,7 @@ async function sendToGemini() {
       const bubbleEl = await addMessage("", "AI", true);   // placeholder
 
       // Compute speed so animation finishes with the audio
-      animateBubbleText(bubbleEl, replyText);
+      animateBubbleText(bubbleEl, marked(replyText));
     } else {
       const bubbleEl = await addMessage("", "AI", true);   // placeholder
 
