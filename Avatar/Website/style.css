@@ -1,137 +1,118 @@
 body {
   font-family: Arial, sans-serif;
   background-color: #524d4d;
-  /* Use a valid color instead of 'none' */
   margin: 0;
   padding: 0;
   display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
   height: 100vh;
-
+  overflow: hidden;
 }
 
-.container {
-  position: fixed;
-  display: flex;
-  flex-direction: column;
-  align-content: space-evenly;
-  justify-content: center;
-  align-items: center;
-  bottom: 50%;
-  right: 20px;
-  width: 60%;
+/* Chat bubbles on the left */
+.responseContainer {
+  width: 30%;
   height: 90%;
-  transform: translateY(50%);
-}
-
-.userControls {
-  padding: 20px;
-  background: rgba(255, 255, 255, 0.8);
-  max-width: 600px;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  backdrop-filter: blur(8px);
+  position: fixed;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #282c34;
   display: flex;
   flex-direction: column;
-  height: auto;
-  width: 70%;
+  overflow-y: auto;
+  border-radius: 20px;
+  padding: 20px;
+}
+
+/* Bubbles */
+.chat-bubble {
+  max-width: 80%;
+  margin: 6px 0;
+  padding: 10px;
+  border-radius: 12px;
+  background: #eee;
+  word-wrap: break-word;
+}
+.chat-bubble.left {
+  text-align: left;
+  background: #ccc;
+}
+.chat-bubble.right {
+  text-align: right;
+  background: #0cf;
+  color: white;
+  margin-left: auto;
+}
+
+/* Right panel (model + input) */
+.container {
+  margin-left: 65%;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 40px;
+}
+
+/* Stack model + input vertically */
+.modelAndInput {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Model container */
+.unityWrapper {
+  display: flex;
+  justify-content: center;
+  width: 800px;
+}
+iframe#UnityFrame {
+  width: 700px;
+  height: 650px;
+  border: none;
+}
+
+/* Input area */
+.userControls {
+  background: rgba(255, 255, 255, 0.9);
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  width: 100%;
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+}
+
+textarea {
+  width: 95%;
+  height: 80px;
+  padding: 10px;
+  font-size: 16px;
+  resize: none;
+  border-radius: 6px;
+  border: 1px solid #ccc;
 }
 
 button {
-  width: 100%;
+  margin-top: 12px;
   padding: 12px;
   font-size: 16px;
-  margin-top: 12px;
   background-color: #4285f4;
   color: white;
-  /* Use 'white' instead of 'none' */
   border: none;
   border-radius: 6px;
   cursor: pointer;
   transition: background-color 0.3s ease;
 }
-
 button:hover {
   background-color: #3367d6;
 }
 
-#response {
-  margin-top: 20px;
-  white-space: pre-wrap;
-  border-top: 1px solid #ccc;
-  padding-top: 10px;
-  color: #333;
-}
-
-/* 🔁 Make iframe responsive */
-iframe#UnityFrame {
-  aspect-ratio: 1/1;
-  width: 700px;
-  border: none;
-  display: block;
-  margin: 0 auto;
-  background: transparent;
-}
-
-/* ✅ Responsive container on smaller screens */
-@media (max-width: 480px) {
-  .userControls {
-    width: 95%;
-    padding: 15px;
-    bottom: 10px;
-  }
-
-  textarea,
-  button {
-    font-size: 20px;
-  }
-}
-
-#response-movement {
-  display: none;
-  justify-content: space-between;
-  gap: 10px;
-}
-
-.responseContainer {
-  height: 90%;
-  width: 30%;
-  position: fixed;
-  left: 10px;
-  bottom: 50%;
-  transform: translateY(50%);
-  background: #282c34;
-  display: flex;
-  flex-direction: column;
-  overflow-y: auto;
-  overflow-x: hidden;
-  border-radius: 20px;
-  border-width: 10px;
-  border-style: solid;
-  border-color: #282c34;
-}
-
-.chat-bubble {
-  max-width: 60%;
-  margin: 5px;
-  padding: 10px;
-  border-radius: 12px;
-  background: #eee;
-  max-width: 60%;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-}
-
-.chat-bubble.left {
-  text-align: left;
-  background: #ddd;
-}
-
-.chat-bubble.right {
-  text-align: right;
-  background: #0cf;
-  color: #fff;
-  margin-left: auto;
+/* Header (title on top of model) */
+.container h1 {
+  color: white;
+  margin-bottom: 12px;
+  align-self: center;
 }
