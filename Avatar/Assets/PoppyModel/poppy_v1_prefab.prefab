@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 1948684019367489224}
   - component: {fileID: 1948684019367489229}
   - component: {fileID: 1948684019367489226}
-  - component: {fileID: 1948684019367489227}
   m_Layer: 0
   m_Name: body_Applied
   m_TagString: Untagged
@@ -127,28 +126,6 @@ SphereCollider:
   serializedVersion: 3
   m_Radius: 0.92
   m_Center: {x: 0, y: -0.04, z: -0.02}
---- !u!95 &1948684019367489227
-Animator:
-  serializedVersion: 7
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1948684019367489225}
-  m_Enabled: 1
-  m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 0}
-  m_CullingMode: 0
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 0
-  m_LinearVelocityBlending: 0
-  m_StabilizeFeet: 0
-  m_AnimatePhysics: 0
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorStateOnDisable: 0
-  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &1948684020103612884
 GameObject:
   m_ObjectHideFlags: 0
@@ -159,7 +136,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1948684020103612887}
   - component: {fileID: 1948684020103612840}
-  - component: {fileID: 1948684020103612841}
   m_Layer: 0
   m_Name: legs_Applied
   m_TagString: Untagged
@@ -242,28 +218,6 @@ SkinnedMeshRenderer:
     m_Center: {x: 0.008426681, y: -0.13573824, z: -1.0600808}
     m_Extent: {x: 0.4516033, y: 0.16444172, z: 0.13190845}
   m_DirtyAABB: 0
---- !u!95 &1948684020103612841
-Animator:
-  serializedVersion: 7
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1948684020103612884}
-  m_Enabled: 1
-  m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: a2affac07aa6e644e95c55c34571e151, type: 2}
-  m_CullingMode: 0
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 1
-  m_LinearVelocityBlending: 0
-  m_StabilizeFeet: 0
-  m_AnimatePhysics: 0
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorStateOnDisable: 0
-  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &1948684020258021944
 GameObject:
   m_ObjectHideFlags: 0
@@ -273,7 +227,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1948684020258021951}
-  - component: {fileID: 1948684020258021947}
   m_Layer: 0
   m_Name: poppy_v1_prefab
   m_TagString: Untagged
@@ -300,23 +253,6 @@ Transform:
   - {fileID: 1948684020505137229}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1948684020258021947
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1948684020258021944}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 20e1a8d895c232a46b1935edbac54b67, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  move: 1
-  speed: 0.1
-  rotationIntensity: 0.6
-  rotationSpeed: 5
-  rotationNoise: 0.1
 --- !u!1 &1948684020505137226
 GameObject:
   m_ObjectHideFlags: 0

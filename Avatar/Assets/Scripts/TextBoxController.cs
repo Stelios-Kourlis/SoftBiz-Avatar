@@ -25,7 +25,7 @@ public class TextBoxController : MonoBehaviour
     private float TEXT_TO_SPEECH_AUDIO_DURATION = -1f;
 
     [SerializeField] private GameObject textResponseObject, clickCaptureObject, thinkingTextObject;
-    [SerializeField] private TalkingSimulator talkingSimulator;
+    [SerializeField] private AvatarController avatarController;
     // [SerializeField] private TextAnimation responseTextAnimation;
     private TextBoxAnimator Animator => gameObject.GetComponent<TextBoxAnimator>();
     private GameObject responseObject, thinkingText;
@@ -40,7 +40,7 @@ public class TextBoxController : MonoBehaviour
             Debug.LogError("TextResponseObject is not assigned.");
             return;
         }
-        if (talkingSimulator == null)
+        if (avatarController == null)
         {
             Debug.LogError("TalkingSimulator is not assigned.");
             return;
@@ -127,7 +127,7 @@ public class TextBoxController : MonoBehaviour
     {
         Debug.Log($"[AddToResponse] Adding: {allText}");
         allText = MarkdownToTMPConverter.ConvertToTMPCompatibleText(allText);
-        talkingSimulator.StopTalking();
+        avatarController.StopTalking();
         StartCoroutine(RespondAndWaitForInput(allText));
         // if (responseCoroutine != null) StopCoroutine(responseCoroutine);
         // responseCoroutine = StartCoroutine(AddToResponseCor(allText));
@@ -159,7 +159,7 @@ public class TextBoxController : MonoBehaviour
             {
                 responseTextAnimation.StopAnimatingTextBounce(); //If next mid sentence finish that sentence
                 showNextPart = false;
-                talkingSimulator.StopTalking();
+                avatarController.StopTalking();
                 showPreviousPart = false;
                 yield return new WaitUntil(() => showNextPart || showPreviousPart);
             }
@@ -177,7 +177,7 @@ public class TextBoxController : MonoBehaviour
 #if UNITY_WEBGL && !UNITY_EDITOR
                     SendCurrentIndexOutOfTotal(pieceIndex, responseSentences.Count);
 #endif
-                    talkingSimulator.StopTalking();
+                    avatarController.StopTalking();
                     StartCoroutine(Animator.AnimateTextBoxDisappearance(responseObject));
                     yield break;
                 }
@@ -194,7 +194,7 @@ public class TextBoxController : MonoBehaviour
     public void ConcludeResponse()
     {
         StartCoroutine(Animator.AnimateTextBoxDisappearance(responseObject));
-        talkingSimulator.StopTalking();
+        avatarController.StopTalking();
     }
 
     private bool TextFitsInTextBox(string text)
@@ -269,7 +269,7 @@ public class TextBoxController : MonoBehaviour
 
         textComponent.text = nextSentence;
         int wordCount = nextSentence.Split(new char[] { ' ', '\n', '\t' }, System.StringSplitOptions.RemoveEmptyEntries).Length; //Get word count
-        talkingSimulator.StartTalking();
+        avatarController.StartTalking();
         // yield return null;
         float totalTime = TEXT_TO_SPEECH_AUDIO_DURATION > 0 ? TEXT_TO_SPEECH_AUDIO_DURATION : wordCount * RESPONSE_DURATION_PER_WORD;
         if (totalTime <= 0) totalTime = 0.1f;
@@ -281,11 +281,11 @@ public class TextBoxController : MonoBehaviour
         if (TEXT_TO_SPEECH_AUDIO_DURATION > 0)
         {   //Has TTS, sync talking with audio
             yield return new WaitForSeconds(totalTime - textAnimationTime); //Wait for the rest of the time
-            talkingSimulator.StopTalking();
+            avatarController.StopTalking();
         }
         else
         {   //No TTS, so end talking after the text animation
-            talkingSimulator.StopTalking();
+            avatarController.StopTalking();
             yield return new WaitForSeconds(totalTime - textAnimationTime);
         }
     }
