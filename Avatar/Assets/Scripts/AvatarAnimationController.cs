@@ -4,7 +4,7 @@ using UnityEngine;
 
 
 
-public class AvatarController : MonoBehaviour
+public class AvatarAnimationController : MonoBehaviour
 {
     private enum States
     {
@@ -12,17 +12,17 @@ public class AvatarController : MonoBehaviour
         Thinking = 1,
         Talking = 2,
         Sitting = 3,
+        LookingAround = 4,
     }
 
-    [SerializeField]
     private Animator animator;
 
     void Awake()
     {
+        animator = gameObject.GetComponent<Animator>();
+
         if (animator == null)
-        {
-            Debug.LogError("Animator component is not assigned in AvatarController.");
-        }
+            Debug.LogError($"Avatar {gameObject.name} has no Animator component attached.");
     }
 
     public void StartIdle()
@@ -43,5 +43,10 @@ public class AvatarController : MonoBehaviour
     public void StartTalking()
     {
         animator.SetInteger("State", (int)States.Talking);
+    }
+
+    public void StartLookingAround()
+    {
+        animator.SetInteger("State", (int)States.LookingAround);
     }
 }
