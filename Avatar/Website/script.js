@@ -1,8 +1,3 @@
-import { marked } from 'https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js';
-
-const geminiApiKey = "AIzaSyC2YV4tiwz6vJ6oc5pwt-w82itmvBV_ASs";
-const elevenLabsApiKey = "sk_cf911377d70e13c64ba2f17dade6caa87e91f2648eeea224";
-const voiceId = "21m00Tcm4TlvDq8ikWAM";
 
 let unityInstance = null;
 let audioPlayer = document.getElementById("audioPlayer");
@@ -27,11 +22,11 @@ async function sendToTTS(text) {
   // waitForUnity();
   return new Promise(async (resolve, reject) => {
     try {
-      const ttsRes = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}/stream`, {
+      const ttsRes = await fetch('http://localhost:3000/api/tts', {
         method: "POST", // critical: must be POST
         headers: {
           "Content-Type": "application/json",
-          "xi-api-key": elevenLabsApiKey,
+        
         },
         body: JSON.stringify({
           text: text,
@@ -82,24 +77,28 @@ async function sendToGemini() {
     parts: [{ text: userInput }]
   });
 
-  const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiApiKey}`;
   const requestBody = {
     contents: conversationHistory
   };
 
   try {
-    const response = await fetch(geminiUrl, {
+    const response = await fetch("http://localhost:3000/api/gemini", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(requestBody)
     });
+
+    if (!response.ok) {
+      const errText = await response.text();
+      console.error("Gemini proxy error:", errText);
+      return;
+    }
 
     const data = await response.json();
     const replyText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
 
     if (!replyText) return;
 
-    // Add model's reply to history
     conversationHistory.push({
       role: "model",
       parts: [{ text: replyText }]
@@ -108,21 +107,14 @@ async function sendToGemini() {
     document.getElementById("sendBtn").disabled = false;
     document.getElementById("sendBtn").innerHTML = "Send";
 
+    const bubbleEl = await addMessage("", "AI", true);
+
     if (ignoreTTS) {
-      const bubbleEl = await addMessage("", "AI", true);   // placeholder
-
-      // Compute speed so animation finishes with the audio
-      animateBubbleText(bubbleEl, marked(replyText));
+      animateBubbleText(bubbleEl, window.marked.parse(replyText));
     } else {
-      const bubbleEl = await addMessage("", "AI", true);   // placeholder
-
-      // Kick off TTS and wait for “playing”
       const duration = await sendToTTS(replyText);
-
-      // Compute speed so animation finishes with the audio
       const msPerChar = duration == -1 ? 25 : (duration * 1000) / replyText.length;
-      console.log("Duration:", duration, "msPerChar:", msPerChar);
-      animateBubbleText(bubbleEl, marked(replyText), msPerChar);
+      animateBubbleText(bubbleEl, window.marked.parse(replyText), msPerChar);
     }
   } catch (err) {
     console.error("Gemini fetch error:", err);
