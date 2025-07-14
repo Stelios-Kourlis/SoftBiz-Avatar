@@ -11,6 +11,7 @@ public class AvatarController : MonoBehaviour
         Idle = 0,
         Thinking = 1,
         Talking = 2,
+        Sitting = 3,
     }
 
     [SerializeField]
@@ -24,23 +25,23 @@ public class AvatarController : MonoBehaviour
         }
     }
 
+    public void StartIdle()
+    {
+        animator.SetInteger("State", (int)States.Idle);
+    }
+
+    public void StartSitting()
+    {
+        animator.SetInteger("State", (int)States.Sitting);
+    }
+
     public void StartThinking()
     {
-        animator.SetBool("isThinking", true);
-    }
-
-    public void StopThinking()
-    {
-        animator.SetBool("isThinking", false);
-    }
-
-    public void StopTalking()
-    {
-        throw new NotImplementedException();
+        animator.SetInteger("State", (int)States.Thinking);
     }
 
     public void StartTalking()
     {
-        throw new NotImplementedException();
+        animator.SetInteger("State", (int)States.Talking);
     }
 }
