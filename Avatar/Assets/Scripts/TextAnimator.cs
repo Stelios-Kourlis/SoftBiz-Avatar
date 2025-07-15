@@ -1,202 +1,204 @@
-using System.Collections;
-using UnityEngine;
-using TMPro;
-using System.Linq;
-using System.Collections.Generic;
+//OBSOLETE SINCE MOVING RESPONSE TO HTML SIDE
 
-[RequireComponent(typeof(TMP_Text))]
-public class TextAnimator : MonoBehaviour
-{
+// using System.Collections;
+// using UnityEngine;
+// using TMPro;
+// using System.Linq;
+// using System.Collections.Generic;
 
-    private TMP_Text tmpText;
-    private TMP_TextInfo textInfo;
-    public int TmpCharCount => GetComponent<TMP_Text>().textInfo.characterCount;
-    public float jumpHeight = 2f;
-    public float jumpDuration = 0.25f;
-    public float delayBetweenLoops = 0.5f;
-    public float fadeInDuration = 0.5f;
-    public float delayBetweenFades = 0.3f;
-    Vector3[][] originalVertices;
-    public bool isAnimationRunning = false;
-    private Coroutine textBounceCoroutine;
+// [RequireComponent(typeof(TMP_Text))]
+// public class TextAnimator : MonoBehaviour
+// {
 
-    void Awake()
-    {
-        tmpText = GetComponent<TMP_Text>();
-    }
+//     private TMP_Text tmpText;
+//     private TMP_TextInfo textInfo;
+//     public int TmpCharCount => GetComponent<TMP_Text>().textInfo.characterCount;
+//     public float jumpHeight = 2f;
+//     public float jumpDuration = 0.25f;
+//     public float delayBetweenLoops = 0.5f;
+//     public float fadeInDuration = 0.5f;
+//     public float delayBetweenFades = 0.3f;
+//     Vector3[][] originalVertices;
+//     public bool isAnimationRunning = false;
+//     private Coroutine textBounceCoroutine;
 
-    public void AnimateTextBouncing(float waveDuration, int startIndex = 0)
-    {
-        textBounceCoroutine = StartCoroutine(AnimateTextBounce(waveDuration, startIndex));
-    }
+//     void Awake()
+//     {
+//         tmpText = GetComponent<TMP_Text>();
+//     }
 
-    public void StopAnimatingTextBounce()
-    {
-        if (textBounceCoroutine != null) StopCoroutine(textBounceCoroutine);
-        isAnimationRunning = false;
-        tmpText.ForceMeshUpdate();
-        for (int i = 0; i < textInfo.meshInfo.Length; i++)
-        {
-            textInfo.meshInfo[i].mesh.vertices = originalVertices[i];
-            tmpText.UpdateGeometry(textInfo.meshInfo[i].mesh, i);
-        }
-    }
+//     public void AnimateTextBouncing(float waveDuration, int startIndex = 0)
+//     {
+//         textBounceCoroutine = StartCoroutine(AnimateTextBounce(waveDuration, startIndex));
+//     }
 
-    public IEnumerator AnimateTextLoop(float waveDuration)
-    {
-        isAnimationRunning = true;
-        tmpText.ForceMeshUpdate();
-        textInfo = tmpText.textInfo;
+//     public void StopAnimatingTextBounce()
+//     {
+//         if (textBounceCoroutine != null) StopCoroutine(textBounceCoroutine);
+//         isAnimationRunning = false;
+//         tmpText.ForceMeshUpdate();
+//         for (int i = 0; i < textInfo.meshInfo.Length; i++)
+//         {
+//             textInfo.meshInfo[i].mesh.vertices = originalVertices[i];
+//             tmpText.UpdateGeometry(textInfo.meshInfo[i].mesh, i);
+//         }
+//     }
 
-        originalVertices = new Vector3[textInfo.meshInfo.Length][];
-        for (int i = 0; i < originalVertices.Length; i++)
-            originalVertices[i] = textInfo.meshInfo[i].vertices.Clone() as Vector3[];
+//     public IEnumerator AnimateTextLoop(float waveDuration)
+//     {
+//         isAnimationRunning = true;
+//         tmpText.ForceMeshUpdate();
+//         textInfo = tmpText.textInfo;
 
-        // float waveDuration = jumpDuration + (textInfo.characterCount - 1) * delayBetweenJumps;
-        float delayBetweenJumps = (waveDuration - jumpDuration) / (textInfo.characterCount - 1);
-        if (delayBetweenJumps < 0) delayBetweenJumps = 0.01f;
-        Debug.Log($"Wave Duration: {waveDuration}");
+//         originalVertices = new Vector3[textInfo.meshInfo.Length][];
+//         for (int i = 0; i < originalVertices.Length; i++)
+//             originalVertices[i] = textInfo.meshInfo[i].vertices.Clone() as Vector3[];
 
-        while (true)
-        {
-            float elapsedTime = 0f;
+//         // float waveDuration = jumpDuration + (textInfo.characterCount - 1) * delayBetweenJumps;
+//         float delayBetweenJumps = (waveDuration - jumpDuration) / (textInfo.characterCount - 1);
+//         if (delayBetweenJumps < 0) delayBetweenJumps = 0.01f;
+//         Debug.Log($"Wave Duration: {waveDuration}");
 
-            while (elapsedTime < waveDuration)
-            {
-                if (tmpText == null)
-                {
-                    yield break;
-                }
+//         while (true)
+//         {
+//             float elapsedTime = 0f;
 
-                tmpText.ForceMeshUpdate();
-                textInfo = tmpText.textInfo;
+//             while (elapsedTime < waveDuration)
+//             {
+//                 if (tmpText == null)
+//                 {
+//                     yield break;
+//                 }
 
-                for (int i = 0; i < textInfo.characterCount; i++)
-                {
-                    var charInfo = textInfo.characterInfo[i];
-                    if (!charInfo.isVisible) continue;
+//                 tmpText.ForceMeshUpdate();
+//                 textInfo = tmpText.textInfo;
 
-                    float charStartTime = i * delayBetweenJumps;
-                    float charElapsed = elapsedTime - charStartTime;
-                    if (charElapsed < 0 || charElapsed > jumpDuration) continue;
+//                 for (int i = 0; i < textInfo.characterCount; i++)
+//                 {
+//                     var charInfo = textInfo.characterInfo[i];
+//                     if (!charInfo.isVisible) continue;
 
-                    float progress = Mathf.Clamp01(charElapsed / jumpDuration);
-                    float jumpOffset = Mathf.Sin(progress * Mathf.PI) * jumpHeight;
+//                     float charStartTime = i * delayBetweenJumps;
+//                     float charElapsed = elapsedTime - charStartTime;
+//                     if (charElapsed < 0 || charElapsed > jumpDuration) continue;
 
-                    int materialIndex = charInfo.materialReferenceIndex;
-                    int vertexIndex = charInfo.vertexIndex;
+//                     float progress = Mathf.Clamp01(charElapsed / jumpDuration);
+//                     float jumpOffset = Mathf.Sin(progress * Mathf.PI) * jumpHeight;
 
-                    Vector3[] sourceVertices = originalVertices[materialIndex];
-                    Vector3[] destinationVertices = textInfo.meshInfo[materialIndex].vertices;
+//                     int materialIndex = charInfo.materialReferenceIndex;
+//                     int vertexIndex = charInfo.vertexIndex;
 
-                    Vector3 offset = new(0, jumpOffset, 0);
+//                     Vector3[] sourceVertices = originalVertices[materialIndex];
+//                     Vector3[] destinationVertices = textInfo.meshInfo[materialIndex].vertices;
 
-                    for (int j = 0; j < 4; j++)
-                        destinationVertices[vertexIndex + j] = sourceVertices[vertexIndex + j] + offset;
-                }
+//                     Vector3 offset = new(0, jumpOffset, 0);
 
-                for (int i = 0; i < textInfo.meshInfo.Length; i++)
-                {
-                    textInfo.meshInfo[i].mesh.vertices = textInfo.meshInfo[i].vertices;
-                    tmpText.UpdateGeometry(textInfo.meshInfo[i].mesh, i);
-                }
+//                     for (int j = 0; j < 4; j++)
+//                         destinationVertices[vertexIndex + j] = sourceVertices[vertexIndex + j] + offset;
+//                 }
 
-                elapsedTime += Time.deltaTime;
-                yield return null;
-            }
+//                 for (int i = 0; i < textInfo.meshInfo.Length; i++)
+//                 {
+//                     textInfo.meshInfo[i].mesh.vertices = textInfo.meshInfo[i].vertices;
+//                     tmpText.UpdateGeometry(textInfo.meshInfo[i].mesh, i);
+//                 }
 
-            yield return new WaitForSeconds(delayBetweenLoops); // delay between waves
-        }
-    }
+//                 elapsedTime += Time.deltaTime;
+//                 yield return null;
+//             }
 
-    private IEnumerator AnimateTextBounce(float waveDuration, int startIndex = 0)
-    {
-        isAnimationRunning = true;
-        tmpText.ForceMeshUpdate();
-        textInfo = tmpText.textInfo;
+//             yield return new WaitForSeconds(delayBetweenLoops); // delay between waves
+//         }
+//     }
 
-        originalVertices = new Vector3[textInfo.meshInfo.Length][];
-        for (int i = 0; i < originalVertices.Length; i++)
-            originalVertices[i] = textInfo.meshInfo[i].vertices.Clone() as Vector3[];
+//     private IEnumerator AnimateTextBounce(float waveDuration, int startIndex = 0)
+//     {
+//         isAnimationRunning = true;
+//         tmpText.ForceMeshUpdate();
+//         textInfo = tmpText.textInfo;
 
-        float delayBetweenJumps = (waveDuration - jumpDuration) / (textInfo.characterCount - 1);
-        if (delayBetweenJumps < 0) delayBetweenJumps = 0.05f;
-        // waveDuration = jumpDuration + (textInfo.characterCount - 1) * delayBetweenJumps;
+//         originalVertices = new Vector3[textInfo.meshInfo.Length][];
+//         for (int i = 0; i < originalVertices.Length; i++)
+//             originalVertices[i] = textInfo.meshInfo[i].vertices.Clone() as Vector3[];
 
-        float elapsedTime = 0f;
-        Debug.Log($"Wave Duration: {waveDuration}");
+//         float delayBetweenJumps = (waveDuration - jumpDuration) / (textInfo.characterCount - 1);
+//         if (delayBetweenJumps < 0) delayBetweenJumps = 0.05f;
+//         // waveDuration = jumpDuration + (textInfo.characterCount - 1) * delayBetweenJumps;
 
-        while (elapsedTime < waveDuration)
-        {
-            if (tmpText == null)
-            {
-                yield break;
-            }
+//         float elapsedTime = 0f;
+//         Debug.Log($"Wave Duration: {waveDuration}");
 
-            tmpText.ForceMeshUpdate();
-            textInfo = tmpText.textInfo;
+//         while (elapsedTime < waveDuration)
+//         {
+//             if (tmpText == null)
+//             {
+//                 yield break;
+//             }
 
-            for (int i = startIndex; i < textInfo.characterCount; i++)
-            {
-                var charInfo = textInfo.characterInfo[i];
-                if (!charInfo.isVisible) continue;
+//             tmpText.ForceMeshUpdate();
+//             textInfo = tmpText.textInfo;
 
-                float charStartTime = i * delayBetweenJumps;
-                float charElapsed = elapsedTime - charStartTime;
+//             for (int i = startIndex; i < textInfo.characterCount; i++)
+//             {
+//                 var charInfo = textInfo.characterInfo[i];
+//                 if (!charInfo.isVisible) continue;
 
-                int materialIndex = charInfo.materialReferenceIndex;
-                int vertexIndex = charInfo.vertexIndex;
-                var colors = tmpText.textInfo.meshInfo[materialIndex].colors32;
+//                 float charStartTime = i * delayBetweenJumps;
+//                 float charElapsed = elapsedTime - charStartTime;
 
-                if (charElapsed < 0)
-                {
-                    for (int color = 0; color < 4; color++)
-                    {
-                        colors[vertexIndex + color].a = 0; // set alpha to 0
-                    }
-                    continue; // skip this character until its time to animate
-                }
+//                 int materialIndex = charInfo.materialReferenceIndex;
+//                 int vertexIndex = charInfo.vertexIndex;
+//                 var colors = tmpText.textInfo.meshInfo[materialIndex].colors32;
 
-                for (int color = 0; color < 4; color++)
-                {
-                    colors[vertexIndex + color].a = 255;
-                }
+//                 if (charElapsed < 0)
+//                 {
+//                     for (int color = 0; color < 4; color++)
+//                     {
+//                         colors[vertexIndex + color].a = 0; // set alpha to 0
+//                     }
+//                     continue; // skip this character until its time to animate
+//                 }
 
-                if (charElapsed > jumpDuration) continue;
+//                 for (int color = 0; color < 4; color++)
+//                 {
+//                     colors[vertexIndex + color].a = 255;
+//                 }
 
-                float progress = Mathf.Clamp01(charElapsed / jumpDuration);
-                float jumpOffset = Mathf.Sin(progress * Mathf.PI) * jumpHeight;
+//                 if (charElapsed > jumpDuration) continue;
+
+//                 float progress = Mathf.Clamp01(charElapsed / jumpDuration);
+//                 float jumpOffset = Mathf.Sin(progress * Mathf.PI) * jumpHeight;
 
 
-                Vector3[] sourceVertices = originalVertices[materialIndex];
-                Vector3[] destinationVertices = textInfo.meshInfo[materialIndex].vertices;
+//                 Vector3[] sourceVertices = originalVertices[materialIndex];
+//                 Vector3[] destinationVertices = textInfo.meshInfo[materialIndex].vertices;
 
-                Vector3 offset = new(0, jumpOffset, 0);
+//                 Vector3 offset = new(0, jumpOffset, 0);
 
-                for (int j = 0; j < 4; j++)
-                    destinationVertices[vertexIndex + j] = sourceVertices[vertexIndex + j] + offset;
-            }
+//                 for (int j = 0; j < 4; j++)
+//                     destinationVertices[vertexIndex + j] = sourceVertices[vertexIndex + j] + offset;
+//             }
 
-            for (int i = 0; i < textInfo.meshInfo.Length; i++)
-            {
-                textInfo.meshInfo[i].mesh.vertices = textInfo.meshInfo[i].vertices;
-                tmpText.UpdateGeometry(textInfo.meshInfo[i].mesh, i);
-            }
+//             for (int i = 0; i < textInfo.meshInfo.Length; i++)
+//             {
+//                 textInfo.meshInfo[i].mesh.vertices = textInfo.meshInfo[i].vertices;
+//                 tmpText.UpdateGeometry(textInfo.meshInfo[i].mesh, i);
+//             }
 
-            elapsedTime += Time.deltaTime;
-            tmpText.UpdateVertexData(TMP_VertexDataUpdateFlags.Colors32);
-            yield return null;
-        }
+//             elapsedTime += Time.deltaTime;
+//             tmpText.UpdateVertexData(TMP_VertexDataUpdateFlags.Colors32);
+//             yield return null;
+//         }
 
-        // Ensure final position reset to original (optional)
-        tmpText.ForceMeshUpdate();
-        for (int i = 0; i < textInfo.meshInfo.Length; i++)
-        {
-            textInfo.meshInfo[i].mesh.vertices = originalVertices[i];
-            tmpText.UpdateGeometry(textInfo.meshInfo[i].mesh, i);
-        }
+//         // Ensure final position reset to original (optional)
+//         tmpText.ForceMeshUpdate();
+//         for (int i = 0; i < textInfo.meshInfo.Length; i++)
+//         {
+//             textInfo.meshInfo[i].mesh.vertices = originalVertices[i];
+//             tmpText.UpdateGeometry(textInfo.meshInfo[i].mesh, i);
+//         }
 
-        isAnimationRunning = false;
-    }
+//         isAnimationRunning = false;
+//     }
 
-}
+// }

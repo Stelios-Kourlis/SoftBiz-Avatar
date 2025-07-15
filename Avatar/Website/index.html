@@ -6,23 +6,26 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Chat with Poppy</title>
   <link rel="stylesheet" href="style.css" />
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 
 <body>
+  <div class="responseContainer" id="resBox"></div>
 
-  <h1 style="text-align: center;">Chat with Poppy</h1>
-  <iframe id="UnityFrame" src="UnityWebGL/index.html"></iframe>
   <div class="container">
-    <textarea id="userInput" placeholder="Type your question..."></textarea>
-    <button onclick="sendToGemini()">Send</button>
-    <div id="response-movement">
-      <button id="prevButton" onclick="prevLine()">Previous</button>
-      <button id="nextButton" onclick="skipLine()">Next</button>
+    <div class="modelAndInput">
+      <h1>Chat with Poppy</h1>
+      <div class="unityWrapper">
+        <iframe id="UnityFrame" src="UnityWebGL/index.html"></iframe>
+      </div>
+      <div class="userControls">
+        <textarea id="userInput" placeholder="Type your question..."></textarea>
+        <button id="sendBtn">Send</button>
+        <button style="display: none;" id="stopBtn">Stop</button>
+      </div>
     </div>
   </div>
-
   <audio id="audioPlayer" style="display: none;"></audio>
-
   <script src="./script.js"></script>
   <script>
     window.addEventListener("message", (event) => {

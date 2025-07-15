@@ -65,7 +65,8 @@ sysinfo.txt
 
 # Mono auto generated files
 mono_crash.*
-
+# Ignore environment files
+.env*
 # Builds
 *.apk
 *.aab
@@ -102,3 +103,4 @@ Avatar/Website/UnityWebGL/index.html
 /Avatar/Website/UnityWebGL/TemplateData
 Avatar/Website/keys.js
 /Avatar/Assets/Plugins/Demigiant
+/Avatar/Website/server/node_modules
