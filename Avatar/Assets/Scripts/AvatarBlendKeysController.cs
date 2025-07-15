@@ -13,7 +13,7 @@ public class AvatarBlendKeysController : MonoBehaviour
     private AvatarAnimationController avatarAnimationController;
 
     private SkinnedMeshRenderer eyeMesh, eyeAoMesh, eyelashMesh, headMesh, teethMesh, tongueMesh;
-    private readonly List<Coroutine> talkingCoroutines = new();
+    private readonly List<Coroutine> talkingCoroutines = new(3);
 
     void Awake()
     {
@@ -48,6 +48,11 @@ public class AvatarBlendKeysController : MonoBehaviour
             StartTalking();
         else
             StopTalking();
+
+        if (state == AvatarAnimationController.States.Thinking)
+            EyesLookUp();
+        else
+            EyesLookDown();
     }
 
     private bool HasBlendShape(SkinnedMeshRenderer smr, string shapeName)
@@ -62,14 +67,14 @@ public class AvatarBlendKeysController : MonoBehaviour
         return false;
     }
 
-    public void TryApplyBlendShapeWeight(SkinnedMeshRenderer smr, string shapeName, float weight)
+    private void TryApplyBlendShapeWeight(SkinnedMeshRenderer smr, string shapeName, float weight)
     {
         if (!HasBlendShape(smr, shapeName)) return;
         int index = smr.sharedMesh.GetBlendShapeIndex(shapeName);
         smr.SetBlendShapeWeight(index, weight);
     }
 
-    public void TryApplyBlendShapeWeightToAll(string shapeName, float weight)
+    private void TryApplyBlendShapeWeightToAll(string shapeName, float weight)
     {
         TryApplyBlendShapeWeight(eyeMesh, shapeName, weight);
         TryApplyBlendShapeWeight(eyeAoMesh, shapeName, weight);
@@ -103,7 +108,7 @@ public class AvatarBlendKeysController : MonoBehaviour
         }
     }
 
-    public void StartTalking()
+    private void StartTalking()
     {
         talkingCoroutines.Clear();
         talkingCoroutines.Add(StartCoroutine(BlendShapeOverTime("mouthOpen", 0, 50, 15, 0.05f, 0.05f)));
@@ -111,7 +116,7 @@ public class AvatarBlendKeysController : MonoBehaviour
         talkingCoroutines.Add(StartCoroutine(BlendShapeOverTime("mouthPucker", 0, 100, 40, 0.15f, 0.1f)));
     }
 
-    public void StopTalking()
+    private void StopTalking()
     {
         IEnumerator StopTalkingCoroutines()
         {
@@ -151,5 +156,21 @@ public class AvatarBlendKeysController : MonoBehaviour
 
             yield return new WaitForSeconds(interval);
         }
+    }
+
+    private void EyesLookUp()
+    {
+        DOTween.To(() => 0f, weight =>
+        {
+            TryApplyBlendShapeWeightToAll("eyesLookUp", weight);
+        }, 50f, 0.2f).WaitForCompletion();
+    }
+
+    private void EyesLookDown()
+    {
+        DOTween.To(() => 50f, weight =>
+        {
+            TryApplyBlendShapeWeightToAll("eyesLookUp", weight);
+        }, 0f, 0.2f).WaitForCompletion();
     }
 }
