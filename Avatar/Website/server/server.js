@@ -1,82 +1,77 @@
+// server.js  (Node ≥18, ES modules)
 import path from 'path';
-import fs from 'fs';
 import { fileURLToPath } from 'url';
-
 import express from 'express';
 import fetch from 'node-fetch';
 import dotenv from 'dotenv';
 import cors from 'cors';
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __dirname  = path.dirname(__filename);
 
-// 🔍 Log the current working directory
-console.log("📁 Current directory:", __dirname);
-
-// 🔍 Check if .env exists
-const envPath = path.join(__dirname, '.env');
-console.log("🔍 Checking for .env at:", envPath);
-console.log("📄 .env exists?", fs.existsSync(envPath));
-
-dotenv.config({ path: envPath }); // ✅ force correct path
-
-const app = express();
-
-// ✅ Allow requests coming from Live Server (127.0.0.1:5500)
-app.use(
-  cors({
-    origin: 'http://127.0.0.1:5500',
-  })
-);
-
-app.use(express.json());
+/* ——— load .env ——— */
+dotenv.config({ path: path.join(__dirname, '.env') });
 
 const {
-  GEMINI_API_KEY,
-  ELEVEN_API_KEY,
-  VOICE_ID = '21m00Tcm4TlvDq8ikWAM',
+  OPENAI_API_KEY,
+  FRONTEND_ORIGIN = 'http://127.0.0.1:5500',   // change if needed
+  PORT = 3000
 } = process.env;
 
-/* ───────── Gemini ───────── */
-app.post('/api/gemini', async (req, res) => {
+if (!OPENAI_API_KEY) {
+  console.error('❌  OPENAI_API_KEY missing in .env');
+  process.exit(1);
+}
+
+const app = express();
+app.use(cors({ origin: FRONTEND_ORIGIN }));
+app.use(express.json());
+
+/* ——— CHAT (text) ——— */
+app.post('/api/openai/chat', async (req, res) => {
   try {
-    const upstream = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
-
-    const r = await fetch(upstream, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(req.body),
+    const r = await fetch('https://api.openai.com/v1/chat/completions', {
+      method : 'POST',
+      headers: {
+        'Authorization': `Bearer ${OPENAI_API_KEY}`,
+        'Content-Type' : 'application/json'
+      },
+      body: JSON.stringify(req.body)
     });
-
     res.status(r.status).type('application/json').send(await r.text());
   } catch (err) {
-    console.error('Gemini proxy failure:', err);
-    res.status(500).json({ error: 'Gemini proxy failure' });
+    console.error('Chat proxy failure:', err);
+    res.status(500).json({ error: 'Chat proxy failure' });
   }
 });
 
-/* ───────── ElevenLabs ───────── */
-app.post('/api/tts', async (req, res) => {
+/* ——— TTS (audio) ——— */
+app.post('/api/openai/tts', async (req, res) => {
   try {
-    const upstream = `https://api.elevenlabs.io/v1/text-to-speech/${VOICE_ID}/stream`;
+    const { input, voice = 'spruce' } = req.body;
 
-    const r = await fetch(upstream, {
-      method: 'POST',
+    const r = await fetch('https://api.openai.com/v1/audio/speech', {
+      method : 'POST',
       headers: {
-        'xi-api-key': ELEVEN_API_KEY,
-        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${OPENAI_API_KEY}`,
+        'Content-Type' : 'application/json'
       },
-      body: JSON.stringify(req.body),
+      body: JSON.stringify({
+        model : 'tts-1-hd',
+        input,
+        voice,
+        format: 'mp3'
+      })
     });
 
     res.status(r.status);
-    r.body.pipe(res); // stream audio through
+    r.body.pipe(res);          // stream MP3 straight through
   } catch (err) {
     console.error('TTS proxy failure:', err);
     res.status(500).send('TTS proxy failure');
   }
 });
 
-app.listen(3000, () =>
-  console.log('✅ Proxy listening on http://localhost:3000')
+app.listen(PORT, () =>
+  console.log(`✅  Proxy listening on http://localhost:${PORT}`)
 );
