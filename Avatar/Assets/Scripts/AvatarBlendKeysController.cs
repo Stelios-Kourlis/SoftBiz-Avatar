@@ -4,13 +4,16 @@ using System.Linq;
 using DG.Tweening;
 using UnityEngine;
 
+[RequireComponent(typeof(AvatarAnimationController))]
 public class AvatarBlendKeysController : MonoBehaviour
 {
     [SerializeField] private float BLINK_DURATION = 0.2f;
     [SerializeField] private float BLINK_INTERVAL = 2f;
 
+    private AvatarAnimationController avatarAnimationController;
+
     private SkinnedMeshRenderer eyeMesh, eyeAoMesh, eyelashMesh, headMesh, teethMesh, tongueMesh;
-    private List<Coroutine> talkingCoroutines = new();
+    private readonly List<Coroutine> talkingCoroutines = new();
 
     void Awake()
     {
@@ -21,14 +24,30 @@ public class AvatarBlendKeysController : MonoBehaviour
         teethMesh = transform.Find("Teeth_Mesh").GetComponent<SkinnedMeshRenderer>();
         tongueMesh = transform.Find("Tongue_Mesh").GetComponent<SkinnedMeshRenderer>();
 
+        avatarAnimationController = gameObject.GetComponent<AvatarAnimationController>();
+
         SkinnedMeshRenderer[] meshes = { eyeMesh, eyeAoMesh, eyelashMesh, headMesh, teethMesh, tongueMesh };
-        if (meshes.Any(m => m == null))
+        string[] meshNames = { "Eye_Mesh", "EyeAO_Mesh", "Eyelash_Mesh", "Head_Mesh", "Teeth_Mesh", "Tongue_Mesh" };
+
+        for (int i = 0; i < meshes.Length; i++)
         {
-            Debug.LogWarning("One or more meshes are null!");
+            if (meshes[i] == null)
+            {
+                Debug.LogWarning($"{meshNames[i]} is null!");
+            }
         }
 
+        avatarAnimationController.OnStateChanged += AnimationStateChanged;
+
         StartCoroutine(StartBlinking());
-        StartTalking();
+    }
+
+    private void AnimationStateChanged(AvatarAnimationController.States state)
+    {
+        if (state == AvatarAnimationController.States.Talking)
+            StartTalking();
+        else
+            StopTalking();
     }
 
     private bool HasBlendShape(SkinnedMeshRenderer smr, string shapeName)
@@ -94,15 +113,21 @@ public class AvatarBlendKeysController : MonoBehaviour
 
     public void StopTalking()
     {
-        foreach (var coroutine in talkingCoroutines)
+        IEnumerator StopTalkingCoroutines()
         {
-            if (coroutine != null)
-                StopCoroutine(coroutine);
+            foreach (var coroutine in talkingCoroutines)
+            {
+                if (coroutine != null)
+                    StopCoroutine(coroutine);
+            }
+            yield return null;
+            talkingCoroutines.Clear();
+            TryApplyBlendShapeWeightToAll("mouthOpen", 0);
+            TryApplyBlendShapeWeightToAll("mouthFunnel", 0);
+            TryApplyBlendShapeWeightToAll("mouthPucker", 0);
         }
-        talkingCoroutines.Clear();
-        TryApplyBlendShapeWeightToAll("mouthOpen", 0);
-        TryApplyBlendShapeWeightToAll("mouthFunnel", 0);
-        TryApplyBlendShapeWeightToAll("mouthPucker", 0);
+
+        StartCoroutine(StopTalkingCoroutines());
     }
 
     private IEnumerator BlendShapeOverTime(string blendShapeName, int min, int max, int minDiff, float duration, float interval)

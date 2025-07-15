@@ -8,8 +8,8 @@ public class CameraSwitcher : MonoBehaviour
     void Start()
     {
         // Start with main camera on
-        mainCamera.enabled = true;
-        closeUpCamera.enabled = false;
+        // mainCamera.enabled = true;
+        // closeUpCamera.enabled = false;
     }
 
     public void ToggleCameras()

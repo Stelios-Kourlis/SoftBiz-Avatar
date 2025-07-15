@@ -9,6 +9,31 @@ public class TestButtonLinker : MonoBehaviour
         model = GameObject.Find("model");
     }
 
+    public void StartIdle()
+    {
+        model.GetComponent<AvatarAnimationController>().StartIdle();
+    }
+
+    public void StartSitting()
+    {
+        model.GetComponent<AvatarAnimationController>().StartSitting();
+    }
+
+    public void StartThinking()
+    {
+        model.GetComponent<AvatarAnimationController>().StartThinking();
+    }
+
+    public void StartTalking()
+    {
+        model.GetComponent<AvatarAnimationController>().StartTalking();
+    }
+
+    public void StartLookingAround()
+    {
+        model.GetComponent<AvatarAnimationController>().StartLookingAround();
+    }
+
     public void SetBlendShapeWeight(float weight)
     {
         if (blendShapeName == null || blendShapeName == string.Empty)
