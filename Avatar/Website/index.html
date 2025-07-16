@@ -4,30 +4,34 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Chat with Poppy</title>
+  <title>Chat with Leeroy Jenkins </title>
   <link rel="stylesheet" href="style.css" />
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 
 <body>
-  <div class="responseContainer" id="resBox"></div>
+
 
   <div class="container">
     <div class="modelAndInput">
-      <h1>Chat with Poppy</h1>
       <div class="unityWrapper">
+        <div id="clickOverlay"></div>
+        <div id="clickOverlay2"></div>
         <iframe id="UnityFrame" src="UnityWebGL/index.html"></iframe>
+        <div id="bubbleContainer"></div>
+        
       </div>
-      <div class="userControls">
+      <div class="userControls" style="display: none;">
         <textarea id="userInput" placeholder="Type your question..."></textarea>
-        <button id="sendBtn">Send</button>
-        <button style="display: none;" id="stopBtn">Stop</button>
+        <button id="sendBtn">Send</button>       
+        <button style="display: none;" id="stopBtn">Skip</button>
       </div>
     </div>
   </div>
   <audio id="audioPlayer" style="display: none;"></audio>
   <script src="./script.js"></script>
   <script>
+    let TextAreaShown= false;   
     window.addEventListener("message", (event) => {
       if (event.data?.type === "UnityMessage") {
         HandleUnityMessage(event.data.payload);
@@ -36,6 +40,33 @@
         UpdateButtonsBasedOnIndex(event.data.payload);
       }
     });
+    function postUnityClick() {
+    window.postMessage({ type: "UnityClicked" }, "*");
+  }
+
+  window.addEventListener("message", (event) => {
+    if (event.data?.type === "UnityClicked") {
+      document.querySelector(".userControls").style.display = "flex";
+    }
+
+    if (event.data?.type === "UnityMessage") {
+      HandleUnityMessage(event.data.payload);
+    }
+
+    if (event.data?.type === "UnityIndex") {
+      UpdateButtonsBasedOnIndex(event.data.payload);
+    }
+  });
+  document.getElementById('clickOverlay').addEventListener('click', () => {
+  if(TextAreaShown==false){
+  document.querySelector('.userControls').style.display = 'flex';
+  TextAreaShown=true;
+  }else{
+    document.querySelector('.userControls').style.display = 'none';
+    TextAreaShown=false;
+  }
+});
+
   </script>
 </body>
 

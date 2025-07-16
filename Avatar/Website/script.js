@@ -1,12 +1,13 @@
 /* main.js — chat + TTS + Unity */
 let unityInstance = null;
 let audioPlayer   = document.getElementById('audioPlayer');
-let ignoreTTS     = false;              // toggle if you want silent mode
+let ignoreTTS     = false;
 let conversationHistory = [];
 
 /* ——— INIT ——— */
 window.addEventListener('DOMContentLoaded', () => {
   waitForUnity();
+  unityInstance?.SendMessage('model', 'StartIdle');
   document.getElementById('sendBtn').addEventListener('click', sendMsg);
 });
 
@@ -23,7 +24,7 @@ async function sendMsg() {
   // UI state
   document.getElementById('sendBtn').disabled  = true;
   document.getElementById('sendBtn').textContent = 'Thinking…';
-  addMessage(userInput, 'me');
+  unityInstance?.SendMessage('model', 'StartThinking');
   userInputEl.value = '';
 
   // add to history
@@ -49,12 +50,9 @@ async function sendMsg() {
   const replyText = chatData.choices?.[0]?.message?.content || '(empty reply)';
   conversationHistory.push({ role: 'assistant', content: replyText });
 
-  // add bubble placeholder
-  const bubbleEl = await addMessage('', 'AI', true);
-
-  /* 2️⃣  TTS  */
+  /* 2️⃣  TTS + bubble animation */
   if (ignoreTTS) {
-    animateBubbleText(bubbleEl, marked.parse(replyText));
+    animateUnityBubbleText(replyText);
     restoreSendBtn();
     return;
   }
@@ -67,7 +65,7 @@ async function sendMsg() {
 
   if (!ttsRes.ok) {
     console.error('TTS error:', await ttsRes.text());
-    animateBubbleText(bubbleEl, marked.parse(replyText));
+    animateUnityBubbleText(replyText);
     restoreSendBtn();
     return;
   }
@@ -77,8 +75,8 @@ async function sendMsg() {
   audioPlayer.src = audioURL;
 
   const duration = await playAndGetDuration(audioPlayer);
-  const msPerChar = (duration * 500) / replyText.length;
-  animateBubbleText(bubbleEl, marked.parse(replyText), msPerChar);
+  const msPerChar = (duration * 1000) / replyText.length;
+  animateUnityBubbleText(replyText, msPerChar);
   restoreSendBtn();
 }
 
@@ -112,44 +110,40 @@ function waitForUnity() {
 /* ——— HANDLE UNITY → JS ——— */
 function HandleUnityMessage(txt) {
   console.log('[Unity]', txt);
-  if (!ignoreTTS) sendMsgWithPreset(txt);   // optional: echo back
+  if (!ignoreTTS) sendMsgWithPreset(txt); // optional: echo back
 }
 
-/* ——— BUBBLE ANIMATION ——— */
-function animateBubbleText(bubbleEl, html, msPerChar = 25) {
+/* ——— ANIMATED UNITY BUBBLE ——— */
+function animateUnityBubbleText(text, msPerChar = 25) {
+  const container = document.getElementById('bubbleContainer');
+  container.innerHTML = '';
+
+  const bubble = document.createElement('div');
+  bubble.className = 'speech-bubble';
+
+  const paragraph = document.createElement('p');
+  bubble.appendChild(paragraph);
+  container.appendChild(bubble);
+
+  const html = marked.parse(text);
   let i = 0;
-  const p = bubbleEl.querySelector('p');
 
   const endAnim = () => {
     clearInterval(timer);
-    p.innerHTML = html;
-    unityInstance?.SendMessage('poppy_v1_prefab', 'StopTalking');
+    paragraph.innerHTML = html;
+    unityInstance?.SendMessage('model', 'StartIdle');
     document.getElementById('stopBtn').style.display = 'none';
+    document.getElementById('sendBtn').style.display = 'inline-block';
+    audioPlayer.pause();
   };
 
+  document.getElementById('sendBtn').style.display = 'none';
   document.getElementById('stopBtn').onclick = endAnim;
   document.getElementById('stopBtn').style.display = 'inline-block';
-  unityInstance?.SendMessage('poppy_v1_prefab', 'StartTalking');
+  unityInstance?.SendMessage('model', 'StartTalking');
 
   const timer = setInterval(() => {
-    p.innerHTML = html.slice(0, i++);
+    paragraph.innerHTML = html.slice(0, i++);
     if (i > html.length) endAnim();
   }, msPerChar);
-}
-
-/* ——— CHAT UI DOM ——— */
-async function addMessage(text, sender, animated = false) {
-  const html = await (await fetch('chatBubble.html')).text();
-  const temp = document.createElement('div');
-  temp.innerHTML = html.trim();
-  const bubble = temp.firstChild;
-
-  bubble.classList.add(sender === 'me' ? 'right' : 'left');
-  document.getElementById('resBox').appendChild(bubble);
-
-  if (animated) {
-    bubble.querySelector('p').innerHTML = '';
-    return bubble;
-  }
-  bubble.querySelector('p').innerHTML = text;
 }
