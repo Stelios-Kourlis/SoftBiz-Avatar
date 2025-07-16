@@ -15,7 +15,6 @@ public class AvatarAnimationController : MonoBehaviour
     }
 
     private Animator animator;
-    public Action<States> OnStateChanged;
 
     void Awake()
     {
@@ -25,18 +24,15 @@ public class AvatarAnimationController : MonoBehaviour
     public void StartIdle()
     {
         animator.SetInteger("State", (int)States.Idle);
-        OnStateChanged?.Invoke(States.Idle);
     }
 
     public void StartThinking()
     {
         animator.SetInteger("State", (int)States.Thinking);
-        OnStateChanged?.Invoke(States.Thinking);
     }
 
     public void StartTalking()
     {
         animator.SetInteger("State", (int)States.Talking);
-        OnStateChanged?.Invoke(States.Talking);
     }
 }

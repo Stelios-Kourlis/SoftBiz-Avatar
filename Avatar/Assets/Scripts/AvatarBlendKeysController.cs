@@ -5,13 +5,10 @@ using System.Linq;
 using DG.Tweening;
 using UnityEngine;
 
-[RequireComponent(typeof(AvatarAnimationController))]
 public class AvatarBlendKeysController : MonoBehaviour
 {
     [SerializeField] private float BLINK_DURATION = 0.2f;
     [SerializeField] private float BLINK_INTERVAL = 2f;
-
-    private AvatarAnimationController avatarAnimationController;
 
     private SkinnedMeshRenderer eyeMesh, eyeAoMesh, eyelashMesh, headMesh, teethMesh, tongueMesh;
     private readonly List<Coroutine> talkingCoroutines = new(3);
@@ -26,8 +23,6 @@ public class AvatarBlendKeysController : MonoBehaviour
         teethMesh = transform.Find("Teeth_Mesh").GetComponent<SkinnedMeshRenderer>();
         tongueMesh = transform.Find("Tongue_Mesh").GetComponent<SkinnedMeshRenderer>();
 
-        avatarAnimationController = gameObject.GetComponent<AvatarAnimationController>();
-
         SkinnedMeshRenderer[] meshes = { eyeMesh, eyeAoMesh, eyelashMesh, headMesh, teethMesh, tongueMesh };
         string[] meshNames = { "Eye_Mesh", "EyeAO_Mesh", "Eyelash_Mesh", "Head_Mesh", "Teeth_Mesh", "Tongue_Mesh" };
 
@@ -39,23 +34,21 @@ public class AvatarBlendKeysController : MonoBehaviour
             }
         }
 
-        avatarAnimationController.OnStateChanged += AnimationStateChanged;
-
         StartCoroutine(StartBlinking());
     }
 
-    private void AnimationStateChanged(AvatarAnimationController.States state)
-    {
-        if (state == AvatarAnimationController.States.Talking)
-            StartTalking();
-        else
-            StopTalking();
+    // private void AnimationStateChanged(AvatarAnimationController.States state)
+    // {
+    //     if (state == AvatarAnimationController.States.Talking)
+    //         StartTalking();
+    //     else
+    //         StopTalking();
 
-        if (state == AvatarAnimationController.States.Thinking)
-            EyesLookUp();
-        else
-            EyesLookDown();
-    }
+    //     if (state == AvatarAnimationController.States.Thinking)
+    //         EyesLookUp();
+    //     else
+    //         EyesLookDown();
+    // }
 
     private bool HasBlendShape(SkinnedMeshRenderer smr, string shapeName)
     {
@@ -110,7 +103,7 @@ public class AvatarBlendKeysController : MonoBehaviour
         }
     }
 
-    private void StartTalking()
+    public void BlendStartTalking()
     {
         talkingCoroutines.Clear();
         talkingCoroutines.Add(StartCoroutine(BlendTalkShapeOverTime("mouthOpen", 0, 50, 15, 0.05f, 0.05f)));
@@ -118,7 +111,7 @@ public class AvatarBlendKeysController : MonoBehaviour
         talkingCoroutines.Add(StartCoroutine(BlendTalkShapeOverTime("mouthPucker", 0, 100, 40, 0.15f, 0.1f)));
     }
 
-    private void StopTalking()
+    public void BlendStopTalking()
     {
         IEnumerator StopTalkingCoroutines()
         {
@@ -175,7 +168,7 @@ public class AvatarBlendKeysController : MonoBehaviour
         }
     }
 
-    private void EyesLookUp()
+    public void BlendEyesLookUp()
     {
         DOTween.To(() => 0f, weight =>
         {
@@ -183,7 +176,7 @@ public class AvatarBlendKeysController : MonoBehaviour
         }, 50f, 0.2f).WaitForCompletion();
     }
 
-    private void EyesLookDown()
+    public void BlendEyesLookDown()
     {
         DOTween.To(() => 50f, weight =>
         {

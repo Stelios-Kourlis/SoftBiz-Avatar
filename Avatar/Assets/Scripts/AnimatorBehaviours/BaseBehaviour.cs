@@ -18,11 +18,13 @@ public class BaseBehaviour : StateMachineBehaviour
 
         if (stateInfo.IsName("Thinking"))
         {
+            animator.transform.GetComponent<AvatarBlendKeysController>().BlendEyesLookUp();
             posTween = cameraTransform.DOMove(closeUpPosition, duration).SetEase(Ease.InOutQuad);
             rotTween = cameraTransform.DORotate(closeUpRotation, duration).SetEase(Ease.InOutQuad);
         }
         else
         {
+            animator.transform.GetComponent<AvatarBlendKeysController>().BlendEyesLookDown();
             posTween = cameraTransform.DOMove(initialPosition, duration).SetEase(Ease.InOutQuad);
             rotTween = cameraTransform.DORotate(initialRotation, duration).SetEase(Ease.InOutQuad);
         }
