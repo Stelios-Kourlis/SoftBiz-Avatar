@@ -88,7 +88,6 @@ body {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  padding-right: 40px;
 }
 
 /* Stack model + input vertically */
@@ -108,10 +107,9 @@ body {
 
 .unityWrapper {
   position: relative;
-  width: 500px;
+  width: 700px;
   display: flex;
   justify-content: center;
-  padding-left: 100px;
 }
 
 iframe#UnityFrame {
