@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +15,7 @@ public class AvatarBlendKeysController : MonoBehaviour
 
     private SkinnedMeshRenderer eyeMesh, eyeAoMesh, eyelashMesh, headMesh, teethMesh, tongueMesh;
     private readonly List<Coroutine> talkingCoroutines = new(3);
+    private readonly List<Tween> activeTalkingTweens = new(3);
 
     void Awake()
     {
@@ -111,49 +113,64 @@ public class AvatarBlendKeysController : MonoBehaviour
     private void StartTalking()
     {
         talkingCoroutines.Clear();
-        talkingCoroutines.Add(StartCoroutine(BlendShapeOverTime("mouthOpen", 0, 50, 15, 0.05f, 0.05f)));
-        talkingCoroutines.Add(StartCoroutine(BlendShapeOverTime("mouthFunnel", 0, 70, 40, 0.2f, 0.1f)));
-        talkingCoroutines.Add(StartCoroutine(BlendShapeOverTime("mouthPucker", 0, 100, 40, 0.15f, 0.1f)));
+        talkingCoroutines.Add(StartCoroutine(BlendTalkShapeOverTime("mouthOpen", 0, 50, 15, 0.05f, 0.05f)));
+        talkingCoroutines.Add(StartCoroutine(BlendTalkShapeOverTime("mouthFunnel", 0, 70, 40, 0.2f, 0.1f)));
+        talkingCoroutines.Add(StartCoroutine(BlendTalkShapeOverTime("mouthPucker", 0, 100, 40, 0.15f, 0.1f)));
     }
 
     private void StopTalking()
     {
         IEnumerator StopTalkingCoroutines()
         {
+            foreach (var tween in activeTalkingTweens)
+            {
+                if (tween != null && tween.IsActive())
+                {
+                    tween.Kill();
+                }
+            }
+
             foreach (var coroutine in talkingCoroutines)
             {
                 if (coroutine != null)
+                {
                     StopCoroutine(coroutine);
+                }
             }
             yield return null;
             talkingCoroutines.Clear();
             TryApplyBlendShapeWeightToAll("mouthOpen", 0);
             TryApplyBlendShapeWeightToAll("mouthFunnel", 0);
             TryApplyBlendShapeWeightToAll("mouthPucker", 0);
+            yield return null;
         }
 
         StartCoroutine(StopTalkingCoroutines());
     }
 
-    private IEnumerator BlendShapeOverTime(string blendShapeName, int min, int max, int minDiff, float duration, float interval)
+    private IEnumerator BlendTalkShapeOverTime(string blendShapeName, int min, int max, int minDiff, float duration, float interval)
     {
         int currentWeight = 0;
+        Tween talkTween = null;
 
         while (true)
         {
             int newWeight;
             do
             {
-                newWeight = Random.Range(min, max);
+                newWeight = UnityEngine.Random.Range(min, max);
             } while (Mathf.Abs(currentWeight - newWeight) < minDiff);
 
-            yield return DOTween.To(() => currentWeight, weight =>
+            talkTween = DOTween.To(() => currentWeight, weight =>
             {
                 TryApplyBlendShapeWeightToAll(blendShapeName, weight);
-            }, newWeight, duration).SetEase(Ease.InOutCubic).WaitForCompletion();
+            }, newWeight, duration).SetEase(Ease.InOutCubic);
+
+            activeTalkingTweens.Add(talkTween);
+            yield return talkTween.WaitForCompletion();
+            activeTalkingTweens.Remove(talkTween);
 
             currentWeight = newWeight;
-
             yield return new WaitForSeconds(interval);
         }
     }

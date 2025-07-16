@@ -1,0 +1,936 @@
+fileFormatVersion: 2
+guid: 157bb53da31e1e8429a3f84202dbce6f
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 4130937939564892884
+    second: eyelash_base_color_0
+  - first:
+      213: 5100597535347008078
+    second: eyelash_base_color_1
+  - first:
+      213: 7328458245972365006
+    second: eyelash_base_color_2
+  - first:
+      213: 6186507010086268519
+    second: eyelash_base_color_3
+  - first:
+      213: -974446698570821669
+    second: eyelash_base_color_4
+  - first:
+      213: -304968223704852983
+    second: eyelash_base_color_5
+  - first:
+      213: 2254774035848544073
+    second: eyelash_base_color_6
+  - first:
+      213: 548766303105016064
+    second: eyelash_base_color_7
+  - first:
+      213: -4612912374912057209
+    second: eyelash_base_color_8
+  - first:
+      213: 6078173585812040779
+    second: eyelash_base_color_9
+  - first:
+      213: 4663023306404493550
+    second: eyelash_base_color_10
+  - first:
+      213: -7854988938582607720
+    second: eyelash_base_color_11
+  - first:
+      213: 1686990726004923102
+    second: eyelash_base_color_12
+  - first:
+      213: 4141084762749723022
+    second: eyelash_base_color_13
+  - first:
+      213: 1135479565211777080
+    second: eyelash_base_color_14
+  - first:
+      213: 351423079919427468
+    second: eyelash_base_color_15
+  - first:
+      213: -653016444330461257
+    second: eyelash_base_color_16
+  - first:
+      213: 5247342064616597836
+    second: eyelash_base_color_17
+  - first:
+      213: 5832874057356324971
+    second: eyelash_base_color_18
+  - first:
+      213: -6257530083640994770
+    second: eyelash_base_color_19
+  - first:
+      213: -6878820618188923529
+    second: eyelash_base_color_20
+  - first:
+      213: 3844222648103293247
+    second: eyelash_base_color_21
+  - first:
+      213: 4562016069418275854
+    second: eyelash_base_color_22
+  - first:
+      213: -1114542825457023483
+    second: eyelash_base_color_23
+  - first:
+      213: 8153970573109952964
+    second: eyelash_base_color_24
+  - first:
+      213: 4895839788992669555
+    second: eyelash_base_color_25
+  - first:
+      213: -1669017595014138378
+    second: eyelash_base_color_26
+  - first:
+      213: 5466397820448842223
+    second: eyelash_base_color_27
+  - first:
+      213: -7366661482438615363
+    second: eyelash_base_color_28
+  - first:
+      213: 1008303856129003542
+    second: eyelash_base_color_29
+  - first:
+      213: -1944395100016455594
+    second: eyelash_base_color_30
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: eyelash_base_color_0
+      rect:
+        serializedVersion: 2
+        x: 113
+        y: 384
+        width: 41
+        height: 59
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4d213fc5b2a045930800000000000000
+      internalID: 4130937939564892884
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: eyelash_base_color_1
+      rect:
+        serializedVersion: 2
+        x: 146
+        y: 405
+        width: 22
+        height: 53
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e42679c2f66f8c640800000000000000
+      internalID: 5100597535347008078
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: eyelash_base_color_2
+      rect:
+        serializedVersion: 2
+        x: 164
+        y: 410
+        width: 21
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ece077662f9e3b560800000000000000
+      internalID: 7328458245972365006
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: eyelash_base_color_3
+      rect:
+        serializedVersion: 2
+        x: 184
+        y: 412
+        width: 11
+        height: 38
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 76ee7a02953ead550800000000000000
+      internalID: 6186507010086268519
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: eyelash_base_color_4
+      rect:
+        serializedVersion: 2
+        x: 195
+        y: 414
+        width: 14
+        height: 45
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bdf4227f3e11a72f0800000000000000
+      internalID: -974446698570821669
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: eyelash_base_color_5
+      rect:
+        serializedVersion: 2
+        x: 205
+        y: 418
+        width: 10
+        height: 49
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9065a4e240984cbf0800000000000000
+      internalID: -304968223704852983
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: eyelash_base_color_6
+      rect:
+        serializedVersion: 2
+        x: 216
+        y: 416
+        width: 15
+        height: 51
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 94fb68f0a019a4f10800000000000000
+      internalID: 2254774035848544073
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: eyelash_base_color_7
+      rect:
+        serializedVersion: 2
+        x: 236
+        y: 423
+        width: 12
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 00167419b0c9d9700800000000000000
+      internalID: 548766303105016064
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: eyelash_base_color_8
+      rect:
+        serializedVersion: 2
+        x: 248
+        y: 422
+        width: 28
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7800d51a2a4abffb0800000000000000
+      internalID: -4612912374912057209
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: eyelash_base_color_9
+      rect:
+        serializedVersion: 2
+        x: 274
+        y: 420
+        width: 16
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b4c2d793ca20a5450800000000000000
+      internalID: 6078173585812040779
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: eyelash_base_color_10
+      rect:
+        serializedVersion: 2
+        x: 288
+        y: 418
+        width: 13
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ee87b9dcdf266b040800000000000000
+      internalID: 4663023306404493550
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: eyelash_base_color_11
+      rect:
+        serializedVersion: 2
+        x: 299
+        y: 422
+        width: 8
+        height: 40
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 89839298d297df290800000000000000
+      internalID: -7854988938582607720
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: eyelash_base_color_12
+      rect:
+        serializedVersion: 2
+        x: 312
+        y: 413
+        width: 28
+        height: 39
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: edad6e29025696710800000000000000
+      internalID: 1686990726004923102
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: eyelash_base_color_13
+      rect:
+        serializedVersion: 2
+        x: 334
+        y: 409
+        width: 178
+        height: 103
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e81ea7cb6a6187930800000000000000
+      internalID: 4141084762749723022
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: eyelash_base_color_14
+      rect:
+        serializedVersion: 2
+        x: 347
+        y: 398
+        width: 11
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 838b92606a802cf00800000000000000
+      internalID: 1135479565211777080
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: eyelash_base_color_15
+      rect:
+        serializedVersion: 2
+        x: 360
+        y: 400
+        width: 14
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c8f9874ed6180e400800000000000000
+      internalID: 351423079919427468
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: eyelash_base_color_16
+      rect:
+        serializedVersion: 2
+        x: 92
+        y: 367
+        width: 19
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7b7b133f00500f6f0800000000000000
+      internalID: -653016444330461257
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: eyelash_base_color_17
+      rect:
+        serializedVersion: 2
+        x: 99
+        y: 380
+        width: 24
+        height: 33
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c49ef606ecd42d840800000000000000
+      internalID: 5247342064616597836
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: eyelash_base_color_18
+      rect:
+        serializedVersion: 2
+        x: 365
+        y: 391
+        width: 17
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b60b0502d0882f050800000000000000
+      internalID: 5832874057356324971
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: eyelash_base_color_19
+      rect:
+        serializedVersion: 2
+        x: 382
+        y: 390
+        width: 27
+        height: 31
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e241241fa89c829a0800000000000000
+      internalID: -6257530083640994770
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: eyelash_base_color_20
+      rect:
+        serializedVersion: 2
+        x: 58
+        y: 177
+        width: 67
+        height: 93
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 77d5733e7158980a0800000000000000
+      internalID: -6878820618188923529
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: eyelash_base_color_21
+      rect:
+        serializedVersion: 2
+        x: 87
+        y: 208
+        width: 78
+        height: 98
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f3155b1812c695530800000000000000
+      internalID: 3844222648103293247
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: eyelash_base_color_22
+      rect:
+        serializedVersion: 2
+        x: 153
+        y: 233
+        width: 22
+        height: 69
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e04dc4dc1798f4f30800000000000000
+      internalID: 4562016069418275854
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: eyelash_base_color_23
+      rect:
+        serializedVersion: 2
+        x: 167
+        y: 238
+        width: 39
+        height: 83
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5068ca194395880f0800000000000000
+      internalID: -1114542825457023483
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: eyelash_base_color_24
+      rect:
+        serializedVersion: 2
+        x: 203
+        y: 243
+        width: 72
+        height: 89
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4c1053fd809b82170800000000000000
+      internalID: 8153970573109952964
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: eyelash_base_color_25
+      rect:
+        serializedVersion: 2
+        x: 265
+        y: 220
+        width: 110
+        height: 103
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 377a12c495481f340800000000000000
+      internalID: 4895839788992669555
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: eyelash_base_color_26
+      rect:
+        serializedVersion: 2
+        x: 338
+        y: 213
+        width: 44
+        height: 62
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6f53e45175576d8e0800000000000000
+      internalID: -1669017595014138378
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: eyelash_base_color_27
+      rect:
+        serializedVersion: 2
+        x: 346
+        y: 200
+        width: 59
+        height: 68
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fe1a2d00bdb8cdb40800000000000000
+      internalID: 5466397820448842223
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: eyelash_base_color_28
+      rect:
+        serializedVersion: 2
+        x: 48
+        y: 169
+        width: 28
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dbe91b6796c54c990800000000000000
+      internalID: -7366661482438615363
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: eyelash_base_color_29
+      rect:
+        serializedVersion: 2
+        x: 365
+        y: 183
+        width: 56
+        height: 59
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 610d932d3073efd00800000000000000
+      internalID: 1008303856129003542
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: eyelash_base_color_30
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 512
+        height: 143
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 650528855fe1405e0800000000000000
+      internalID: -1944395100016455594
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      eyelash_base_color_0: 4130937939564892884
+      eyelash_base_color_1: 5100597535347008078
+      eyelash_base_color_10: 4663023306404493550
+      eyelash_base_color_11: -7854988938582607720
+      eyelash_base_color_12: 1686990726004923102
+      eyelash_base_color_13: 4141084762749723022
+      eyelash_base_color_14: 1135479565211777080
+      eyelash_base_color_15: 351423079919427468
+      eyelash_base_color_16: -653016444330461257
+      eyelash_base_color_17: 5247342064616597836
+      eyelash_base_color_18: 5832874057356324971
+      eyelash_base_color_19: -6257530083640994770
+      eyelash_base_color_2: 7328458245972365006
+      eyelash_base_color_20: -6878820618188923529
+      eyelash_base_color_21: 3844222648103293247
+      eyelash_base_color_22: 4562016069418275854
+      eyelash_base_color_23: -1114542825457023483
+      eyelash_base_color_24: 8153970573109952964
+      eyelash_base_color_25: 4895839788992669555
+      eyelash_base_color_26: -1669017595014138378
+      eyelash_base_color_27: 5466397820448842223
+      eyelash_base_color_28: -7366661482438615363
+      eyelash_base_color_29: 1008303856129003542
+      eyelash_base_color_3: 6186507010086268519
+      eyelash_base_color_30: -1944395100016455594
+      eyelash_base_color_4: -974446698570821669
+      eyelash_base_color_5: -304968223704852983
+      eyelash_base_color_6: 2254774035848544073
+      eyelash_base_color_7: 548766303105016064
+      eyelash_base_color_8: -4612912374912057209
+      eyelash_base_color_9: 6078173585812040779
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
