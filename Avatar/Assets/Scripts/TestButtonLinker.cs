@@ -14,11 +14,6 @@ public class TestButtonLinker : MonoBehaviour
         model.GetComponent<AvatarAnimationController>().StartIdle();
     }
 
-    public void StartSitting()
-    {
-        model.GetComponent<AvatarAnimationController>().StartSitting();
-    }
-
     public void StartThinking()
     {
         model.GetComponent<AvatarAnimationController>().StartThinking();
@@ -27,10 +22,5 @@ public class TestButtonLinker : MonoBehaviour
     public void StartTalking()
     {
         model.GetComponent<AvatarAnimationController>().StartTalking();
-    }
-
-    public void StartLookingAround()
-    {
-        model.GetComponent<AvatarAnimationController>().StartLookingAround();
     }
 }

@@ -12,30 +12,20 @@ public class AvatarAnimationController : MonoBehaviour
         Idle = 0,
         Thinking = 1,
         Talking = 2,
-        Sitting = 3,
-        LookingAround = 4,
     }
 
     private Animator animator;
-    private AvatarBlendKeysController avatarBlendKeysController;
     public Action<States> OnStateChanged;
 
     void Awake()
     {
         animator = gameObject.GetComponent<Animator>();
-        avatarBlendKeysController = gameObject.GetComponent<AvatarBlendKeysController>();
     }
 
     public void StartIdle()
     {
         animator.SetInteger("State", (int)States.Idle);
         OnStateChanged?.Invoke(States.Idle);
-    }
-
-    public void StartSitting()
-    {
-        animator.SetInteger("State", (int)States.Sitting);
-        OnStateChanged?.Invoke(States.Sitting);
     }
 
     public void StartThinking()
@@ -48,11 +38,5 @@ public class AvatarAnimationController : MonoBehaviour
     {
         animator.SetInteger("State", (int)States.Talking);
         OnStateChanged?.Invoke(States.Talking);
-    }
-
-    public void StartLookingAround()
-    {
-        animator.SetInteger("State", (int)States.LookingAround);
-        OnStateChanged?.Invoke(States.LookingAround);
     }
 }
