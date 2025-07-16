@@ -54,7 +54,7 @@ body {
 /* Bubble that appears above Unity model */
 #bubbleContainer {
   position: absolute;
-  right: 50%; /* 👈 Move bubble near model on the right */
+  right: 55%; /* 👈 Move bubble near model on the right */
   z-index: 15;
   pointer-events: none;
 }
@@ -108,14 +108,14 @@ body {
 
 .unityWrapper {
   position: relative;
-  width: 400px;
+  width: 500px;
   display: flex;
   justify-content: center;
   padding-left: 100px;
 }
 
 iframe#UnityFrame {
-  width: 400px;
+  width: 700px;
   height: 700px;
   border: none;
 }
