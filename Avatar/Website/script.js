@@ -1,8 +1,13 @@
 /* main.js — chat + TTS + Unity */
 let unityInstance = null;
-let audioPlayer   = document.getElementById('audioPlayer');
-let ignoreTTS     = false;
+let audioPlayer = document.getElementById('audioPlayer');
+let ignoreTTS = false;
 let conversationHistory = [];
+let TextAreaShown = false;
+let isRecording = false;
+let recorder = null;
+let audioChunks = [];
+let micStream = null;
 
 /* ——— INIT ——— */
 window.addEventListener('DOMContentLoaded', () => {
@@ -11,31 +16,113 @@ window.addEventListener('DOMContentLoaded', () => {
   document.getElementById('sendBtn').addEventListener('click', sendMsg);
 });
 
+const micBtn = document.getElementById('micBtn');
+if (micBtn) {
+  micBtn.addEventListener('click', async function handleMicClick(event) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (!isRecording) {
+      try {
+        micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        recorder = new MediaRecorder(micStream);
+        audioChunks = [];
+
+        recorder.ondataavailable = (evt) => {
+          audioChunks.push(evt.data);
+        };
+
+recorder.onstop = async () => {
+  try {
+    isRecording = false;
+    micBtn.textContent = '🎤';
+    micStream.getTracks().forEach(track => track.stop());
+
+    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+    console.log('[DEBUG] Blob size:', audioBlob.size);
+
+    if (audioBlob.size === 0) {
+      console.warn('❗️ Recording blob is empty, aborting.');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('audio', audioBlob, 'recording.webm');
+
+    console.log('🎙️ Sending audio to Whisper…');
+    const res = await fetch('http://localhost:3000/api/openai/stt', {
+      method: 'POST',
+      body: formData
+    });
+
+    console.log('[DEBUG] STT response status:', res.status);
+
+    const text = await res.text();
+    console.log('[DEBUG] STT raw response text:', text);
+
+    if (!res.ok) {
+      console.error('STT failed:', text);
+      return;
+    }
+
+    const data = JSON.parse(text);
+    const transcript = data.text?.trim();
+    console.log('[STT] Transcript:', transcript);
+
+    if (transcript) {
+      // either use sendMsgDirect(transcript);
+      document.getElementById('userInput').value = transcript;
+      sendMsg(); 
+    }
+  } catch (err) {
+    console.error('❌ STT fetch crashed:', err);
+  }
+};
+
+
+        recorder.start();
+        isRecording = true;
+        micBtn.textContent = '⏹️';
+      } catch (err) {
+        console.error('Mic access error:', err);
+        alert('Microphone permission denied.');
+      }
+    } else {
+      if (recorder && recorder.state === 'recording') {
+        recorder.stop(); // trigger onstop
+      }
+    }
+  });
+}
+
 window.addEventListener('keydown', e => {
   if (e.key === 'Enter') sendMsg();
+});
+
+document.getElementById('clickOverlay').addEventListener('click', () => {
+  const controls = document.querySelector('.userControls');
+  TextAreaShown = !TextAreaShown;
+  controls.style.display = TextAreaShown ? 'flex' : 'none';
 });
 
 /* ——— SEND MESSAGE ——— */
 async function sendMsg() {
   const userInputEl = document.getElementById('userInput');
-  const userInput   = userInputEl.value.trim();
+  const userInput = userInputEl.value.trim();
   if (!userInput) return;
-
-  // UI state
-  document.getElementById('sendBtn').disabled  = true;
+  console.log('💬 Sending message to GPT...');
+  document.getElementById('sendBtn').disabled = true;
   document.getElementById('sendBtn').textContent = 'Thinking…';
   unityInstance?.SendMessage('model', 'StartThinking');
   userInputEl.value = '';
 
-  // add to history
   conversationHistory.push({ role: 'user', content: userInput });
 
-  /* 1️⃣  CHAT  */
   const chatRes = await fetch('http://localhost:3000/api/openai/chat', {
-    method : 'POST',
+    method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body   : JSON.stringify({
-      model   : 'gpt-4o',
+    body: JSON.stringify({
+      model: 'gpt-4o',
       messages: conversationHistory
     })
   });
@@ -46,11 +133,10 @@ async function sendMsg() {
     return;
   }
 
-  const chatData  = await chatRes.json();
+  const chatData = await chatRes.json();
   const replyText = chatData.choices?.[0]?.message?.content || '(empty reply)';
   conversationHistory.push({ role: 'assistant', content: replyText });
 
-  /* 2️⃣  TTS + bubble animation */
   if (ignoreTTS) {
     animateUnityBubbleText(replyText);
     restoreSendBtn();
@@ -58,9 +144,9 @@ async function sendMsg() {
   }
 
   const ttsRes = await fetch('http://localhost:3000/api/openai/tts', {
-    method : 'POST',
+    method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body   : JSON.stringify({ input: replyText, voice: 'ash' }) // male
+    body: JSON.stringify({ input: replyText, voice: 'ash' })
   });
 
   if (!ttsRes.ok) {
@@ -71,7 +157,7 @@ async function sendMsg() {
   }
 
   const audioBlob = await ttsRes.blob();
-  const audioURL  = URL.createObjectURL(audioBlob);
+  const audioURL = URL.createObjectURL(audioBlob);
   audioPlayer.src = audioURL;
 
   const duration = await playAndGetDuration(audioPlayer);
@@ -110,7 +196,7 @@ function waitForUnity() {
 /* ——— HANDLE UNITY → JS ——— */
 function HandleUnityMessage(txt) {
   console.log('[Unity]', txt);
-  if (!ignoreTTS) sendMsgWithPreset(txt); // optional: echo back
+  if (!ignoreTTS) sendMsgWithPreset(txt); // optional
 }
 
 /* ——— ANIMATED UNITY BUBBLE ——— */

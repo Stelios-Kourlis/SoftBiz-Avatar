@@ -22,15 +22,16 @@
       </div>
       <div class="userControls" style="display: none;">
         <textarea id="userInput" placeholder="Type your question..."></textarea>
-        <button id="sendBtn">Send</button>       
+        <button id="sendBtn">Send</button>             
         <button style="display: none;" id="stopBtn">Skip</button>
+        <button id="micBtn" type="button">🎤</button>
       </div>
     </div>
   </div>
   <audio id="audioPlayer" style="display: none;"></audio>
   <script src="./script.js"></script>
   <script>
-    let TextAreaShown= false;   
+   
     window.addEventListener("message", (event) => {
       if (event.data?.type === "UnityMessage") {
         HandleUnityMessage(event.data.payload);
@@ -42,30 +43,10 @@
     function postUnityClick() {
     window.postMessage({ type: "UnityClicked" }, "*");
   }
-
-  window.addEventListener("message", (event) => {
-    if (event.data?.type === "UnityClicked") {
-      document.querySelector(".userControls").style.display = "flex";
-    }
-
-    if (event.data?.type === "UnityMessage") {
-      HandleUnityMessage(event.data.payload);
-    }
-
-    if (event.data?.type === "UnityIndex") {
-      UpdateButtonsBasedOnIndex(event.data.payload);
-    }
+ window.addEventListener("beforeunload", (e) => {
+    e.preventDefault();
+    e.returnValue = '';
   });
-  document.getElementById('clickOverlay').addEventListener('click', () => {
-  if(TextAreaShown==false){
-  document.querySelector('.userControls').style.display = 'flex';
-  TextAreaShown=true;
-  }else{
-    document.querySelector('.userControls').style.display = 'none';
-    TextAreaShown=false;
-  }
-});
-
   </script>
 </body>
 
