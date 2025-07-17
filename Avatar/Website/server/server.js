@@ -11,6 +11,8 @@ import FormData from 'form-data';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+/* ——— load .env ——— */
 dotenv.config({ path: path.join(__dirname, '.env') });
 
 const {
@@ -41,17 +43,32 @@ app.post('/api/openai/chat', async (req, res) => {
       },
       body: JSON.stringify(req.body)
     });
-    res.status(r.status).type('application/json').send(await r.text());
+
+    if (JSON.stringify(req.body).includes('"stream":true')) {
+      res.status(r.status);
+      res.setHeader('Content-Type', 'text/event-stream');
+
+      // Stream OpenAI response to client
+      if (r.body) {
+        for await (const chunk of r.body) {
+          res.write(chunk);
+        }
+      }
+
+      res.end();
+    } else {
+      res.status(r.status).type('application/json').send(await r.text());
+    }
   } catch (err) {
     console.error('Chat proxy failure:', err);
     res.status(500).json({ error: 'Chat proxy failure' });
   }
 });
 
-/* ——— TTS ——— */
 app.post('/api/openai/tts', async (req, res) => {
   try {
-    const { input, voice = 'ash' } = req.body;
+    const { input, voice = 'spruce', stream = false } = req.body;
+
     const r = await fetch('https://api.openai.com/v1/audio/speech', {
       method: 'POST',
       headers: {
@@ -59,15 +76,30 @@ app.post('/api/openai/tts', async (req, res) => {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: 'tts-1-hd',
-        input,
-        voice,
-        format: 'mp3'
+        model: 'tts-1',
+        input: input,
+        voice: voice,
+        response_format: 'mp3',
+        stream_format: "audio",
+        stream: stream
       })
     });
 
-    res.status(r.status);
-    r.body.pipe(res);
+    console.log('📥 Stream:', typeof r.body, r.body?.[Symbol.asyncIterator]);
+
+    if (stream) {
+      res.setHeader('Content-Type', 'audio/mpeg');
+      res.setHeader('Transfer-Encoding', 'chunked');
+      res.setHeader('Cache-Control', 'no-cache');
+
+      for await (const chunk of r.body) {
+        res.write(chunk); // write raw audio chunks as they come
+      }
+      res.end();
+    } else {
+      res.status(r.status);
+      r.body.pipe(res);          // stream MP3 straight through
+    }
   } catch (err) {
     console.error('TTS proxy failure:', err);
     res.status(500).send('TTS proxy failure');
