@@ -37,19 +37,6 @@ public class AvatarBlendKeysController : MonoBehaviour
         StartCoroutine(StartBlinking());
     }
 
-    // private void AnimationStateChanged(AvatarAnimationController.States state)
-    // {
-    //     if (state == AvatarAnimationController.States.Talking)
-    //         StartTalking();
-    //     else
-    //         StopTalking();
-
-    //     if (state == AvatarAnimationController.States.Thinking)
-    //         EyesLookUp();
-    //     else
-    //         EyesLookDown();
-    // }
-
     private bool HasBlendShape(SkinnedMeshRenderer smr, string shapeName)
     {
         var mesh = smr.sharedMesh;
@@ -77,6 +64,19 @@ public class AvatarBlendKeysController : MonoBehaviour
         TryApplyBlendShapeWeight(headMesh, shapeName, weight);
         TryApplyBlendShapeWeight(teethMesh, shapeName, weight);
         TryApplyBlendShapeWeight(tongueMesh, shapeName, weight);
+    }
+
+    private float? GetBlendShapeWeight(string shapeName)
+    {
+
+        SkinnedMeshRenderer[] meshes = { eyeMesh, eyeAoMesh, eyelashMesh, headMesh, teethMesh, tongueMesh };
+
+        foreach (SkinnedMeshRenderer mesh in meshes)
+        {
+            if (HasBlendShape(mesh, shapeName))
+                return mesh.GetBlendShapeWeight(mesh.sharedMesh.GetBlendShapeIndex(shapeName));
+        }
+        return null;
     }
 
     private IEnumerator StartBlinking()
@@ -170,17 +170,21 @@ public class AvatarBlendKeysController : MonoBehaviour
 
     public void BlendEyesLookUp()
     {
+        if (GetBlendShapeWeight("eyesLookUp") == 50f) return;
         DOTween.To(() => 0f, weight =>
         {
             TryApplyBlendShapeWeightToAll("eyesLookUp", weight);
+            TryApplyBlendShapeWeightToAll("browOuterUpRight", weight * 2);
         }, 50f, 0.2f).WaitForCompletion();
     }
 
     public void BlendEyesLookDown()
     {
+        if (GetBlendShapeWeight("eyesLookUp") == 0f) return;
         DOTween.To(() => 50f, weight =>
         {
             TryApplyBlendShapeWeightToAll("eyesLookUp", weight);
+            TryApplyBlendShapeWeightToAll("browOuterUpRight", weight * 2);
         }, 0f, 0.2f).WaitForCompletion();
     }
 }

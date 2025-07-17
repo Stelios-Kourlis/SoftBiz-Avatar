@@ -14,14 +14,12 @@ public class TalkingBehaviour : StateMachineBehaviour
 
     public override void OnStateMachineEnter(Animator animator, int stateMachinePathHash)
     {
-        Debug.Log("TalkingBehaviour: OnStateMachineEnter called");
         animator.transform.GetComponent<AvatarBlendKeysController>().BlendStartTalking();
         base.OnStateMachineEnter(animator, stateMachinePathHash);
     }
 
     public override void OnStateMachineExit(Animator animator, int stateMachinePathHash)
     {
-        Debug.Log("TalkingBehaviour: OnStateMachineExit called");
         animator.transform.GetComponent<AvatarBlendKeysController>().BlendStopTalking();
         base.OnStateMachineExit(animator, stateMachinePathHash);
     }
