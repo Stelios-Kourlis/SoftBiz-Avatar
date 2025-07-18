@@ -4,6 +4,7 @@ export class BubbleTextController {
 
     static #appendQueue = [];
     static #isAnimating = false;
+    static #blockAppends = false;
 
     static #createBubbleText() {
         const container = document.getElementById('bubbleContainer');
@@ -16,9 +17,12 @@ export class BubbleTextController {
         paragraph.id = 'bubble-text';
         bubble.appendChild(paragraph);
         container.appendChild(bubble);
+
+        this.#blockAppends = false;
     }
 
     static appendToBubbleText(text) {
+        if (this.#blockAppends) return;
         this.#appendQueue.push(text);
         this.#processQueue();
     }
@@ -33,24 +37,34 @@ export class BubbleTextController {
             const paragraph = document.getElementById('bubble-text');
             let i = startIndex;
 
-            const endAnim = () => {
+            const endAnim = (forceStop = false) => {
                 clearInterval(timer);
                 paragraph.innerHTML = marked.parse(text);
                 UnityAnimationController.startIdle();
                 ButtonController.showFinishButton();
                 audioPlayer.pause();
+                if (forceStop) {
+                    while (this.#appendQueue.length > 0) {
+                        const text = this.#appendQueue.shift();
+                        paragraph.innerHTML = marked.parse(paragraph.innerHTML + text);
+                    }
+                    this.#blockAppends = true;
+                    this.#appendQueue = [];
+                    console.error("Animation stopped by user");
+                    document.getElementById('audioPlayer').pause();
+                }
                 resolve();
             };
 
             document.getElementById('sendBtn').style.display = 'none';
-            document.getElementById('stopBtn').onclick = endAnim;
+            document.getElementById('stopBtn').onclick = () => endAnim(true);
             document.getElementById('stopBtn').style.display = 'inline-block';
             UnityAnimationController.startTalking();
 
             const timer = setInterval(() => {
                 paragraph.innerHTML = marked.parse(text.slice(0, i++));
                 if (i > text.length) endAnim();
-            }, 25);
+            }, 15);
         });
     }
 
@@ -104,10 +118,20 @@ export class ButtonController {
         document.getElementById('stopBtn').style.display = 'none';
     }
 
+    static showSkipButton() {
+        document.getElementById('sendBtn').style.display = 'none';
+        document.getElementById('finishBtn').style.display = 'none';
+        document.getElementById('userInput').style.display = 'none';
+        document.getElementById('micBtn').style.display = 'none';
+        document.getElementById('stopBtn').style.display = 'inline-block';
+    }
+
     static disableSendButton() {
         document.getElementById('sendBtn').disabled = true;
         document.getElementById('sendBtn').textContent = 'Thinking…';
         document.getElementById('userInput').style.display = 'none';
         document.getElementById('micBtn').style.display = 'none';
+        document.getElementById('stopBtn').style.display = 'none';
+        document.getElementById('finishBtn').style.display = 'none';
     }
 }

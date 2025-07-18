@@ -2,7 +2,6 @@ let unityInstance = null;
 
 export function startThinking() {
     unityInstance?.SendMessage('model', 'StartThinking');
-    console.log("UnityAnimationController: StartThinking called");
 }
 
 export function startTalking() {

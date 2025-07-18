@@ -12,8 +12,8 @@ let isRecording = false;
 let recorder = null;
 let audioChunks = [];
 let micStream = null;
-let ignoreTTS = false;
-let streamResponse = true;
+let ignoreTTS = !document.getElementById('ttsCheckbox').checked;;
+let streamResponse = document.getElementById('streamCheckbox').checked;;
 let responseHandler = streamResponse ? StreamedResponseHandler : NonStreamedResponseHandler;
 
 /* ——— INIT ——— */
@@ -185,6 +185,7 @@ async function sendMessageStreamed() {
     if (isFirtstChunk) { //Start talking only on the first chunk
       UnityAnimationController.startTalking();
       isFirtstChunk = false;
+      ButtonController.showSkipButton();
     }
     BubbleTextController.appendToBubbleText(chunk);
     fullResponse += chunk;
@@ -192,7 +193,6 @@ async function sendMessageStreamed() {
   UnityAnimationController.startIdle();
 
   if (ignoreTTS) {
-    ButtonController.showFinishButton();
     return;
   }
 
@@ -227,7 +227,7 @@ async function sendMessageNonStreamed() {
   if (ignoreTTS) {
     UnityAnimationController.startTalking();
     BubbleTextController.appendToBubbleText(response);
-    ButtonController.showFinishButton();
+    ButtonController.showSkipButton();
     return;
   }
 
@@ -236,7 +236,7 @@ async function sendMessageNonStreamed() {
 
   if (!tts) {
     BubbleTextController.appendToBubbleText(response);
-    ButtonController.showFinishButton();
+    ButtonController.showSkipButton();
     return;
   }
 
