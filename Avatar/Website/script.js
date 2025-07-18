@@ -295,6 +295,7 @@ async function sendMsg() {
 function restoreSendBtn() {
   document.getElementById('finishBtn').style.display = 'none';
   document.getElementById('userInput').style.display = 'inline-block';
+  document.getElementById('micBtn').style.display = 'inline-block';
   const btn = document.getElementById('sendBtn');
   btn.disabled = false;
   btn.textContent = 'Send';
@@ -308,6 +309,7 @@ function showFinishButton() {
   document.getElementById('sendBtn').style.display = 'none';
   document.getElementById('finishBtn').style.display = 'inline-block';
   document.getElementById('userInput').style.display = 'none';
+  document.getElementById('micBtn').style.display = 'none';
 }
 
 /* ——— AUDIO UTIL ——— */

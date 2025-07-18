@@ -9,7 +9,11 @@ body {
   align-content: center;
   align-items: end;
   justify-content: flex-end;
-  /* 👈 Move everything to the right */
+
+  background-image: url('dummyWebsiteBackground.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 /* Chat bubbles on the left */
