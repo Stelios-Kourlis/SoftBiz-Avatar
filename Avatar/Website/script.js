@@ -15,6 +15,7 @@ window.addEventListener('DOMContentLoaded', () => {
   waitForUnity();
   unityInstance?.SendMessage('model', 'StartIdle');
   document.getElementById('sendBtn').addEventListener('click', streamResponse ? sendMsgStreamed : sendMsg);
+  document.getElementById('finishBtn').addEventListener('click', restoreSendBtn);
 });
 
 const micBtn = document.getElementById('micBtn');
@@ -97,13 +98,22 @@ if (micBtn) {
 }
 
 window.addEventListener('keydown', e => {
-  if (e.key === 'Enter') streamResponse ? sendMsgStreamed() : sendMsg();
+  if (e.key === 'Enter') {
+    // const finishButtonIsShownInsteadOfSend = getComputedStyle(document.getElementById('finishBtn')).display === 'inline-block';
+    const finishButton = document.getElementById('finishBtn');
+    const finishButtonIsShownInsteadOfSend = !!(finishButton.offsetWidth || finishButton.offsetHeight || finishButton.getClientRects().length);
+    console.log('Enter pressed, finishButtonIsShownInsteadOfSend:', finishButtonIsShownInsteadOfSend);
+    if (finishButtonIsShownInsteadOfSend) restoreSendBtn();
+    else streamResponse ? sendMsgStreamed() : sendMsg();
+  }
 });
 
 document.getElementById('clickOverlay').addEventListener('click', () => {
   const controls = document.querySelector('.userControls');
+  const wrapper = document.querySelector('.unityWrapper');
   TextAreaShown = !TextAreaShown;
   controls.style.display = TextAreaShown ? 'flex' : 'none';
+  wrapper.style.width = TextAreaShown ? "700px" : "256px";
 });
 
 async function sendMsgStreamed() {
@@ -113,6 +123,7 @@ async function sendMsgStreamed() {
 
   document.getElementById('sendBtn').disabled = true;
   document.getElementById('sendBtn').textContent = 'Thinking…';
+  document.getElementById('userInput').style.display = 'none';
   unityInstance?.SendMessage('model', 'StartThinking');
   userInputEl.value = '';
 
@@ -127,6 +138,8 @@ async function sendMsgStreamed() {
       stream: streamResponse
     })
   });
+
+  unityInstance?.SendMessage('model', 'StartTalking');
 
   const reader = chatRes.body.getReader();
   const decoder = new TextDecoder("utf-8");
@@ -166,8 +179,9 @@ async function sendMsgStreamed() {
     }
   }
 
+  unityInstance?.SendMessage('model', 'StartIdle');
   playTTSAsync(fullResponse);
-  restoreSendBtn();
+  showFinishButton();
 }
 
 async function playTTSAsync(text) {
@@ -191,6 +205,7 @@ async function playTTSAsync(text) {
     return;
   }
 
+  unityInstance?.SendMessage('model', 'StartTalking');
   const reader = ttsRes.body.getReader();
   const chunks = [];
 
@@ -207,7 +222,10 @@ async function playTTSAsync(text) {
 
   // Create and play audio
   const audio = new Audio(url);
-  audio.play();
+  const duration = await playAndGetDuration(audio);
+  await new Promise(resolve => setTimeout(resolve, duration * 1000)); // wait duration
+  unityInstance?.SendMessage('model', 'StartIdle');
+
 }
 
 /* ——— SEND MESSAGE ——— */
@@ -220,6 +238,7 @@ async function sendMsg() {
   // UI state
   document.getElementById('sendBtn').disabled = true;
   document.getElementById('sendBtn').textContent = 'Thinking…';
+  document.getElementById('userInput').style.display = 'none';
   unityInstance?.SendMessage('model', 'StartThinking');
   userInputEl.value = '';
 
@@ -246,7 +265,7 @@ async function sendMsg() {
 
   if (ignoreTTS) {
     animateBubbleText(replyText);
-    restoreSendBtn();
+    showFinishButton();
     return;
   }
 
@@ -270,13 +289,25 @@ async function sendMsg() {
   const duration = await playAndGetDuration(audioPlayer);
   const msPerChar = ((duration / 2) * 1000) / replyText.length;
   animateBubbleText(replyText, msPerChar);
-  restoreSendBtn();
+  showFinishButton();
 }
 
 function restoreSendBtn() {
+  document.getElementById('finishBtn').style.display = 'none';
+  document.getElementById('userInput').style.display = 'inline-block';
   const btn = document.getElementById('sendBtn');
   btn.disabled = false;
   btn.textContent = 'Send';
+  btn.style.display = 'inline-block';
+  unityInstance?.SendMessage('model', 'StartIdle');
+  destroyBubbleText();
+  // audioPlayer.pause();
+}
+
+function showFinishButton() {
+  document.getElementById('sendBtn').style.display = 'none';
+  document.getElementById('finishBtn').style.display = 'inline-block';
+  document.getElementById('userInput').style.display = 'none';
 }
 
 /* ——— AUDIO UTIL ——— */
