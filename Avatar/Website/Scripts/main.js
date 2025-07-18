@@ -35,6 +35,10 @@ window.addEventListener('DOMContentLoaded', async () => {
     console.log("TTS checkbox changed, ignoreTTS is now:", ignoreTTS);
   });
 
+  document.getElementById('toggleDebugBtn').addEventListener('click', () => {
+    document.querySelector('.debugContent').classList.toggle('collapsed');
+  });
+
   try {
     // Try to get mic permission and stream
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });

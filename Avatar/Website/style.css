@@ -201,3 +201,7 @@ button:disabled {
 .debugInfo:hover {
   background: rgba(0, 0, 0, 1)
 }
+
+.debugContent.collapsed {
+  display: none;
+}

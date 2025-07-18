@@ -4,28 +4,31 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Chat with Leeroy Jenkins </title>
+  <title>Conferience (Not Really) </title>
   <link rel="stylesheet" href="style.css" />
-  <link rel="icon" href="favicon.ico" type="image/x-icon" />
+  <link rel="icon" href="https://conferience.com/web/favicon.ico" type="image/x-icon" />
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 
 <body>
   <!-- TODO ALL DEBUG! REMOVE IN PROD -->
   <div class="debugInfo">
-    <p>Debug Info</p>
-    <div style="display: flex; flex-direction: row; gap: 10px;">
-      <label>
-        <input type="checkbox" id="streamCheckbox" checked />
-        Stream response
-      </label>
-      <label>
-        <input type="checkbox" id="ttsCheckbox" checked />
-        Enable TTS on response
-      </label>
+    <div class="debugContent">
+      <p>Debug Info</p>
+      <div style="display: flex; flex-direction: row; gap: 10px;">
+        <label>
+          <input type="checkbox" id="streamCheckbox" checked />
+          Stream response
+        </label>
+        <label>
+          <input type="checkbox" id="ttsCheckbox" checked />
+          Enable TTS on response
+        </label>
+      </div>
+      <p>Selected Mic:</p>
+      <p id="selectedMicDebug">Loading Selected Mic...</p>
     </div>
-    <p>Selected Mic:</p>
-    <p id="selectedMicDebug">Loading Selected Mic...</p>
+    <button id="toggleDebugBtn" style="width:auto; z-index:10000;">Toggle Debug</button>
   </div>
 
   <div class="container">
