@@ -11,6 +11,23 @@
 </head>
 
 <body>
+  <!-- TODO ALL DEBUG! REMOVE IN PROD -->
+  <div class="debugInfo">
+    <p>Debug Info</p>
+    <div style="display: flex; flex-direction: row; gap: 10px;">
+      <label>
+        <input type="checkbox" id="streamCheckbox" checked />
+        Stream response
+      </label>
+      <label>
+        <input type="checkbox" id="ttsCheckbox" checked />
+        Enable TTS on response
+      </label>
+    </div>
+    <p>Selected Mic</p>
+    <p id="selectedMicDebug">Loading Selected Mic...</p>
+  </div>
+
   <div class="container">
     <div class="modelAndInput">
       <div class="unityWrapper">
@@ -31,7 +48,7 @@
     </div>
   </div>
   <audio id="audioPlayer" style="display: none;"></audio>
-  <script src="./script.js"></script>
+  <script type="module" src="./scripts/main.js"></script>
   <script>
 
     window.addEventListener("message", (event) => {

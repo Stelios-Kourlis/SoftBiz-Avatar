@@ -117,6 +117,7 @@ body {
   display: flex;
   justify-content: center;
   aspect-ratio: 1;
+  transition: width 0.3s ease;
 }
 
 iframe#UnityFrame {
@@ -181,4 +182,21 @@ button:disabled {
   display: flex;
   justify-content: center;
   width: 100%;
+}
+
+.debugInfo {
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  background: rgba(0, 0, 0, 0.8);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  z-index: 9999;
+  font-family: sans-serif;
+  color: white;
+  transition: background 0.3s ease;
+  padding: 10px;
+}
+
+.debugInfo:hover {
+  background: rgba(0, 0, 0, 1)
 }
