@@ -61,9 +61,11 @@ window.addEventListener('keydown', e => {
 document.getElementById('clickOverlay').addEventListener('click', () => {
   const controls = document.querySelector('.userControls');
   const wrapper = document.querySelector('.unityWrapper');
+  const modelAndInput = document.querySelector('.modelAndInput');
   TextAreaShown = !TextAreaShown;
   controls.style.display = TextAreaShown ? 'flex' : 'none';
   wrapper.style.width = TextAreaShown ? "700px" : "256px";
+  modelAndInput.style.backgroundColor = TextAreaShown ? "#0000007e" : "transparent";
 });
 
 async function handleMicClick(event) {
