@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class BaseBehaviour : StateMachineBehaviour
 {
-    Vector3 initialPosition = new(0.6f, 1.1f, 8.8f), closeUpPosition = new(0.2f, 1.2f, 6.4f);
+    Vector3 initialPosition = new(0.55f, 1.1f, 6.55f), closeUpPosition = new(0.2f, 1.2f, 6.4f);
     Vector3 initialRotation = new(15f, 180f, 0f), closeUpRotation = new(15f, 155f, 0f);
     Tween posTween, rotTween;
     [SerializeField] private float duration = 0.5f;
