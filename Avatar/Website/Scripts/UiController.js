@@ -49,6 +49,7 @@ export class BubbleTextController {
         clearInterval(this.#timer);
         window.removeEventListener('keydown', this.#onEnterKey);
         const paragraph = document.getElementById('bubble-text');
+        if (!paragraph) return;
         UnityAnimationController.startIdle();
         ButtonController.showFinishButton();
         audioPlayer.pause();
@@ -118,8 +119,8 @@ export class BubbleTextController {
 
     static cacheText() {
         let paragraph = document.getElementById('bubble-text');
+        if (this.#appendQueue.length > 0) this.#endAnim(true);
         console.log("Caching text", paragraph.innerText);
-        this.#endAnim(true);
         this.#cache = paragraph ? paragraph.innerText : "";
         this.destroyBubbleText();
     }
