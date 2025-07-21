@@ -46,8 +46,14 @@ export class BubbleTextController {
             const paragraph = document.getElementById('bubble-text');
             let i = startIndex;
 
+            const onEnterKey = (e) => {
+                window.removeEventListener('keydown', onEnterKey);
+                if (e.key === 'Enter') endAnim(true);
+            };
+
             const endAnim = (forceStop = false) => {
                 clearInterval(timer);
+                window.removeEventListener('keydown', onEnterKey);
                 paragraph.innerHTML = marked.parse(text);
                 UnityAnimationController.startIdle();
                 ButtonController.showFinishButton();
@@ -55,7 +61,7 @@ export class BubbleTextController {
                 if (forceStop) {
                     while (this.#appendQueue.length > 0) {
                         const text = this.#appendQueue.shift();
-                        paragraph.innerHTML = marked.parse(paragraph.innerHTML + text);
+                        paragraph.innerHTML = marked.parse(paragraph.innerText + text);
                     }
                     this.#blockAppends = true;
                     this.#appendQueue = [];
@@ -65,12 +71,8 @@ export class BubbleTextController {
                 resolve();
             };
 
-            // document.getElementById('sendBtn').style.display = 'none';
             document.getElementById('stopBtn').onclick = () => endAnim(true);
-            window.addEventListener('keydown', e => {
-                if (e.key === 'Enter')
-                    endAnim(true)
-            }, { once: true });
+            window.addEventListener('keydown', onEnterKey);
             ButtonController.showSkipButton()
             UnityAnimationController.startTalking();
 
@@ -127,6 +129,7 @@ export class ButtonController {
         document.getElementById('stopBtn').style.display = 'none';
         document.getElementById('finishBtn').style.display = 'none';
         document.getElementById('userInput').style.display = 'inline-block';
+        document.getElementById('userInput').focus();
         document.getElementById('micBtn').style.display = 'inline-block';
         document.getElementById('stopBtn').style.display = 'none';
         const btn = document.getElementById('sendBtn');
