@@ -56,7 +56,6 @@ window.addEventListener('keydown', e => {
   if (e.key === 'Enter') {
     const finishButton = document.getElementById('finishBtn');
     const finishButtonIsShownInsteadOfSend = !!(finishButton.offsetWidth || finishButton.offsetHeight || finishButton.getClientRects().length);
-    console.log("Enter pressed, ", streamResponse);
     if (finishButtonIsShownInsteadOfSend) ButtonController.restoreSendBtn();
     else streamResponse ? sendMessageStreamed() : sendMessageNonStreamed();
   }

@@ -20,10 +20,18 @@ export class BubbleTextController {
         container.appendChild(bubble);
 
         this.#blockAppends = false;
+        this.#appendQueue = [];
+        this.userPressedSkip = false;
+        this.#isAnimating = false;
     }
 
     static appendToBubbleText(text) {
+        if (!document.getElementById('bubble-text')) {
+            this.#createBubbleText();
+        }
+
         if (this.#blockAppends) return;
+
         this.#appendQueue.push(text);
         this.#processQueue();
     }
