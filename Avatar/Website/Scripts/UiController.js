@@ -6,6 +6,13 @@ export class BubbleTextController {
     static #isAnimating = false;
     static #blockAppends = false;
     static userPressedSkip = false;
+    static #cache = "";
+    static #timer = null;
+    static #fullResponse = "";
+
+    static isShowing() {
+        return !!document.getElementById('bubble-text');
+    }
 
     static #createBubbleText() {
         const container = document.getElementById('bubbleContainer');
@@ -23,6 +30,7 @@ export class BubbleTextController {
         this.#appendQueue = [];
         this.userPressedSkip = false;
         this.#isAnimating = false;
+        this.#fullResponse = "";
     }
 
     static appendToBubbleText(text) {
@@ -33,8 +41,32 @@ export class BubbleTextController {
         if (this.#blockAppends) return;
 
         this.#appendQueue.push(text);
+        this.#fullResponse += text;
         this.#processQueue();
     }
+
+    static #endAnim = (forceStop = false) => {
+        clearInterval(this.#timer);
+        window.removeEventListener('keydown', this.#onEnterKey);
+        const paragraph = document.getElementById('bubble-text');
+        UnityAnimationController.startIdle();
+        ButtonController.showFinishButton();
+        audioPlayer.pause();
+        this.#cache == "";
+        console.log("Animation ended, cache is ", this.#cache);
+        if (forceStop) {
+            paragraph.innerHTML = marked.parse(this.#fullResponse);
+            this.#blockAppends = true;
+            this.#appendQueue = [];
+            this.userPressedSkip = true;
+            console.error("Animation stopped by user");
+        }
+    };
+
+    static #onEnterKey = (e) => {
+        window.removeEventListener('keydown', onEnterKey);
+        if (e.key === 'Enter') this.#endAnim(true);
+    };
 
     static destroyBubbleText() {
         const container = document.getElementById('bubbleContainer');
@@ -46,39 +78,17 @@ export class BubbleTextController {
             const paragraph = document.getElementById('bubble-text');
             let i = startIndex;
 
-            const onEnterKey = (e) => {
-                window.removeEventListener('keydown', onEnterKey);
-                if (e.key === 'Enter') endAnim(true);
-            };
-
-            const endAnim = (forceStop = false) => {
-                clearInterval(timer);
-                window.removeEventListener('keydown', onEnterKey);
-                paragraph.innerHTML = marked.parse(text);
-                UnityAnimationController.startIdle();
-                ButtonController.showFinishButton();
-                audioPlayer.pause();
-                if (forceStop) {
-                    while (this.#appendQueue.length > 0) {
-                        const text = this.#appendQueue.shift();
-                        paragraph.innerHTML = marked.parse(paragraph.innerText + text);
-                    }
-                    this.#blockAppends = true;
-                    this.#appendQueue = [];
-                    this.userPressedSkip = true;
-                    console.error("Animation stopped by user");
-                }
-                resolve();
-            };
-
-            document.getElementById('stopBtn').onclick = () => endAnim(true);
-            window.addEventListener('keydown', onEnterKey);
+            document.getElementById('stopBtn').onclick = () => this.#endAnim(true);
+            window.addEventListener('keydown', this.#onEnterKey);
             ButtonController.showSkipButton()
             UnityAnimationController.startTalking();
 
-            const timer = setInterval(() => {
+            this.#timer = setInterval(() => {
                 paragraph.innerHTML = marked.parse(text.slice(0, i++));
-                if (i > text.length) endAnim();
+                if (i > text.length) {
+                    this.#endAnim();
+                    resolve();
+                }
             }, 15);
         });
     }
@@ -106,6 +116,29 @@ export class BubbleTextController {
 
         this.#isAnimating = false;
         this.#processQueue(); // check for next
+    }
+
+    static cacheText() {
+        let paragraph = document.getElementById('bubble-text');
+        console.log("Caching text", paragraph.innerText);
+        this.#cache = paragraph ? paragraph.innerText : "";
+        this.#endAnim(true);
+        this.destroyBubbleText();
+    }
+
+    static restoreCachedText() {
+        if (this.isShowing()) return; //Aleady text showing
+        if (!this.#cache || this.#cache == "") return; //No cache to restore
+        console.log("Restoring cached text", this.#cache);
+        this.#createBubbleText();
+        let paragraph = document.getElementById('bubble-text');
+        paragraph.innerHTML = marked.parse(this.#cache);
+    }
+
+    static flushCache() {
+        console.log("Flushing cache", this.#cache);
+        this.#cache = "";
+
     }
 }
 
@@ -137,6 +170,7 @@ export class ButtonController {
         btn.textContent = 'Send';
         btn.style.display = 'inline-block';
         BubbleTextController.destroyBubbleText();
+        BubbleTextController.flushCache();
         UnityAnimationController.startIdle();
     }
 

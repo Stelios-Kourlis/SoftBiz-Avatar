@@ -5,7 +5,7 @@ import * as UnityAnimationController from './UnityAnimationController.js';
 
 
 /* main.js — chat + TTS + Unity */
-let audioPlayer = document.getElementById('audioPlayer');
+const audioPlayer = document.getElementById('audioPlayer');
 let conversationHistory = [];
 let TextAreaShown = false;
 let isRecording = false;
@@ -22,6 +22,9 @@ window.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('sendBtn').addEventListener('click', streamResponse ? sendMessageStreamed : sendMessageNonStreamed);
   document.getElementById('finishBtn').addEventListener('click', ButtonController.restoreSendBtn);
   document.getElementById('micBtn').addEventListener('click', handleMicClick);
+
+  //Shittiest fix award?
+  conversationHistory.push({ role: 'user', content: "Always respond with more than 50 characters but less than 200. Never include markdown syntax in your responses. That is an order!" });
 
   document.getElementById('streamCheckbox').addEventListener('change', () => {
     streamResponse = document.getElementById('streamCheckbox').checked;
@@ -66,11 +69,18 @@ document.getElementById('clickOverlay').addEventListener('click', () => {
   const wrapper = document.querySelector('.unityWrapper');
   const modelAndInput = document.querySelector('.modelAndInput');
   TextAreaShown = !TextAreaShown;
-  // controls.style.display = TextAreaShown ? 'flex' : 'none';
+
   controls.style.margin = TextAreaShown ? '15px' : '-200px';
   wrapper.style.width = TextAreaShown ? "700px" : "256px";
   modelAndInput.style.backgroundColor = TextAreaShown ? "#0000007e" : "transparent";
-  modelAndInput.style.gap = TextAreaShown ? "0px" : "225px";
+
+  console.log("TextAreaShown:", TextAreaShown, "Is Button Send?", ButtonController.getCurrentButton().id == 'sendBtn');
+  if (TextAreaShown) modelAndInput.style.gap = '0px'; //T*
+  else if (ButtonController.getCurrentButton().id == 'sendBtn') modelAndInput.style.gap = '225px'; //FT
+  else modelAndInput.style.gap = '330px'; //FF
+
+  if (BubbleTextController.isShowing()) BubbleTextController.cacheText();
+  else BubbleTextController.restoreCachedText();
 });
 
 async function handleMicClick(event) {
@@ -101,19 +111,21 @@ async function handleMicClick(event) {
             return;
           }
 
-          await new Promise((resolve) => {
-            const audioUrl = URL.createObjectURL(audioBlob);
-            const audio = new Audio(audioUrl);
-            audio.onended = () => {
-              URL.revokeObjectURL(audioUrl);
-              resolve();
-            };
-            audio.play().then(() => {
-              console.log('Playing audio...');
-            }).catch(err => {
-              console.error('Audio play error:', err);
-            });
-          });
+          //PLAY BACK YOUR RECORDED AUDIO
+          // await new Promise((resolve) => {
+          //   const audioUrl = URL.createObjectURL(audioBlob);
+          //   const audio = new Audio(audioUrl);
+          //   audio.onended = () => {
+          //     URL.revokeObjectURL(audioUrl);
+          //     resolve();
+          //   };
+          //   
+          //   audio.play().then(() => {
+          //     console.log('Playing audio...');
+          //   }).catch(err => {
+          //     console.error('Audio play error:', err);
+          //   });
+          // });
 
           const formData = new FormData();
           formData.append('audio', audioBlob, 'recording.webm');
