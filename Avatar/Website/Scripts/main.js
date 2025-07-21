@@ -14,7 +14,6 @@ let audioChunks = [];
 let micStream = null;
 let ignoreTTS = !document.getElementById('ttsCheckbox').checked;
 let streamResponse = document.getElementById('streamCheckbox').checked;
-let responseHandler = streamResponse ? StreamedResponseHandler : NonStreamedResponseHandler;
 
 /* ——— INIT ——— */
 window.addEventListener('DOMContentLoaded', async () => {
@@ -26,7 +25,6 @@ window.addEventListener('DOMContentLoaded', async () => {
 
   document.getElementById('streamCheckbox').addEventListener('change', () => {
     streamResponse = document.getElementById('streamCheckbox').checked;
-    responseHandler = streamResponse ? StreamedResponseHandler : NonStreamedResponseHandler;
     console.log("Stream checkbox changed, streamResponse is now:", streamResponse);
   });
 
@@ -68,9 +66,11 @@ document.getElementById('clickOverlay').addEventListener('click', () => {
   const wrapper = document.querySelector('.unityWrapper');
   const modelAndInput = document.querySelector('.modelAndInput');
   TextAreaShown = !TextAreaShown;
-  controls.style.display = TextAreaShown ? 'flex' : 'none';
+  // controls.style.display = TextAreaShown ? 'flex' : 'none';
+  controls.style.margin = TextAreaShown ? '15px' : '-200px';
   wrapper.style.width = TextAreaShown ? "700px" : "256px";
   modelAndInput.style.backgroundColor = TextAreaShown ? "#0000007e" : "transparent";
+  modelAndInput.style.gap = TextAreaShown ? "0px" : "225px";
 });
 
 async function handleMicClick(event) {
@@ -163,6 +163,10 @@ async function handleMicClick(event) {
   }
 }
 
+function getResponseHandler() {
+  return streamResponse ? StreamedResponseHandler : NonStreamedResponseHandler;
+}
+
 function getUserInput() {
   const userInputEl = document.getElementById('userInput');
   const userInput = userInputEl.value.trim();
@@ -182,12 +186,13 @@ async function sendMessageStreamed() {
 
   let isFirtstChunk = true;
   let fullResponse = '';
-  for await (const chunk of responseHandler.getResponse(conversationHistory)) {
+  for await (const chunk of getResponseHandler().getResponse(conversationHistory)) {
     if (isFirtstChunk) { //Start talking only on the first chunk
       UnityAnimationController.startTalking();
       isFirtstChunk = false;
       ButtonController.showSkipButton();
     }
+    if (BubbleTextController.userPressedSkip) break; // if user pressed skip, stop processing
     BubbleTextController.appendToBubbleText(chunk);
     fullResponse += chunk;
   }
@@ -197,7 +202,7 @@ async function sendMessageStreamed() {
     return;
   }
 
-  const blob = await responseHandler.getTTSAudio(fullResponse);
+  const blob = await getResponseHandler().getTTSAudio(fullResponse);
   audioPlayer.src = URL.createObjectURL(blob);
   if (BubbleTextController.userPressedSkip) return;
   const duration = await playAndGetDuration(audioPlayer);
@@ -216,7 +221,7 @@ async function sendMessageNonStreamed() {
   conversationHistory.push({ role: 'user', content: userInput });
   UnityAnimationController.startThinking();
 
-  const response = await responseHandler.getResponse(conversationHistory)
+  const response = await getResponseHandler().getResponse(conversationHistory)
 
   if (!response) {
     ButtonController.restoreSendBtn();
@@ -234,7 +239,7 @@ async function sendMessageNonStreamed() {
   }
 
   BubbleTextController.appendToBubbleText(response);
-  const tts = await responseHandler.getTTSAudio(response);
+  const tts = await getResponseHandler().getTTSAudio(response);
 
   if (!tts) {
     BubbleTextController.appendToBubbleText(response);
