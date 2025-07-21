@@ -54,10 +54,12 @@ window.addEventListener('DOMContentLoaded', async () => {
 
 window.addEventListener('keydown', e => {
   if (e.key === 'Enter') {
-    const finishButton = document.getElementById('finishBtn');
-    const finishButtonIsShownInsteadOfSend = !!(finishButton.offsetWidth || finishButton.offsetHeight || finishButton.getClientRects().length);
-    if (finishButtonIsShownInsteadOfSend) ButtonController.restoreSendBtn();
-    else streamResponse ? sendMessageStreamed() : sendMessageNonStreamed();
+    // const finishButton = document.getElementById('finishBtn');
+    // const finishButtonIsShownInsteadOfSend = !!(finishButton.offsetWidth || finishButton.offsetHeight || finishButton.getClientRects().length);
+    const currentButton = ButtonController.getCurrentButton();
+    if (currentButton.id === 'finishBtn') ButtonController.restoreSendBtn();
+    else if (currentButton.id === 'sendBtn') { streamResponse ? sendMessageStreamed() : sendMessageNonStreamed(); }
+    else if (currentButton.id === 'stopBtn') return; //listener is in UiController for skipping animations
   }
 });
 

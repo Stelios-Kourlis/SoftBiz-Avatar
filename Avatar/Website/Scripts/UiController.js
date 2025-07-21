@@ -51,7 +51,6 @@ export class BubbleTextController {
                 paragraph.innerHTML = marked.parse(text);
                 UnityAnimationController.startIdle();
                 ButtonController.showFinishButton();
-                // document.getElementById('audioPlayer').pause();
                 audioPlayer.pause();
                 if (forceStop) {
                     while (this.#appendQueue.length > 0) {
@@ -62,13 +61,16 @@ export class BubbleTextController {
                     this.#appendQueue = [];
                     this.userPressedSkip = true;
                     console.error("Animation stopped by user");
-                    // document.getElementById('audioPlayer').pause();
                 }
                 resolve();
             };
 
             // document.getElementById('sendBtn').style.display = 'none';
             document.getElementById('stopBtn').onclick = () => endAnim(true);
+            window.addEventListener('keydown', e => {
+                if (e.key === 'Enter')
+                    endAnim(true)
+            }, { once: true });
             ButtonController.showSkipButton()
             UnityAnimationController.startTalking();
 
@@ -106,6 +108,20 @@ export class BubbleTextController {
 }
 
 export class ButtonController {
+
+    static getCurrentButton() {
+        const finishButton = document.getElementById('finishBtn');
+        const finishButtonIsShown = !!(finishButton.offsetWidth || finishButton.offsetHeight || finishButton.getClientRects().length);
+        if (finishButtonIsShown) return finishButton;
+
+        const sendButton = document.getElementById('sendBtn');
+        const sendButtonIsShown = !!(sendButton.offsetWidth || sendButton.offsetHeight || sendButton.getClientRects().length);
+        if (sendButtonIsShown) return sendButton;
+
+        const stopButton = document.getElementById('stopBtn');
+        const stopButtonIsShown = !!(stopButton.offsetWidth || stopButton.offsetHeight || stopButton.getClientRects().length);
+        if (stopButtonIsShown) return stopButton;
+    }
 
     static restoreSendBtn() {
         document.getElementById('stopBtn').style.display = 'none';
