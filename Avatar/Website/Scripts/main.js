@@ -12,8 +12,8 @@ let isRecording = false;
 let recorder = null;
 let audioChunks = [];
 let micStream = null;
-let ignoreTTS = !document.getElementById('ttsCheckbox').checked;;
-let streamResponse = document.getElementById('streamCheckbox').checked;;
+let ignoreTTS = !document.getElementById('ttsCheckbox').checked;
+let streamResponse = document.getElementById('streamCheckbox').checked;
 let responseHandler = streamResponse ? StreamedResponseHandler : NonStreamedResponseHandler;
 
 /* ——— INIT ——— */
@@ -192,13 +192,14 @@ async function sendMessageStreamed() {
   }
   UnityAnimationController.startIdle();
 
-  if (ignoreTTS) {
+  if (ignoreTTS || BubbleTextController.userPressedSkip) {
     return;
   }
 
   const blob = await responseHandler.getTTSAudio(fullResponse);
-  const audio = new Audio(URL.createObjectURL(blob));
-  const duration = await playAndGetDuration(audio);
+  audioPlayer.src = URL.createObjectURL(blob);
+  if (BubbleTextController.userPressedSkip) return;
+  const duration = await playAndGetDuration(audioPlayer);
   UnityAnimationController.startTalking();
   await new Promise(resolve => setTimeout(resolve, duration * 1000)); // wait duration
   UnityAnimationController.startIdle();
@@ -224,7 +225,7 @@ async function sendMessageNonStreamed() {
 
   conversationHistory.push({ role: 'assistant', content: response });
 
-  if (ignoreTTS) {
+  if (ignoreTTS || BubbleTextController.userPressedSkip) {
     UnityAnimationController.startTalking();
     BubbleTextController.appendToBubbleText(response);
     ButtonController.showSkipButton();
@@ -241,7 +242,7 @@ async function sendMessageNonStreamed() {
   }
 
   audioPlayer.src = URL.createObjectURL(tts);
-
+  if (BubbleTextController.userPressedSkip) return;
   const duration = await playAndGetDuration(audioPlayer);
   UnityAnimationController.startTalking();
   await new Promise(resolve => setTimeout(resolve, duration * 1000)); // wait duration

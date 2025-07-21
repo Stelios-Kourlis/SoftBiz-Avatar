@@ -5,6 +5,7 @@ export class BubbleTextController {
     static #appendQueue = [];
     static #isAnimating = false;
     static #blockAppends = false;
+    static userPressedSkip = false;
 
     static #createBubbleText() {
         const container = document.getElementById('bubbleContainer');
@@ -42,6 +43,7 @@ export class BubbleTextController {
                 paragraph.innerHTML = marked.parse(text);
                 UnityAnimationController.startIdle();
                 ButtonController.showFinishButton();
+                // document.getElementById('audioPlayer').pause();
                 audioPlayer.pause();
                 if (forceStop) {
                     while (this.#appendQueue.length > 0) {
@@ -50,15 +52,16 @@ export class BubbleTextController {
                     }
                     this.#blockAppends = true;
                     this.#appendQueue = [];
+                    this.userPressedSkip = true;
                     console.error("Animation stopped by user");
-                    document.getElementById('audioPlayer').pause();
+                    // document.getElementById('audioPlayer').pause();
                 }
                 resolve();
             };
 
-            document.getElementById('sendBtn').style.display = 'none';
+            // document.getElementById('sendBtn').style.display = 'none';
             document.getElementById('stopBtn').onclick = () => endAnim(true);
-            document.getElementById('stopBtn').style.display = 'inline-block';
+            ButtonController.showSkipButton()
             UnityAnimationController.startTalking();
 
             const timer = setInterval(() => {
@@ -116,6 +119,7 @@ export class ButtonController {
         document.getElementById('userInput').style.display = 'none';
         document.getElementById('micBtn').style.display = 'none';
         document.getElementById('stopBtn').style.display = 'none';
+        document.getElementById('audioPlayer').pause();
     }
 
     static showSkipButton() {
