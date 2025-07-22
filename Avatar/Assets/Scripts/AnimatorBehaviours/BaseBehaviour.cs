@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class BaseBehaviour : StateMachineBehaviour
 {
-    Vector3 initialCameraPosition = new(0.55f, 1.1f, 6.55f), thinkingCameraPosition = new(0.2f, 1.2f, 6.4f);
+    Vector3 initialCameraPosition = new(0.55f, 1.25f, 7f), thinkingCameraPosition = new(0.09f, 1.27f, 6.65f);
     Vector3 initialCameraRotation = new(15f, 180f, 0f), thinkingCameraRotation = new(15f, 155f, 0f);
     Tween posTween, rotTween;
     [SerializeField] private float duration = 0.5f;
@@ -20,7 +20,7 @@ public class BaseBehaviour : StateMachineBehaviour
         {
             animator.transform.GetComponent<AvatarBlendKeysController>().BlendEyesLookUp();
             posTween = cameraTransform.DOMove(thinkingCameraPosition, duration).SetEase(Ease.InOutQuad);
-            rotTween = cameraTransform.DORotate(thinkingCameraPosition, duration).SetEase(Ease.InOutQuad);
+            rotTween = cameraTransform.DORotate(thinkingCameraRotation, duration).SetEase(Ease.InOutQuad);
         }
         else
         {
