@@ -2,9 +2,10 @@ using System;
 using System.Collections;
 using UnityEngine;
 
-
+/// <summary>
+/// Entry point for controlling avatar animations. Use this instead of directly manipulating the Animator.
+/// </summary>
 [RequireComponent(typeof(Animator))]
-[RequireComponent(typeof(AvatarBlendKeysController))]
 public class AvatarAnimationController : MonoBehaviour
 {
     public enum States

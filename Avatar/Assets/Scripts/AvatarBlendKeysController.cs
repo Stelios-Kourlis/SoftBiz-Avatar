@@ -6,18 +6,33 @@ using System.Linq;
 using DG.Tweening;
 using UnityEngine;
 
+/// <summary>
+/// Used to control the BlendShapes of the model
+/// </summary>
 public class AvatarBlendKeysController : MonoBehaviour
 {
+    /// <summary> The duration of a single a blink. This is the combined time for both the opening and closing of the eyes. </summary>
     [SerializeField] private float BLINK_DURATION = 0.2f;
+    /// <summary> The interval from the completion of a blink to the beggining of the next one </summary>
     [SerializeField] private float BLINK_INTERVAL = 2f;
+    /// <summary> The weight of a viseme BlendShape when talking </summary>
     [SerializeField] private float LIP_SYNC_MAX_WEIGHT = 70f;
+    /// <summary> The duration of the transition from 1 viseme BlendShape to the next one </summary>
     [SerializeField] private float LIP_SYNC_TRANSITION_TIME = 0.1f;
+    /// <summary> The ease type of the transtition when entering a new viseme BlendShape </summary>
     [SerializeField] private Ease LIP_SYNC_FADE_IN_EASE = Ease.InCubic;
+    /// <summary> The ease type of the transtition when exiting the previous viseme BlendShape </summary>
     [SerializeField] private Ease LIP_SYNC_FADE_OUT_EASE = Ease.OutCubic;
 
-
+    /// <summary>
+    /// The SkinnedMeshRenderers that have the BlendShapes for the eyes, eyelids, eyelashes, head, teeth and tongue.
+    /// This assumes the model is an Avaturn T2 model.
+    /// </summary>
     private SkinnedMeshRenderer eyeMesh, eyeAoMesh, eyelashMesh, headMesh, teethMesh, tongueMesh;
+
+    [Obsolete("This field has been deprecated since it does not provide any lip sync. Use StartLipSync instead.")]
     private readonly List<Coroutine> talkingCoroutines = new(3);
+    [Obsolete("This field has been deprecated since it does not provide any lip sync. Use StartLipSync instead.")]
     private readonly List<Tween> activeTalkingTweens = new(3);
 
     void Awake()
@@ -43,6 +58,12 @@ public class AvatarBlendKeysController : MonoBehaviour
         StartCoroutine(StartBlinking());
     }
 
+    /// <summary>
+    /// Check if the specified SkinnedMeshRenderers have the specified blend shape.
+    /// </summary>
+    /// <param name="smr">The SkinnedMeshRenderer to check</param>
+    /// <param name="shapeName">The name of the BlendShape to check for</param>
+    /// <returns>If the SkinnedMeshRenderer had a BlendShape named shapeName</returns>
     private bool HasBlendShape(SkinnedMeshRenderer smr, string shapeName)
     {
         var mesh = smr.sharedMesh;
@@ -55,6 +76,13 @@ public class AvatarBlendKeysController : MonoBehaviour
         return false;
     }
 
+    /// <summary>
+    /// Try to apply the specified weight to the specified BlendShape of the SkinnedMeshRenderer.
+    /// If the BlendShape does not exist, it will do nothing.
+    /// </summary>
+    /// <param name="smr">The SkinnedMeshRenderer that has the BlendShape</param>
+    /// <param name="shapeName">The name of the BlendShape</param>
+    /// <param name="weight">The new weight of the BlendShape</param>
     private void TryApplyBlendShapeWeight(SkinnedMeshRenderer smr, string shapeName, float weight)
     {
         if (!HasBlendShape(smr, shapeName)) return;
@@ -62,6 +90,12 @@ public class AvatarBlendKeysController : MonoBehaviour
         smr.SetBlendShapeWeight(index, weight);
     }
 
+    /// <summary>
+    /// Apply the specified weight to the specified BlendShape to all SkinnedMeshRenderers that have it.
+    /// Any SkinnedMeshRenderers that do not have the BlendShape will have no change applied to them.
+    /// </summary>
+    /// <param name="shapeName">The name of the BlendShape</param>
+    /// <param name="weight">The new weight of the BlendShape</param>
     private void TryApplyBlendShapeWeightToAll(string shapeName, float weight)
     {
         TryApplyBlendShapeWeight(eyeMesh, shapeName, weight);
@@ -72,6 +106,12 @@ public class AvatarBlendKeysController : MonoBehaviour
         TryApplyBlendShapeWeight(tongueMesh, shapeName, weight);
     }
 
+    /// <summary>
+    /// Get the current weight of the specified BlendShape from all SkinnedMeshRenderers.
+    /// This assumes that all SkinnedMeshRenderers that have this BlendShape have the same weight for it.
+    /// </summary>
+    /// <param name="shapeName">The name of the BlendShape</param>
+    /// <returns>The value of the BlendShape on the first SkinnedMeshRenderer that has it. Null if no SkinnedMeshRenderers have the BlendShape</returns>
     private float? GetBlendShapeWeight(string shapeName)
     {
 
@@ -85,6 +125,9 @@ public class AvatarBlendKeysController : MonoBehaviour
         return null;
     }
 
+    /// <summary>
+    /// Periodically blink the avatar. To tweak blinking parameters, change BLINK_DURATION and BLINK_INTERVAL preferably from the Unity Editor.
+    /// </summary>
     private IEnumerator StartBlinking()
     {
         while (true)
@@ -95,7 +138,7 @@ public class AvatarBlendKeysController : MonoBehaviour
                 TryApplyBlendShapeWeightToAll("eyeBlinkRight", weight);
                 TryApplyBlendShapeWeightToAll("eyeSquintLeft", weight);
                 TryApplyBlendShapeWeightToAll("eyeSquintRight", weight);
-            }, 100f, BLINK_DURATION).WaitForCompletion();
+            }, 100f, BLINK_DURATION / 2).WaitForCompletion();
 
             yield return DOTween.To(() => 100f, weight =>
             {
@@ -103,12 +146,13 @@ public class AvatarBlendKeysController : MonoBehaviour
                 TryApplyBlendShapeWeightToAll("eyeBlinkRight", weight);
                 TryApplyBlendShapeWeightToAll("eyeSquintLeft", weight);
                 TryApplyBlendShapeWeightToAll("eyeSquintRight", weight);
-            }, 0f, BLINK_DURATION).WaitForCompletion();
+            }, 0f, BLINK_DURATION / 2).WaitForCompletion();
 
             yield return new WaitForSeconds(BLINK_INTERVAL);
         }
     }
 
+    [Obsolete("This function has been deprecated since it does not provide any lip sync. Use StartLipSync instead.")]
     public void BlendStartTalking()
     {
         talkingCoroutines.Clear();
@@ -117,6 +161,7 @@ public class AvatarBlendKeysController : MonoBehaviour
         talkingCoroutines.Add(StartCoroutine(BlendTalkShapeOverTime("mouthPucker", 0, 100, 40, 0.15f, 0.1f)));
     }
 
+    [Obsolete("This function has been deprecated since it does not provide any lip sync. Use StartLipSync instead.")]
     public void BlendStopTalking()
     {
         IEnumerator StopTalkingCoroutines()
@@ -138,6 +183,7 @@ public class AvatarBlendKeysController : MonoBehaviour
             }
             yield return null;
             talkingCoroutines.Clear();
+            activeTalkingTweens.Clear();
             TryApplyBlendShapeWeightToAll("mouthOpen", 0);
             TryApplyBlendShapeWeightToAll("mouthFunnel", 0);
             TryApplyBlendShapeWeightToAll("mouthPucker", 0);
@@ -147,6 +193,7 @@ public class AvatarBlendKeysController : MonoBehaviour
         StartCoroutine(StopTalkingCoroutines());
     }
 
+    [Obsolete("This function has been deprecated due to its parent function being deprecated. See BlendStartTalking for more details.")]
     private IEnumerator BlendTalkShapeOverTime(string blendShapeName, int min, int max, int minDiff, float duration, float interval)
     {
         int currentWeight = 0;
@@ -174,6 +221,9 @@ public class AvatarBlendKeysController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Smoothly blend the eyes to look upwards and to raise the right eyebrow. Used to better represent a thining pose
+    /// </summary>
     public void BlendEyesLookUp()
     {
         if (GetBlendShapeWeight("eyesLookUp") == 50f) return;
@@ -184,6 +234,9 @@ public class AvatarBlendKeysController : MonoBehaviour
         }, 50f, 0.2f).WaitForCompletion();
     }
 
+    /// <summary>
+    /// Smoothly blend the eyes to look straight again and lower the right eyebrow. Used to recover from a thining pose
+    /// </summary>
     public void BlendEyesLookDown()
     {
         if (GetBlendShapeWeight("eyesLookUp") == 0f) return;
@@ -195,10 +248,12 @@ public class AvatarBlendKeysController : MonoBehaviour
     }
 
     /// <summary>
-    /// Parse the JSON data into a LipSyncData object.
+    /// Parse the RhubarbLipSync JSON results into a LipSyncData object.
+    /// <para>Using any other file except a RhubarbLipSync with JSON output may result in undefined behaviour and is not recommended.
+    /// This method will do nothing to handle any potential errors from invalid inputs</para>
     /// </summary>
     /// <param name="json">The RhubarbLipSync JSON output</param>
-    /// <returns></returns>
+    /// <returns>The parsed data as a LipSyncData object.</returns>
     private LipSyncData ParseLipSyncData(string json)
     {
         LipSyncData data = JsonUtility.FromJson<LipSyncData>(json);
