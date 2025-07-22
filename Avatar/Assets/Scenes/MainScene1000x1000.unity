@@ -368,7 +368,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   BLINK_DURATION: 0.2
   BLINK_INTERVAL: 2
-  LIP_SYNC_MAX_WEIGHT: 70
+  LIP_SYNC_MAX_WEIGHT: 65
+  LIP_SYNC_TRANSITION_TIME: 0.125
+  LIP_SYNC_FADE_IN_EASE: 10
+  LIP_SYNC_FADE_OUT_EASE: 10
 --- !u!95 &36989290
 Animator:
   serializedVersion: 7
