@@ -2,7 +2,6 @@ using UnityEngine;
 
 public class TestButtonLinker : MonoBehaviour
 {
-    [SerializeField] private string blendShapeName;
     private GameObject model;
     void Start()
     {
@@ -22,5 +21,10 @@ public class TestButtonLinker : MonoBehaviour
     public void StartTalking()
     {
         model.GetComponent<AvatarAnimationController>().StartTalking();
+    }
+
+    public void StartLipSync(string jsonData)
+    {
+        model.GetComponent<AvatarBlendKeysController>().StartLipSync(jsonData);
     }
 }

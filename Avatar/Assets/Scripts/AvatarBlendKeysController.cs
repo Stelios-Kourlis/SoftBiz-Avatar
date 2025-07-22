@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using DG.Tweening;
 using UnityEngine;
@@ -9,6 +10,11 @@ public class AvatarBlendKeysController : MonoBehaviour
 {
     [SerializeField] private float BLINK_DURATION = 0.2f;
     [SerializeField] private float BLINK_INTERVAL = 2f;
+    [SerializeField] private float LIP_SYNC_MAX_WEIGHT = 70f;
+    [SerializeField] private float LIP_SYNC_TRANSITION_TIME = 0.05f;
+    [SerializeField] private Ease LIP_SYNC_FADE_IN_EASE = Ease.InCubic;
+    [SerializeField] private Ease LIP_SYNC_FADE_OUT_EASE = Ease.OutCubic;
+
 
     private SkinnedMeshRenderer eyeMesh, eyeAoMesh, eyelashMesh, headMesh, teethMesh, tongueMesh;
     private readonly List<Coroutine> talkingCoroutines = new(3);
@@ -187,4 +193,80 @@ public class AvatarBlendKeysController : MonoBehaviour
             TryApplyBlendShapeWeightToAll("browOuterUpRight", weight * 2);
         }, 0f, 0.2f).WaitForCompletion();
     }
+
+    public LipSyncData ParseLipSyncData(string json)
+    {
+        LipSyncData data = JsonUtility.FromJson<LipSyncData>(json);
+
+        Dictionary<string, string> visemeMap = new()
+        {
+            { "A", "PP" },
+            { "B", "kk" }, //Yes the kk viseme is lowercase
+            { "C", "E" }, //?
+            { "D", "AA" },
+            { "E", "O" },
+            { "F", "U" },
+            { "G", "FF" },
+            { "H", "" },
+            { "X", "sil"}
+        };
+
+        foreach (MouthCue cue in data.mouthCues)
+        {
+            if (visemeMap.TryGetValue(cue.value, out string viseme))
+            {
+                Debug.Log($"Mapped {cue.value} to viseme_{viseme}");
+                cue.value = "viseme_" + viseme;
+            }
+            else
+            {
+                Debug.LogWarning($"Unknown viseme type: {cue.value}. Defaulting to 'sil'");
+                cue.value = "sil"; // Default to silence if unknown
+            }
+        }
+
+        return data;
+    }
+
+    public void StartLipSync(string jsonData)
+    {
+        LipSyncData lsd = ParseLipSyncData(jsonData); //Bad abbrevation, I know
+        StartCoroutine(LipSyncCoroutine());
+        Debug.Log($"Starting lip sync with {lsd.mouthCues.Length} cues.");
+
+        IEnumerator LipSyncCoroutine()
+        {
+            MouthCue previousCue = null;
+            foreach (MouthCue cue in lsd.mouthCues)
+            {
+                float duration = cue.end - cue.start;
+                Sequence seq = DOTween.Sequence();
+
+                Debug.Log($"Cue: {cue.value}, Start: {cue.start}, End: {cue.end}, Duration: {duration}");
+                Debug.Log($"Previous Cue: {previousCue?.value}");
+                if (previousCue != null && previousCue.value != cue.value)
+                {
+                    seq.Join(DOTween.To(() => LIP_SYNC_MAX_WEIGHT, weight =>
+                    {
+                        TryApplyBlendShapeWeightToAll(previousCue.value, weight);
+                    }, 0f, LIP_SYNC_TRANSITION_TIME).SetEase(Ease.OutCubic));
+                }
+
+                seq.Join(DOTween.To(() => 0f, weight =>
+                {
+                    TryApplyBlendShapeWeightToAll(cue.value, weight);
+                }, LIP_SYNC_MAX_WEIGHT, LIP_SYNC_TRANSITION_TIME).SetEase(Ease.OutCubic));
+
+                seq.AppendInterval(Mathf.Max(duration - LIP_SYNC_TRANSITION_TIME, 0.1f));
+
+                seq.Play();
+                yield return seq.WaitForCompletion();
+
+                previousCue = cue;
+            }
+        }
+    }
+
 }
+
+
