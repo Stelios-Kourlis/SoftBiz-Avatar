@@ -291,9 +291,6 @@ public class AvatarBlendKeysController : MonoBehaviour
     {
         LipSyncData lsd = ParseLipSyncData(jsonData); //Bad abbrevation, I know
         StartCoroutine(LipSyncCoroutine(lsd));
-        Debug.Log($"Starting lip sync with {lsd.mouthCues.Length} cues.");
-
-
     }
 
     private IEnumerator LipSyncCoroutine(LipSyncData lsd)
