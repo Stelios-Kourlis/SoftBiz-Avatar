@@ -123,7 +123,6 @@ app.post('/api/openai/lipsync', async (req, res) => {
       fs.mkdirSync(uploadsDir, { recursive: true });
     }
 
-    const mp3Path = path.join(uploadsDir, 'tts.mp3');
     const wavPath = path.join(uploadsDir, 'tts.wav');
     const visemePath = path.join(uploadsDir, 'tts.json');
 
@@ -146,16 +145,6 @@ app.post('/api/openai/lipsync', async (req, res) => {
       throw new Error(`TTS request failed: ${response.status} ${response.statusText}`);
     }
 
-    // 2. Save MP3 file
-    await new Promise((resolve, reject) => {
-      const fileStream = fs.createWriteStream(mp3Path);
-      response.body.pipe(fileStream);
-      response.body.on('error', reject);
-      fileStream.on('finish', resolve);
-    });
-
-    // 3. Convert MP3 to WAV (mono 44.1kHz 16-bit)
-    await execAsync(`"${ffmpegPath}" -y -i "${mp3Path}" -ar 44100 -ac 1 -sample_fmt s16 "${wavPath}"`);
 
     // 4. Run Rhubarb to get visemes
     // Adjust path to rhubarb.exe if necessary
