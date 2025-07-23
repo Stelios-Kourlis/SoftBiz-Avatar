@@ -123,8 +123,16 @@ app.post('/api/openai/lipsync', async (req, res) => {
       fs.mkdirSync(uploadsDir, { recursive: true });
     }
 
+    const wavPathUnproccesed = path.join(uploadsDir, 'tts_unproc.wav');
     const wavPath = path.join(uploadsDir, 'tts.wav');
     const visemePath = path.join(uploadsDir, 'tts.json');
+    const transcriptPath = path.join(uploadsDir, 'tts.txt');
+
+    fs.writeFile(transcriptPath, text, (err) => {
+      if (err) console.error(err);
+      else console.log('File saved');
+    });
+
 
     // 1. Request MP3 from OpenAI TTS
     const response = await fetch('https://api.openai.com/v1/audio/speech', {
@@ -145,6 +153,12 @@ app.post('/api/openai/lipsync', async (req, res) => {
       throw new Error(`TTS request failed: ${response.status} ${response.statusText}`);
     }
 
+    await new Promise((resolve, reject) => {
+      const fileStream = fs.createWriteStream(wavPathUnproccesed);
+      response.body.pipe(fileStream);
+      response.body.on('error', reject);
+      fileStream.on('finish', resolve);
+    });
 
     // 4. Run Rhubarb to get visemes
     // Adjust path to rhubarb.exe if necessary
@@ -155,7 +169,9 @@ app.post('/api/openai/lipsync', async (req, res) => {
       throw new Error(`rhubarb.exe not found at ${rhubarbFile}`);
     }
 
-    await execAsync(`"${rhubarbFile}" -f json -o "${visemePath}" "${wavPath}"`);
+    await execAsync(`"${ffmpegPath}" -y -i "${wavPathUnproccesed}" -acodec pcm_s16le -ar 44100 "${wavPath}"`);
+
+    await execAsync(`"${rhubarbFile}" "${wavPath}" -f json -o "${visemePath}" -d "${transcriptPath}" --extendedShapes GX `);
 
     // 5. Read visemes JSON
     const visemes = JSON.parse(fs.readFileSync(visemePath, 'utf8'));
