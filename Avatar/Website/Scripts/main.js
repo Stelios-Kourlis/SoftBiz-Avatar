@@ -120,9 +120,12 @@ async function sendMessageStreamed() {
   audioPlayer.src = `http://localhost:3000${audioUrl}`;
   audioPlayer.volume = 1.0;
   audioPlayer.muted = false;
-  audioPlayer.oncanplay = () => console.log('[audio] canplay event fired');;
+  audioPlayer.oncanplay = () => console.log('[audio] canplay event fired');
   audioPlayer.onplay = () => {
-    console.log('Audio playback started');
+    console.log('Audio playback started at');
+    const now = new Date();
+    const timeString = now.toTimeString().split(' ')[0] + '.' + now.getMilliseconds().toString().padStart(3, '0');
+    console.log("[JS LS]", timeString);
     UnityAnimationController.startLipSync(JSON.stringify(visemes));
   };
 
@@ -151,10 +154,11 @@ async function sendMessageNonStreamed() {
   }
 
   conversationHistory.push({ role: 'assistant', content: response });
-  BubbleTextController.appendToBubbleText(response);
 
-  if (ignoreTTS || BubbleTextController.userPressedSkip) return;
-
+  if (ignoreTTS || BubbleTextController.userPressedSkip) {
+    BubbleTextController.appendToBubbleText(response);
+    return;
+  }
   const lipsyncRes = await fetch('http://localhost:3000/api/openai/lipsync', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -172,8 +176,13 @@ async function sendMessageNonStreamed() {
   audioPlayer.onended = () => console.log('[audio] ended event fired');
   audioPlayer.onerror = (e) => console.error('[audio] error event', e);
   audioPlayer.onplay = () => {
-    console.log('Audio playback started');
+    console.log('Audio playback started at');
+    const now = new Date();
+    const timeString = now.toTimeString().split(' ')[0] + '.' + now.getMilliseconds().toString().padStart(3, '0');
+    console.log("[JS LS]", timeString);
+    UnityAnimationController.startIdle();
     UnityAnimationController.startLipSync(JSON.stringify(visemes));
+    BubbleTextController.appendToBubbleText(response);
   };
 
   try {

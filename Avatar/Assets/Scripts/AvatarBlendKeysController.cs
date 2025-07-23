@@ -295,6 +295,7 @@ public class AvatarBlendKeysController : MonoBehaviour
 
     private IEnumerator LipSyncCoroutine(LipSyncData lsd)
     {
+        Debug.Log($"[Unity LS] {DateTime.Now:HH:mm:ss.fff}");
         MouthCue previousCue = null;
         foreach (MouthCue cue in lsd.mouthCues)
         {

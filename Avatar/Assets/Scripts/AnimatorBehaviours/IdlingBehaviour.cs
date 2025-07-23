@@ -17,13 +17,6 @@ public class IdlingBehaviour : StateMachineBehaviour
             currentStateIsIdle = true;
         }
         else currentStateIsIdle = false;
-
-        //The idle animation rotates the character around the Y axis ever so slightly but it accumulates over time
-        //This is to prevent the character from rotating indefinitely
-        Transform t = animator.transform;
-        Vector3 euler = t.rotation.eulerAngles;
-        euler.y = 0f;
-        t.rotation = Quaternion.Euler(euler);
     }
 
     // OnStateUpdate is called before OnStateUpdate is called on any state inside this state machine
