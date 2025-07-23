@@ -11,9 +11,11 @@ import FormData from 'form-data';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import ffmpegPath from 'ffmpeg-static';
+
 const execAsync = promisify(exec);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const rhubarbPath = process.env.RHUBARB_PATH;
 /* ——— load .env ——— */
 dotenv.config({ path: path.join(__dirname, '.env') });
 
@@ -22,6 +24,8 @@ const {
   FRONTEND_ORIGIN = 'http://127.0.0.1:5500',
   PORT = 3000
 } = process.env;
+
+// console.log(rhubarbPath);
 
 if (!OPENAI_API_KEY) {
   console.error('OPENAI_API_KEY missing in .env');
@@ -108,6 +112,7 @@ app.post('/api/openai/tts', async (req, res) => {
     res.status(500).send('TTS proxy failure');
   }
 });
+
 app.post('/api/openai/lipsync', async (req, res) => {
   try {
     const { text, voice = 'ash' } = req.body;
@@ -153,12 +158,14 @@ app.post('/api/openai/lipsync', async (req, res) => {
 
     // 4. Run Rhubarb to get visemes
     // Adjust path to rhubarb.exe if necessary
-    const rhubarbPath = path.join(__dirname, 'rhubarb.exe');
+    const rhubarbFile = path.join(rhubarbPath, 'rhubarb.exe');
+    console.log('Rhubarb path:', rhubarbPath);
+    console.log('Rhubarb file:', rhubarbFile);
     if (!fs.existsSync(rhubarbPath)) {
-      throw new Error(`rhubarb.exe not found at ${rhubarbPath}`);
+      throw new Error(`rhubarb.exe not found at ${rhubarbFile}`);
     }
 
-    await execAsync(`"${rhubarbPath}" -f json -o "${visemePath}" "${wavPath}"`);
+    await execAsync(`"${rhubarbFile}" -f json -o "${visemePath}" "${wavPath}"`);
 
     // 5. Read visemes JSON
     const visemes = JSON.parse(fs.readFileSync(visemePath, 'utf8'));
