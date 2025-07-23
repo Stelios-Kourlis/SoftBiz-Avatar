@@ -72,47 +72,47 @@ app.post('/api/openai/chat', async (req, res) => {
   }
 });
 
+///This post is obsolete, use /api/openai/lipsync instead
+// app.post('/api/openai/tts', async (req, res) => {
+//   try {
+//     const { input, voice = 'ash', stream = false } = req.body;
 
-app.post('/api/openai/tts', async (req, res) => {
-  try {
-    const { input, voice = 'ash', stream = false } = req.body;
+//     const r = await fetch('https://api.openai.com/v1/audio/speech', {
+//       method: 'POST',
+//       headers: {
+//         'Authorization': `Bearer ${OPENAI_API_KEY}`,
+//         'Content-Type': 'application/json'
+//       },
+//       body: JSON.stringify({
+//         model: 'tts-1',
+//         input: input,
+//         voice: voice,
+//         response_format: 'mp3',
+//         stream_format: "audio",
+//         stream: stream
+//       })
+//     });
 
-    const r = await fetch('https://api.openai.com/v1/audio/speech', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${OPENAI_API_KEY}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: 'tts-1',
-        input: input,
-        voice: voice,
-        response_format: 'mp3',
-        stream_format: "audio",
-        stream: stream
-      })
-    });
+//     console.log('Stream:', typeof r.body, r.body?.[Symbol.asyncIterator]);
 
-    console.log('📥 Stream:', typeof r.body, r.body?.[Symbol.asyncIterator]);
+//     if (stream) {
+//       res.setHeader('Content-Type', 'audio/mpeg');
+//       res.setHeader('Transfer-Encoding', 'chunked');
+//       res.setHeader('Cache-Control', 'no-cache');
 
-    if (stream) {
-      res.setHeader('Content-Type', 'audio/mpeg');
-      res.setHeader('Transfer-Encoding', 'chunked');
-      res.setHeader('Cache-Control', 'no-cache');
-
-      for await (const chunk of r.body) {
-        res.write(chunk); // write raw audio chunks as they come
-      }
-      res.end();
-    } else {
-      res.status(r.status);
-      r.body.pipe(res);          // stream MP3 straight through
-    }
-  } catch (err) {
-    console.error('TTS proxy failure:', err);
-    res.status(500).send('TTS proxy failure');
-  }
-});
+//       for await (const chunk of r.body) {
+//         res.write(chunk); // write raw audio chunks as they come
+//       }
+//       res.end();
+//     } else {
+//       res.status(r.status);
+//       r.body.pipe(res);          // stream MP3 straight through
+//     }
+//   } catch (err) {
+//     console.error('TTS proxy failure:', err);
+//     res.status(500).send('TTS proxy failure');
+//   }
+// });
 
 app.post('/api/openai/lipsync', async (req, res) => {
   try {
@@ -138,7 +138,7 @@ app.post('/api/openai/lipsync', async (req, res) => {
         model: 'tts-1',
         voice,
         input: text,
-        response_format: 'mp3',
+        response_format: 'wav',
       }),
     });
 

@@ -48,38 +48,4 @@ export class StreamedResponseHandler extends ResponseHandler {
             }
         }
     }
-
-    static async getTTSAudio(text) {
-        const ttsRes = await fetch('http://localhost:3000/api/openai/tts', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ input: text, voice: 'ash', stream: true }) // male
-        });
-
-        console.log("Status:", ttsRes.status);
-        console.log("Content-Type:", ttsRes.headers.get("content-type"));
-
-        if (!ttsRes.ok) {
-            console.error('TTS stream error: Bad status', ttsRes.status);
-            return null;
-        }
-        if (!ttsRes.body) {
-            console.error('TTS stream error: No response body');
-            return null;
-        }
-
-        // unityInstance?.SendMessage('model', 'StartTalking');
-        const reader = ttsRes.body.getReader();
-        const chunks = [];
-
-        // Read chunks as they arrive
-        while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            chunks.push(value);
-        }
-
-        // Combine all chunks into a single Blob
-        return new Blob(chunks, { type: 'audio/mpeg' });
-    }
 }

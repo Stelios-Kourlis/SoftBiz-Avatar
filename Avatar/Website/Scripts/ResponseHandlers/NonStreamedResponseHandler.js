@@ -20,19 +20,4 @@ export class NonStreamedResponseHandler extends ResponseHandler {
         const chatData = await response.json();
         return chatData.choices?.[0]?.message?.content || '(empty reply)';
     }
-
-    static async getTTSAudio(text) {
-        const speech = await fetch('http://localhost:3000/api/openai/tts', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ input: text, voice: 'ash' }) // male
-        });
-
-        if (!speech.ok) {
-            console.error('TTS error:', await speech.text());
-            return null;
-        }
-
-        return await speech.blob();
-    }
 }
