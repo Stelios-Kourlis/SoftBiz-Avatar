@@ -122,20 +122,15 @@ async function sendMessageStreamed() {
   audioPlayer.muted = false;
   audioPlayer.oncanplay = () => console.log('[audio] canplay event fired');;
   audioPlayer.onplay = () => {
-  console.log('Audio playback started');
-  const unityInstance = unityFrame.contentWindow.unityInstance;
-  unityFrame.contentWindow.unityInstance?.SendMessage(
-    'model',                // GameObject in Unity
-    'StartLipSync',         // Exact method name in Unity script
-    JSON.stringify(visemes) // Actual Rhubarb-style data
-  );
-};
+    console.log('Audio playback started');
+    UnityAnimationController.startLipSync(JSON.stringify(visemes));
+  };
 
-try {
-  await audioPlayer.play();
-} catch (err) {
-  console.warn('Audio play interrupted:', err);
-}
+  try {
+    await audioPlayer.play();
+  } catch (err) {
+    console.warn('Audio play interrupted:', err);
+  }
 
   ButtonController.showFinishButton();
 }
@@ -169,28 +164,23 @@ async function sendMessageNonStreamed() {
   const { audioUrl, visemes } = await lipsyncRes.json();
 
   audioPlayer.src = `http://localhost:3000${audioUrl}`;
-    console.log('Playing audio from URL:', `http://localhost:3000${audioUrl}`);
-    audioPlayer.volume = 1.0;
-audioPlayer.muted = false;
+  console.log('Playing audio from URL:', `http://localhost:3000${audioUrl}`);
+  audioPlayer.volume = 1.0;
+  audioPlayer.muted = false;
   audioPlayer.oncanplay = () => console.log('[audio] canplay event fired');
-audioPlayer.onplay = () => console.log('[audio] play event fired');
-audioPlayer.onended = () => console.log('[audio] ended event fired');
-audioPlayer.onerror = (e) => console.error('[audio] error event', e);
+  audioPlayer.onplay = () => console.log('[audio] play event fired');
+  audioPlayer.onended = () => console.log('[audio] ended event fired');
+  audioPlayer.onerror = (e) => console.error('[audio] error event', e);
   audioPlayer.onplay = () => {
-  console.log('Audio playback started');
-  const unityInstance = unityFrame.contentWindow.unityInstance;
-  unityFrame.contentWindow.unityInstance?.SendMessage(
-    'model',                // GameObject in Unity
-    'StartLipSync',         // Exact method name in Unity script
-    JSON.stringify(visemes) // Actual Rhubarb-style data
-  );
-};
+    console.log('Audio playback started');
+    UnityAnimationController.startLipSync(JSON.stringify(visemes));
+  };
 
-try {
-  await audioPlayer.play();
-} catch (err) {
-  console.warn('Audio play interrupted:', err);
-}
+  try {
+    await audioPlayer.play();
+  } catch (err) {
+    console.warn('Audio play interrupted:', err);
+  }
 
   ButtonController.showFinishButton();
 }

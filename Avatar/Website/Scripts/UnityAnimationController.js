@@ -12,6 +12,10 @@ export function startIdle() {
     unityInstance?.SendMessage('model', 'StartIdle');
 }
 
+export function startLipSync(jsonLipSyncDataString) {
+    unityInstance?.SendMessage('model', 'StartLipSync', jsonLipSyncDataString);
+}
+
 export async function waitForUnity() {
     return new Promise((resolve) => {
         const check = () => {
