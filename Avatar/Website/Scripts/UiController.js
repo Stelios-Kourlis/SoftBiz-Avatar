@@ -52,7 +52,7 @@ export class BubbleTextController {
         if (!paragraph) return;
         UnityAnimationController.startIdle();
         ButtonController.showFinishButton();
-        audioPlayer.pause();
+        //audioPlayer.pause();
         if (forceStop) {
             paragraph.innerHTML = marked.parse(this.#fullResponse);
             this.#blockAppends = true;
@@ -80,7 +80,6 @@ export class BubbleTextController {
             document.getElementById('stopBtn').onclick = () => this.#endAnim(true);
             window.addEventListener('keydown', this.#onEnterKey);
             ButtonController.showSkipButton()
-            UnityAnimationController.startTalking();
 
             this.#timer = setInterval(() => {
                 paragraph.innerHTML = marked.parse(text.slice(0, i++));
@@ -179,7 +178,7 @@ export class ButtonController {
         document.getElementById('userInput').style.display = 'none';
         document.getElementById('micBtn').style.display = 'none';
         document.getElementById('stopBtn').style.display = 'none';
-        document.getElementById('audioPlayer').pause();
+        //document.getElementById('audioPlayer').pause();
     }
 
     static showSkipButton() {

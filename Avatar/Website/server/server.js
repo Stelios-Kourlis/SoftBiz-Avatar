@@ -8,10 +8,12 @@ import cors from 'cors';
 import multer from 'multer';
 import fs from 'fs';
 import FormData from 'form-data';
-
+import { exec } from 'child_process';
+import { promisify } from 'util';
+import ffmpegPath from 'ffmpeg-static';
+const execAsync = promisify(exec);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
 /* ——— load .env ——— */
 dotenv.config({ path: path.join(__dirname, '.env') });
 
@@ -31,6 +33,7 @@ const upload = multer({ dest: 'uploads/' });
 
 app.use(cors({ origin: FRONTEND_ORIGIN }));
 app.use(express.json());
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 /* ——— CHAT ——— */
 app.post('/api/openai/chat', async (req, res) => {
@@ -67,7 +70,7 @@ app.post('/api/openai/chat', async (req, res) => {
 
 app.post('/api/openai/tts', async (req, res) => {
   try {
-    const { input, voice = 'spruce', stream = false } = req.body;
+    const { input, voice = 'ash', stream = false } = req.body;
 
     const r = await fetch('https://api.openai.com/v1/audio/speech', {
       method: 'POST',
@@ -103,6 +106,71 @@ app.post('/api/openai/tts', async (req, res) => {
   } catch (err) {
     console.error('TTS proxy failure:', err);
     res.status(500).send('TTS proxy failure');
+  }
+});
+app.post('/api/openai/lipsync', async (req, res) => {
+  try {
+    const { text, voice = 'ash' } = req.body;
+    const uploadsDir = path.join(__dirname, 'uploads');
+
+    if (!fs.existsSync(uploadsDir)) {
+      fs.mkdirSync(uploadsDir, { recursive: true });
+    }
+
+    const mp3Path = path.join(uploadsDir, 'tts.mp3');
+    const wavPath = path.join(uploadsDir, 'tts.wav');
+    const visemePath = path.join(uploadsDir, 'tts.json');
+
+    // 1. Request MP3 from OpenAI TTS
+    const response = await fetch('https://api.openai.com/v1/audio/speech', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${OPENAI_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'tts-1',
+        voice,
+        input: text,
+        response_format: 'mp3',
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`TTS request failed: ${response.status} ${response.statusText}`);
+    }
+
+    // 2. Save MP3 file
+    await new Promise((resolve, reject) => {
+      const fileStream = fs.createWriteStream(mp3Path);
+      response.body.pipe(fileStream);
+      response.body.on('error', reject);
+      fileStream.on('finish', resolve);
+    });
+
+    // 3. Convert MP3 to WAV (mono 44.1kHz 16-bit)
+    await execAsync(`"${ffmpegPath}" -y -i "${mp3Path}" -ar 44100 -ac 1 -sample_fmt s16 "${wavPath}"`);
+
+    // 4. Run Rhubarb to get visemes
+    // Adjust path to rhubarb.exe if necessary
+    const rhubarbPath = path.join(__dirname, 'rhubarb.exe');
+    if (!fs.existsSync(rhubarbPath)) {
+      throw new Error(`rhubarb.exe not found at ${rhubarbPath}`);
+    }
+
+    await execAsync(`"${rhubarbPath}" -f json -o "${visemePath}" "${wavPath}"`);
+
+    // 5. Read visemes JSON
+    const visemes = JSON.parse(fs.readFileSync(visemePath, 'utf8'));
+
+    // 6. Return audio URL (MP3) and visemes
+    res.json({
+      audioUrl: '/uploads/tts.wav',
+      visemes,
+    });
+  } catch (err) {
+    console.error('Lipsync pipeline failed:', err);
+    res.status(500).json({ error: 'Lip sync generation failed', details: err.message });
   }
 });
 

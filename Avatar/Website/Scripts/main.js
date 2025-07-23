@@ -1,11 +1,12 @@
+
 import { ButtonController, BubbleTextController } from './UiController.js';
 import { StreamedResponseHandler } from './ResponseHandlers/StreamedResponseHandler.js';
 import { NonStreamedResponseHandler } from './ResponseHandlers/NonStreamedResponseHandler.js';
 import * as UnityAnimationController from './UnityAnimationController.js';
 
-
 /* main.js — chat + TTS + Unity */
 const audioPlayer = document.getElementById('audioPlayer');
+const micBtn = document.getElementById('micBtn');
 let conversationHistory = [];
 let TextAreaShown = false;
 let isRecording = false;
@@ -14,7 +15,7 @@ let audioChunks = [];
 let micStream = null;
 let ignoreTTS = !document.getElementById('ttsCheckbox').checked;
 let streamResponse = document.getElementById('streamCheckbox').checked;
-
+const unityFrame = document.getElementById("UnityFrame");
 /* ——— INIT ——— */
 window.addEventListener('DOMContentLoaded', async () => {
   await UnityAnimationController.waitForUnity();
@@ -23,7 +24,6 @@ window.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('finishBtn').addEventListener('click', ButtonController.restoreSendBtn);
   document.getElementById('micBtn').addEventListener('click', handleMicClick);
 
-  //Shittiest fix award?
   conversationHistory.push({ role: 'user', content: "Always respond with more than 50 characters but less than 200. Never include markdown syntax in your responses. That is an order!" });
 
   document.getElementById('streamCheckbox').addEventListener('change', () => {
@@ -41,26 +41,20 @@ window.addEventListener('DOMContentLoaded', async () => {
   });
 
   try {
-    // Try to get mic permission and stream
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     const audioTrack = stream.getAudioTracks()[0];
     document.getElementById('selectedMicDebug').textContent = audioTrack?.label || 'None';
-    // Stop the tracks immediately since we just want the label
     stream.getTracks().forEach(t => t.stop());
   } catch {
-    // Permission denied or no mic
     document.getElementById('selectedMicDebug').textContent = 'None';
   }
 });
 
 window.addEventListener('keydown', e => {
   if (e.key === 'Enter') {
-    // const finishButton = document.getElementById('finishBtn');
-    // const finishButtonIsShownInsteadOfSend = !!(finishButton.offsetWidth || finishButton.offsetHeight || finishButton.getClientRects().length);
     const currentButton = ButtonController.getCurrentButton();
     if (currentButton.id === 'finishBtn') ButtonController.restoreSendBtn();
     else if (currentButton.id === 'sendBtn') { streamResponse ? sendMessageStreamed() : sendMessageNonStreamed(); }
-    else if (currentButton.id === 'stopBtn') return; //listener is in UiController for skipping animations
   }
 });
 
@@ -73,16 +67,133 @@ document.getElementById('clickOverlay').addEventListener('click', () => {
   controls.style.margin = TextAreaShown ? '15px' : '-200px';
   wrapper.style.width = TextAreaShown ? "700px" : "256px";
   modelAndInput.style.backgroundColor = TextAreaShown ? "#0000007e" : "transparent";
-
-  console.log("TextAreaShown:", TextAreaShown, "Is Button Send?", ButtonController.getCurrentButton().id == 'sendBtn');
-  if (TextAreaShown) modelAndInput.style.gap = '0px'; //T*
-  else if (ButtonController.getCurrentButton().id == 'sendBtn') modelAndInput.style.gap = '225px'; //FT
-  else modelAndInput.style.gap = '330px'; //FF
+  modelAndInput.style.gap = TextAreaShown ? '0px' : (ButtonController.getCurrentButton().id == 'sendBtn' ? '225px' : '330px');
 
   if (BubbleTextController.isShowing()) BubbleTextController.cacheText();
   else BubbleTextController.restoreCachedText();
 });
 
+function getResponseHandler() {
+  return streamResponse ? StreamedResponseHandler : NonStreamedResponseHandler;
+}
+
+function getUserInput() {
+  const userInputEl = document.getElementById('userInput');
+  const userInput = userInputEl.value.trim();
+  if (!userInput) return null;
+  userInputEl.value = '';
+  return userInput;
+}
+
+async function sendMessageStreamed() {
+  const userInput = getUserInput();
+  if (!userInput) return;
+
+  ButtonController.disableSendButton();
+  UnityAnimationController.startThinking();
+
+  conversationHistory.push({ role: 'user', content: userInput });
+
+  let isFirtstChunk = true;
+  let fullResponse = '';
+  for await (const chunk of getResponseHandler().getResponse(conversationHistory)) {
+    if (isFirtstChunk) {
+      isFirtstChunk = false;
+      ButtonController.showSkipButton();
+    }
+    if (BubbleTextController.userPressedSkip) break;
+    BubbleTextController.appendToBubbleText(chunk);
+    fullResponse += chunk;
+  }
+  UnityAnimationController.startIdle();
+
+  if (ignoreTTS || BubbleTextController.userPressedSkip) return;
+
+  const lipsyncRes = await fetch('http://localhost:3000/api/openai/lipsync', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ text: fullResponse })
+  });
+
+  const { audioUrl, visemes } = await lipsyncRes.json();
+  console.log('Playing audio from URL:', `http://localhost:3000${audioUrl}`);
+  audioPlayer.src = `http://localhost:3000${audioUrl}`;
+  audioPlayer.volume = 1.0;
+  audioPlayer.muted = false;
+  audioPlayer.oncanplay = () => console.log('[audio] canplay event fired');;
+  audioPlayer.onplay = () => {
+  console.log('Audio playback started');
+  const unityInstance = unityFrame.contentWindow.unityInstance;
+  unityFrame.contentWindow.unityInstance?.SendMessage(
+    'model',                // GameObject in Unity
+    'StartLipSync',         // Exact method name in Unity script
+    JSON.stringify(visemes) // Actual Rhubarb-style data
+  );
+};
+
+try {
+  await audioPlayer.play();
+} catch (err) {
+  console.warn('Audio play interrupted:', err);
+}
+
+  ButtonController.showFinishButton();
+}
+
+async function sendMessageNonStreamed() {
+  const userInput = getUserInput();
+  if (!userInput) return;
+
+  ButtonController.disableSendButton();
+  UnityAnimationController.startThinking();
+  conversationHistory.push({ role: 'user', content: userInput });
+
+  const response = await getResponseHandler().getResponse(conversationHistory);
+  if (!response) {
+    ButtonController.restoreSendBtn();
+    UnityAnimationController.startIdle();
+    return;
+  }
+
+  conversationHistory.push({ role: 'assistant', content: response });
+  BubbleTextController.appendToBubbleText(response);
+
+  if (ignoreTTS || BubbleTextController.userPressedSkip) return;
+
+  const lipsyncRes = await fetch('http://localhost:3000/api/openai/lipsync', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ text: response })
+  });
+
+  const { audioUrl, visemes } = await lipsyncRes.json();
+
+  audioPlayer.src = `http://localhost:3000${audioUrl}`;
+    console.log('Playing audio from URL:', `http://localhost:3000${audioUrl}`);
+    audioPlayer.volume = 1.0;
+audioPlayer.muted = false;
+  audioPlayer.oncanplay = () => console.log('[audio] canplay event fired');
+audioPlayer.onplay = () => console.log('[audio] play event fired');
+audioPlayer.onended = () => console.log('[audio] ended event fired');
+audioPlayer.onerror = (e) => console.error('[audio] error event', e);
+  audioPlayer.onplay = () => {
+  console.log('Audio playback started');
+  const unityInstance = unityFrame.contentWindow.unityInstance;
+  unityFrame.contentWindow.unityInstance?.SendMessage(
+    'model',                // GameObject in Unity
+    'StartLipSync',         // Exact method name in Unity script
+    JSON.stringify(visemes) // Actual Rhubarb-style data
+  );
+};
+
+try {
+  await audioPlayer.play();
+} catch (err) {
+  console.warn('Audio play interrupted:', err);
+}
+
+  ButtonController.showFinishButton();
+}
 async function handleMicClick(event) {
   event.preventDefault();
   event.stopPropagation();
@@ -173,107 +284,4 @@ async function handleMicClick(event) {
       recorder.stop(); // trigger onstop
     }
   }
-}
-
-function getResponseHandler() {
-  return streamResponse ? StreamedResponseHandler : NonStreamedResponseHandler;
-}
-
-function getUserInput() {
-  const userInputEl = document.getElementById('userInput');
-  const userInput = userInputEl.value.trim();
-  if (!userInput) return null;
-  userInputEl.value = '';
-  return userInput;
-}
-
-async function sendMessageStreamed() {
-  const userInput = getUserInput()
-  if (!userInput) return;
-
-  ButtonController.disableSendButton();
-  UnityAnimationController.startThinking();
-
-  conversationHistory.push({ role: 'user', content: userInput });
-
-  let isFirtstChunk = true;
-  let fullResponse = '';
-  for await (const chunk of getResponseHandler().getResponse(conversationHistory)) {
-    if (isFirtstChunk) { //Start talking only on the first chunk
-      UnityAnimationController.startTalking();
-      isFirtstChunk = false;
-      ButtonController.showSkipButton();
-    }
-    if (BubbleTextController.userPressedSkip) break; // if user pressed skip, stop processing
-    BubbleTextController.appendToBubbleText(chunk);
-    fullResponse += chunk;
-  }
-  UnityAnimationController.startIdle();
-
-  if (ignoreTTS || BubbleTextController.userPressedSkip) {
-    return;
-  }
-
-  const blob = await getResponseHandler().getTTSAudio(fullResponse);
-  audioPlayer.src = URL.createObjectURL(blob);
-  if (BubbleTextController.userPressedSkip) return;
-  const duration = await playAndGetDuration(audioPlayer);
-  UnityAnimationController.startTalking();
-  await new Promise(resolve => setTimeout(resolve, duration * 1000)); // wait duration
-  UnityAnimationController.startIdle();
-  ButtonController.showFinishButton();
-}
-
-async function sendMessageNonStreamed() {
-  const userInput = getUserInput();
-  if (!userInput) return;
-
-  // UI state
-  ButtonController.disableSendButton();
-  conversationHistory.push({ role: 'user', content: userInput });
-  UnityAnimationController.startThinking();
-
-  const response = await getResponseHandler().getResponse(conversationHistory)
-
-  if (!response) {
-    ButtonController.restoreSendBtn();
-    UnityAnimationController.startIdle();
-    return;
-  }
-
-  conversationHistory.push({ role: 'assistant', content: response });
-
-  if (ignoreTTS || BubbleTextController.userPressedSkip) {
-    UnityAnimationController.startTalking();
-    BubbleTextController.appendToBubbleText(response);
-    ButtonController.showSkipButton();
-    return;
-  }
-
-  BubbleTextController.appendToBubbleText(response);
-  const tts = await getResponseHandler().getTTSAudio(response);
-
-  if (!tts) {
-    BubbleTextController.appendToBubbleText(response);
-    ButtonController.showSkipButton();
-    return;
-  }
-
-  audioPlayer.src = URL.createObjectURL(tts);
-  if (BubbleTextController.userPressedSkip) return;
-  const duration = await playAndGetDuration(audioPlayer);
-  UnityAnimationController.startTalking();
-  await new Promise(resolve => setTimeout(resolve, duration * 1000)); // wait duration
-  UnityAnimationController.startIdle();
-  ButtonController.showFinishButton();
-}
-
-function playAndGetDuration(player) {
-  return new Promise((resolve, reject) => {
-    player.addEventListener('loadedmetadata', () => {
-      player.play().catch(reject);
-    }, { once: true });
-
-    player.addEventListener('playing', () => resolve(player.duration), { once: true });
-  });
 }
