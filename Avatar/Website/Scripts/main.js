@@ -14,7 +14,8 @@ let recorder = null;
 let audioChunks = [];
 let micStream = null;
 let ignoreTTS = !document.getElementById('ttsCheckbox').checked;
-let streamResponse = document.getElementById('streamCheckbox').checked;
+// let streamResponse = document.getElementById('streamCheckbox').checked;
+let streamResponse = false;
 
 /* ——— INIT ——— */
 window.addEventListener('DOMContentLoaded', async () => {

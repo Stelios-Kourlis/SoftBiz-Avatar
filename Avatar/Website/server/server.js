@@ -47,46 +47,11 @@ function printCurrentTime(message = '') {
 // An optional bool "stream" paramater may be supplied to enable streaming responses (default: false)
 // It returns an entire JSON response from OpenAI or an Async Generator depending on the "stream" parameter
 app.post('/api/openai/chat', async (req, res) => {
-    // try {
-    //   const r = await openai.chat.completions.create({
-    //     messages: req.body.messages,
-    //     model: "gpt-4o-mini",
-    //     modalities: ["text"],
-    //     stream: req.body.stream || false,
-    //   }) as AsyncIterable<OpenAI.Chat.Completions.ChatCompletionChunk>;
-    //   if (!r) {
-    //     console.error("Invalid initial response from OpenAI API:", r);
-    //     return res.status(500).json({ error: "Invalid response from OpenAI API" });
-    //   }
-    //   console.log("Using streaming:", req.body.stream)
-    //   if (req.body.stream == true) {
-    //     res.status(200);
-    //     res.setHeader('Content-Type', 'text/event-stream');
-    //     res.setHeader('Cache-Control', 'no-cache');
-    //     res.setHeader('Connection', 'keep-alive');
-    //     for await (const chunk of r) {
-    //       if (chunk.choices[0].finish_reason === 'stop') {
-    //         res.end();
-    //         break;
-    //       }
-    //       console.log(chunk.choices[0].delta.content);
-    //     }
-    //   } else {
-    //     if (!r.body || !r.choices || r.choices.length === 0) {
-    //       console.error("Invalid unstreamed response from OpenAI API:", r);
-    //       return res.status(500).json({ error: "Invalid response from OpenAI API" });
-    //     }
-    //     res.status(200).type('application/json').send(r);
-    //   }
-    // } catch (err) {
-    //   console.error('Chat proxy failure:', err);
-    //   res.status(500).json({ error: 'Chat proxy failure' });
-    // }
     if (req.body.stream)
         return getChatResponseStreamed(req.body.messages, res);
     return getChatResponseNonStreamed(req.body.messages, res);
 });
-async function getChatResponseStreamed(conversationHistory, res) {
+async function* getChatResponseStreamed(conversationHistory, res) {
     try {
         const r = await openai.chat.completions.create({
             messages: conversationHistory,
@@ -96,7 +61,8 @@ async function getChatResponseStreamed(conversationHistory, res) {
         });
         if (!r) {
             console.error("Invalid initial response from OpenAI API:", r);
-            return res.status(500).json({ error: "Invalid response from OpenAI API" });
+            yield { error: "Invalid response from OpenAI API" };
+            return;
         }
         res.status(200);
         res.setHeader('Content-Type', 'text/event-stream');
@@ -108,11 +74,17 @@ async function getChatResponseStreamed(conversationHistory, res) {
                 break;
             }
             console.log(chunk.choices[0].delta.content);
+            const content = chunk.choices[0].delta.content;
+            if (content === null || content === undefined) {
+                yield { error: 'Stream content response is undefined or null' };
+                return;
+            }
+            yield content;
         }
     }
     catch (err) {
         console.error('Chat proxy failure:', err);
-        res.status(500).json({ error: 'Chat proxy failure' });
+        yield { error: 'Chat proxy failure' };
     }
 }
 async function getChatResponseNonStreamed(conversationHistory, res) {
@@ -131,50 +103,13 @@ async function getChatResponseNonStreamed(conversationHistory, res) {
             console.error("Invalid unstreamed response from OpenAI API:", r);
             return res.status(500).json({ error: "Invalid response from OpenAI API" });
         }
-        res.status(200).type('application/json').send(r);
+        return res.status(200).type('application/json').send(r.choices?.[0]?.message?.content);
     }
     catch (err) {
         console.error('Chat proxy failure:', err);
-        res.status(500).json({ error: 'Chat proxy failure' });
+        return res.status(500).json({ error: 'Chat proxy failure' });
     }
 }
-///This post is obsolete, use /api/openai/lipsync instead
-// app.post('/api/openai/tts', async (req, res) => {
-//   try {
-//     const { input, voice = 'ash', stream = false } = req.body;
-//     const r = await fetch('https://api.openai.com/v1/audio/speech', {
-//       method: 'POST',
-//       headers: {
-//         'Authorization': `Bearer ${OPENAI_API_KEY}`,
-//         'Content-Type': 'application/json'
-//       },
-//       body: JSON.stringify({
-//         model: 'tts-1',
-//         input: input,
-//         voice: voice,
-//         response_format: 'mp3',
-//         stream_format: "audio",
-//         stream: stream
-//       })
-//     });
-//     console.log('Stream:', typeof r.body, r.body?.[Symbol.asyncIterator]);
-//     if (stream) {
-//       res.setHeader('Content-Type', 'audio/mpeg');
-//       res.setHeader('Transfer-Encoding', 'chunked');
-//       res.setHeader('Cache-Control', 'no-cache');
-//       for await (const chunk of r.body) {
-//         res.write(chunk); // write raw audio chunks as they come
-//       }
-//       res.end();
-//     } else {
-//       res.status(r.status);
-//       r.body.pipe(res);          // stream MP3 straight through
-//     }
-//   } catch (err) {
-//     console.error('TTS proxy failure:', err);
-//     res.status(500).send('TTS proxy failure');
-//   }
-// });
 //This endpoint is used for responses with lipsync data
 // It expected a request with a body containing a "messages" array
 // An optional "voice" parameter may be supplied to change the voice used for TTS (default: "ash")
@@ -242,9 +177,9 @@ app.post('/api/openai/lipsync', async (req, res) => {
     catch (err) {
         console.error('Lipsync pipeline failed:', err);
         if (err instanceof Error)
-            res.status(500).json({ error: 'Lip sync generation failed', details: err.message });
+            res.status(500).json({ error: 'Lip sync generation failed' + err.message });
         else
-            res.status(500).json({ error: 'Lip sync generation failed', details: 'Unknown error occurred' });
+            res.status(500).json({ error: 'Lip sync generation failed due to an unknown error' });
     }
 });
 /* ——— STT (Whisper) ——— */
@@ -265,6 +200,7 @@ app.post('/api/openai/stt', upload.single('audio'), async (req, res) => {
             file: fs.createReadStream(webmPath),
         });
         const result = r;
+        console.log("STT RESULT: ", result);
         fs.unlinkSync(webmPath); // ✅ Clean up renamed file
         res.json(result);
     }
@@ -273,3 +209,4 @@ app.post('/api/openai/stt', upload.single('audio'), async (req, res) => {
         res.status(500).send('STT proxy failure');
     }
 });
+app.listen(PORT, () => console.log(`Proxy listening on http://localhost:${PORT}`));

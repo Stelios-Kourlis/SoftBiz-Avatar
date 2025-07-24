@@ -1,7 +1,7 @@
 // server.js  (Node ≥18, ES modules)
 import path from 'path';
 import { fileURLToPath } from 'url';
-import express, { Express } from 'express';
+import express, { Express, Request, Response } from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import multer, { Multer } from 'multer';
@@ -25,8 +25,6 @@ const {
   PORT = 3000
 } = process.env;
 
-
-
 if (!OPENAI_API_KEY) {
   console.error('OPENAI_API_KEY missing in .env');
   process.exit(1);
@@ -35,6 +33,20 @@ if (!OPENAI_API_KEY) {
 if (!process.env.RHUBARB_PATH) {
   console.error('RHUBARB_PATH missing in .env or system environment variables');
   process.exit(1);
+}
+
+interface ErrorResponse {
+  error: string;
+}
+
+interface TextRequestBody {
+  messages: { role: 'user' | 'assistant'; content: string }[];
+  voice?: string; // Optional voice parameter
+  stream?: boolean; // Optional stream parameter for chat responses
+}
+
+interface TextResponseBody {
+  response: string;
 }
 
 const app: Express = express();
@@ -62,54 +74,17 @@ function printCurrentTime(message = '') {
 // It expected a request with a body containing a "messages" array
 // An optional bool "stream" paramater may be supplied to enable streaming responses (default: false)
 // It returns an entire JSON response from OpenAI or an Async Generator depending on the "stream" parameter
-app.post('/api/openai/chat', async (req, res) => {
-  // try {
-  //   const r = await openai.chat.completions.create({
-  //     messages: req.body.messages,
-  //     model: "gpt-4o-mini",
-  //     modalities: ["text"],
-  //     stream: req.body.stream || false,
-  //   }) as AsyncIterable<OpenAI.Chat.Completions.ChatCompletionChunk>;
-
-  //   if (!r) {
-  //     console.error("Invalid initial response from OpenAI API:", r);
-  //     return res.status(500).json({ error: "Invalid response from OpenAI API" });
-  //   }
-
-  //   console.log("Using streaming:", req.body.stream)
-
-  //   if (req.body.stream == true) {
-  //     res.status(200);
-  //     res.setHeader('Content-Type', 'text/event-stream');
-  //     res.setHeader('Cache-Control', 'no-cache');
-  //     res.setHeader('Connection', 'keep-alive');
-
-  //     for await (const chunk of r) {
-  //       if (chunk.choices[0].finish_reason === 'stop') {
-  //         res.end();
-  //         break;
-  //       }
-  //       console.log(chunk.choices[0].delta.content);
-  //     }
-  //   } else {
-  //     if (!r.body || !r.choices || r.choices.length === 0) {
-  //       console.error("Invalid unstreamed response from OpenAI API:", r);
-  //       return res.status(500).json({ error: "Invalid response from OpenAI API" });
-  //     }
-  //     res.status(200).type('application/json').send(r);
-  //   }
-  // } catch (err) {
-  //   console.error('Chat proxy failure:', err);
-  //   res.status(500).json({ error: 'Chat proxy failure' });
-  // }
+app.post('/api/openai/chat', async (
+  req: Request<{}, {}, TextRequestBody>,
+  res: Response) => {
   if (req.body.stream) return getChatResponseStreamed(req.body.messages, res);
   return getChatResponseNonStreamed(req.body.messages, res);
 });
 
-async function getChatResponseStreamed(
+async function* getChatResponseStreamed(
   conversationHistory: { role: 'user' | 'assistant'; content: string }[],
-  res: express.Response
-) {
+  res: Response
+): AsyncGenerator<string | ErrorResponse, void, unknown> {
   type ChatCompletionChunk = OpenAI.Chat.Completions.ChatCompletionChunk //Shorthand type alias
   try {
     const r: AsyncIterable<ChatCompletionChunk> = await openai.chat.completions.create({
@@ -121,7 +96,8 @@ async function getChatResponseStreamed(
 
     if (!r) {
       console.error("Invalid initial response from OpenAI API:", r);
-      return res.status(500).json({ error: "Invalid response from OpenAI API" });
+      yield { error: "Invalid response from OpenAI API" };
+      return;
     }
 
     res.status(200);
@@ -135,17 +111,23 @@ async function getChatResponseStreamed(
         break;
       }
       console.log(chunk.choices[0].delta.content);
+      const content = chunk.choices[0].delta.content;
+      if (content === null || content === undefined) {
+        yield { error: 'Stream content response is undefined or null' };
+        return;
+      }
+      yield content;
     }
   } catch (err) {
     console.error('Chat proxy failure:', err);
-    res.status(500).json({ error: 'Chat proxy failure' });
+    yield { error: 'Chat proxy failure' };
   }
 }
 
 async function getChatResponseNonStreamed(
   conversationHistory: { role: 'user' | 'assistant'; content: string }[],
-  res: express.Response
-) {
+  res: Response
+): Promise<Response<TextResponseBody | ErrorResponse>> {
   try {
     const r = await openai.chat.completions.create({
       messages: conversationHistory,
@@ -163,18 +145,25 @@ async function getChatResponseNonStreamed(
       console.error("Invalid unstreamed response from OpenAI API:", r);
       return res.status(500).json({ error: "Invalid response from OpenAI API" });
     }
-    res.status(200).type('application/json').send(r);
+    return res.status(200).type('application/json').send(r.choices?.[0]?.message?.content);
   } catch (err) {
     console.error('Chat proxy failure:', err);
-    res.status(500).json({ error: 'Chat proxy failure' });
+    return res.status(500).json({ error: 'Chat proxy failure' });
   }
+}
+
+// Define the structure of the response body
+interface LipSyncResponseBody {
+  audioUrl: string; // Path to the processed WAV file
+  lipSyncData: any; // Replace `any` with the actual type if known
+  transcript: string; // Transcript text
 }
 
 //This endpoint is used for responses with lipsync data
 // It expected a request with a body containing a "messages" array
 // An optional "voice" parameter may be supplied to change the voice used for TTS (default: "ash")
 //It returns a json with the path to the .wav audio file ("audioUrl"), the RhubarbLipSync output ("lipSyncData"), and the transcript text ("transcript")
-app.post('/api/openai/lipsync', async (req, res) => {
+app.post('/api/openai/lipsync', async (req: Request<{}, {}, TextRequestBody>, res: Response<LipSyncResponseBody | ErrorResponse>) => {
   try {
     const uploadsDir = path.join(__dirname, 'uploads');
 
@@ -252,17 +241,23 @@ app.post('/api/openai/lipsync', async (req, res) => {
   } catch (err) {
     console.error('Lipsync pipeline failed:', err);
     if (err instanceof Error)
-      res.status(500).json({ error: 'Lip sync generation failed', details: err.message });
+      res.status(500).json({ error: 'Lip sync generation failed' + err.message });
     else
-      res.status(500).json({ error: 'Lip sync generation failed', details: 'Unknown error occurred' });
+      res.status(500).json({ error: 'Lip sync generation failed due to an unknown error' });
   }
 });
+
+interface STTRequestBody {
+  audio: string; // Path to the audio file
+}
 
 /* ——— STT (Whisper) ——— */
 //This endpoint is used for speech-to-text transcription
 // It expects a request with a body that has a path to the audio file name "audio"
 // It returns the transcription result from OpenAI Whisper as text
-app.post('/api/openai/stt', upload.single('audio'), async (req, res) => {
+app.post('/api/openai/stt', upload.single('audio'), async (
+  req: Request<{}, {}, STTRequestBody>,
+  res: Response<string | ErrorResponse>) => {
   try {
 
     if (!req.file) {
@@ -279,9 +274,8 @@ app.post('/api/openai/stt', upload.single('audio'), async (req, res) => {
       file: fs.createReadStream(webmPath),
     })
 
-    const result = r;
-    fs.unlinkSync(webmPath); // ✅ Clean up renamed file
-    res.json(result);
+    fs.unlinkSync(webmPath); // Clean up renamed file
+    res.json(r.text);
   } catch (err) {
     console.error('STT proxy failure:', err);
     res.status(500).send('STT proxy failure');
