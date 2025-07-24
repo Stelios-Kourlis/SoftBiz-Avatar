@@ -166,6 +166,11 @@ async function sendMessageNonStreamed() {
   }
 
   const responseData = await response.json();
+  if (responseData.transcript === undefined) {
+    BubbleTextController.appendToBubbleText("Something went wrong. Try again later.");
+    console.error("No valid response from the server. This happened if no audio was created, maybe ran out of tokens")
+    return;
+  }
   console.log('Response received:', responseData);
 
   conversationHistory.push({ role: 'assistant', content: responseData.transcript });

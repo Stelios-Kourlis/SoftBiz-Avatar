@@ -202,7 +202,8 @@ app.post('/api/openai/lipsync', async (req: Request<{}, {}, TextRequestBody>, re
       || response.choices[0].message.audio === undefined
       || response.choices[0].message.audio?.data === undefined
       || response.choices[0].message.audio?.transcript === undefined) {
-      console.error("Invalid response structure from OpenAI API:", response);
+      // console.error("Invalid response structure from OpenAI API:", response);
+      console.error("Response:", JSON.stringify(response, null, 2));
       return res.status(500).json({ error: "Invalid response structure from OpenAI API" });
     }
 
