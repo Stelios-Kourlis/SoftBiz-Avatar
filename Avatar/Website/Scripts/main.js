@@ -147,6 +147,7 @@ async function sendMessageNonStreamed() {
   UnityAnimationController.startThinking();
   conversationHistory.push({ role: 'user', content: userInput });
 
+  console.log('Sending conv history to server:', conversationHistory);
   // const response = await getResponseHandler().getResponse(conversationHistory);
   const response = await fetch('http://localhost:3000/api/openai/lipsync', {
     method: 'POST',
