@@ -47,6 +47,12 @@ app.use(cors({ origin: FRONTEND_ORIGIN }));
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+function printCurrentTime(message = '') {
+  const now = new Date();
+  const timeString = now.toTimeString().split(' ')[0] + '.' + now.getMilliseconds().toString().padStart(3, '0');
+  console.log(message + timeString);
+}
+
 /* ——— CHAT ——— */
 // This endpoint is used for text responses only using Chat Completions
 // It expected a request with a body containing a "messages" array
@@ -155,6 +161,7 @@ app.post('/api/openai/lipsync', async (req, res) => {
 
     console.log("Messages", req.body.messages);
 
+    printCurrentTime("[Sending request]")
     const response = await openai.chat.completions.create({
       messages: req.body.messages,
       model: "gpt-4o-mini-audio-preview",
@@ -165,44 +172,46 @@ app.post('/api/openai/lipsync', async (req, res) => {
       },
     })
 
+    printCurrentTime("[Response Received]")
+
     if (!response) {
       console.error("No available response from OpenAI API:");
       return res.status(500).json({ error: "Invalid response from OpenAI API" });
     }
 
-    console.log(response.choices[0].message.audio);
+    // console.log(response.choices[0].message.audio.transcript);
 
     //Save the transcript so it gets passed to Rhubarb as well
     fs.writeFileSync(transcriptPath, response.choices[0].message.audio.transcript, (err) => {
       if (err) console.error(err);
       else console.log('File saved');
     });
+    printCurrentTime("[Transcript Saved]")
 
     //Save the audio from the response
     const audioData = response.choices[0].message.audio.data;
 
     if (typeof audioData === 'string') {
-      // Handle Base64-encoded string
       const buffer = Buffer.from(audioData, 'base64'); // Decode Base64 to binary
       fs.writeFileSync(wavPathUnproccesed, buffer); // Write the binary data to a file
-      console.log('Audio file saved from Base64 data');
     } else if (Buffer.isBuffer(audioData)) {
-      // Handle raw binary data (Buffer)
       fs.writeFileSync(wavPathUnproccesed, audioData); // Write the buffer directly to a file
-      console.log('Audio file saved from raw binary data');
     } else {
       console.error('Unexpected audio data format:', audioData);
       throw new Error('Unsupported audio data format');
     }
+    printCurrentTime("[Audio Saved]")
     // 4. Run Rhubarb to get visemes
     // Adjust path to rhubarb.exe if necessary
 
     // The files needs to be WAV, pcm_s16le, 44100Hz for rhubarb to pick it up correctly
-    exec(`"${ffmpegPath}" -y -i "${wavPathUnproccesed}" -acodec pcm_s16le -ar 44100 "${wavPath}"`);
+    await execAsync(`"${ffmpegPath}" -y -i "${wavPathUnproccesed}" -acodec pcm_s16le -ar 44100 "${wavPath}"`);
+    printCurrentTime("[ffmpeg Conversion Done]")
 
     //parameters in order: -f: Output Format, -o: Output file, -d: Transcript file, --extendedShapes: Extended viseme shapes
     //For more info see: https://github.com/DanielSWolf/rhubarb-lip-sync?tab=readme-ov-file#options
-    exec(`"${rhubarbExePath}" "${wavPath}" -f json -o "${visemePath}" -d "${transcriptPath}" --extendedShapes GX `);
+    await execAsync(`"${rhubarbExePath}" "${wavPath}" -f json -o "${visemePath}" -d "${transcriptPath}" --extendedShapes GX `);
+    printCurrentTime("[Rhubarb Completed]")
 
     // 5. Read visemes JSON
     const visemes = JSON.parse(fs.readFileSync(visemePath, 'utf8'));
