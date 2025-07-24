@@ -1,5 +1,7 @@
 // server.js  (Node ≥18, ES modules)
 import path from 'path';
+// import { register } from 'node:module';
+// import { pathToFileURL } from 'node:url';
 import { fileURLToPath } from 'url';
 import express from 'express';
 import dotenv from 'dotenv';
@@ -10,6 +12,7 @@ import { exec } from 'child_process';
 import { promisify } from 'util';
 import ffmpegPath from 'ffmpeg-static';
 import OpenAI from 'openai';
+// register('ts-node/esm', pathToFileURL('./'));
 const execAsync = promisify(exec);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -199,10 +202,8 @@ app.post('/api/openai/stt', upload.single('audio'), async (req, res) => {
             language: 'en',
             file: fs.createReadStream(webmPath),
         });
-        const result = r;
-        console.log("STT RESULT: ", result);
-        fs.unlinkSync(webmPath); // ✅ Clean up renamed file
-        res.json(result);
+        fs.unlinkSync(webmPath); // Clean up renamed file
+        res.json(r.text);
     }
     catch (err) {
         console.error('STT proxy failure:', err);

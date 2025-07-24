@@ -1,10 +1,10 @@
 // server.js  (Node ≥18, ES modules)
 import path from 'path';
 import { fileURLToPath } from 'url';
-import express, { Express, Request, Response } from 'express';
+import express, { Request, Response } from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
-import multer, { Multer } from 'multer';
+import multer from 'multer';
 import fs from 'fs';
 import { exec } from 'child_process';
 import { promisify } from 'util';
@@ -49,15 +49,15 @@ interface TextResponseBody {
   response: string;
 }
 
-const app: Express = express();
-const upload: Multer = multer({ dest: 'uploads/' });
+const app = express();
+const upload = multer({ dest: 'uploads/' });
 
 //This expects a const named exactly OPENAI_API_KEY
 //If the name is ever changed pass it excplicity like this
 //const client = new OpenAI({
 //  apiKey: process.env['KEY_NAME'],
 //});
-const openai: OpenAI = new OpenAI();
+const openai = new OpenAI();
 
 app.use(cors({ origin: FRONTEND_ORIGIN }));
 app.use(express.json());
