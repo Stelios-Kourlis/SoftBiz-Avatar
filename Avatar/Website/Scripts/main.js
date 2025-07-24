@@ -13,8 +13,9 @@ let isRecording = false;
 let recorder = null;
 let audioChunks = [];
 let micStream = null;
-let ignoreTTS = !document.getElementById('ttsCheckbox').checked;
+// let ignoreTTS = !document.getElementById('ttsCheckbox').checked;
 // let streamResponse = document.getElementById('streamCheckbox').checked;
+let ignoreTTS = false;
 let streamResponse = false;
 
 /* ——— INIT ——— */
@@ -139,7 +140,6 @@ async function sendMessageStreamed() {
   ButtonController.showFinishButton();
 }
 
-//TODO This doesnt handle the No TTS case yet
 async function sendMessageNonStreamed() {
   const userInput = getUserInput();
   if (!userInput) return;

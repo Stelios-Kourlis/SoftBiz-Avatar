@@ -1,7 +1,5 @@
 // server.js  (Node ≥18, ES modules)
 import path from 'path';
-// import { register } from 'node:module';
-// import { pathToFileURL } from 'node:url';
 import { fileURLToPath } from 'url';
 import express from 'express';
 import dotenv from 'dotenv';
@@ -12,7 +10,6 @@ import { exec } from 'child_process';
 import { promisify } from 'util';
 import ffmpegPath from 'ffmpeg-static';
 import OpenAI from 'openai';
-// register('ts-node/esm', pathToFileURL('./'));
 const execAsync = promisify(exec);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
