@@ -1,0 +1,5 @@
+Short answer is that this model has the avatar skeleton that the animations use.
+Removing it and assigning another skeleton breaks the animations.
+Maybe it is because this was a T1 avaturn avatar without facial animation support
+and the animation also dont have facial animations
+Trying to use the other model's avatar creates error about facial animation

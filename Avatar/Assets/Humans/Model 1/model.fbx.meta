@@ -75,7 +75,7 @@ ModelImporter:
       name: avaturn_shoes_0_material.003
     second: {fileID: 2100000, guid: 83d3d6bebc4930f4aa3b0c229f40fa7e, type: 2}
   materials:
-    materialImportMode: 2
+    materialImportMode: 0
     materialName: 0
     materialSearch: 1
     materialLocation: 1
@@ -146,7 +146,7 @@ ModelImporter:
     blendShapeNormalImportMode: 1
     normalSmoothingSource: 0
   referencedClips: []
-  importAnimation: 1
+  importAnimation: 0
   humanDescription:
     serializedVersion: 3
     human:

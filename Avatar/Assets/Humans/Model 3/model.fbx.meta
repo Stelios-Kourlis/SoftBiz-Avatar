@@ -8,22 +8,22 @@ ModelImporter:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: Body
-    second: {fileID: 2100000, guid: c31eaf697e82c77469707babe02bf7d2, type: 2}
+    second: {fileID: 2100000, guid: 8ea0861129b56584f94f42a34de207c5, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: EyeAO
-    second: {fileID: 2100000, guid: 5253837f43e831a4d9cc682e1dde7bad, type: 2}
+    second: {fileID: 2100000, guid: 7daedda06d86d5f45ae8cbd3cc02c7b4, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: Eyelash
-    second: {fileID: 2100000, guid: c61a484b35f32a0468691640eff9b898, type: 2}
+    second: {fileID: 2100000, guid: d086d092dd49b204f80c6010d6f1355c, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: Eyes
-    second: {fileID: 2100000, guid: 568a34eef6938144da678cc7b5828c8f, type: 2}
+    second: {fileID: 2100000, guid: 3a84787f6d93e0543a262ae339b00318, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
@@ -33,12 +33,12 @@ ModelImporter:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: Teeth
-    second: {fileID: 2100000, guid: 83293bde12f2e2048b8ed2d8149abafd, type: 2}
+    second: {fileID: 2100000, guid: ab538a2f8aa24704e8f70901d4e1c0d8, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: Teeth.001
-    second: {fileID: 2100000, guid: 066a92b5d0fb2b545b0b97797c10dac5, type: 2}
+    second: {fileID: 2100000, guid: 1955bd9d56f4ae749a2f7d9b411399f8, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
