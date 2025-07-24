@@ -24,7 +24,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('finishBtn').addEventListener('click', ButtonController.restoreSendBtn);
   document.getElementById('micBtn').addEventListener('click', handleMicClick);
 
-  conversationHistory.push({ role: 'user', content: "Always respond with more than 50 characters but less than 200. Never include markdown syntax in your responses. That is an order!" });
+  conversationHistory.push({ role: 'user', content: "Always respond with more than 50 characters but less than 200. Never include markdown syntax in your responses. Use English and only english. That is an order!" });
 
   document.getElementById('streamCheckbox').addEventListener('change', () => {
     streamResponse = document.getElementById('streamCheckbox').checked;
@@ -138,6 +138,7 @@ async function sendMessageStreamed() {
   ButtonController.showFinishButton();
 }
 
+//TODO This doesnt handle the No TTS case yet
 async function sendMessageNonStreamed() {
   const userInput = getUserInput();
   if (!userInput) return;
@@ -146,31 +147,34 @@ async function sendMessageNonStreamed() {
   UnityAnimationController.startThinking();
   conversationHistory.push({ role: 'user', content: userInput });
 
-  const response = await getResponseHandler().getResponse(conversationHistory);
+  // const response = await getResponseHandler().getResponse(conversationHistory);
+  const response = await fetch('http://localhost:3000/api/openai/lipsync', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      messages: conversationHistory,
+    })
+  })
+
   if (!response) {
     ButtonController.restoreSendBtn();
     UnityAnimationController.startIdle();
     return;
   }
 
-  conversationHistory.push({ role: 'assistant', content: response });
+  const responseData = await response.json();
+  console.log('Response received:', responseData);
 
-  if (ignoreTTS || BubbleTextController.userPressedSkip) {
-    BubbleTextController.appendToBubbleText(response);
-    return;
-  }
-  const lipsyncRes = await fetch('http://localhost:3000/api/openai/lipsync', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ text: response })
-  });
+  conversationHistory.push({ role: 'assistant', content: responseData.transcript });
 
-  const { audioUrl, visemes } = await lipsyncRes.json();
+  const audioUrl = responseData.audioUrl;
+  const visemes = responseData.lipSyncData;
 
   audioPlayer.src = `http://localhost:3000${audioUrl}`;
   console.log('Playing audio from URL:', `http://localhost:3000${audioUrl}`);
   audioPlayer.volume = 1.0;
   audioPlayer.muted = false;
+  //TODO Remove all debug prints
   audioPlayer.oncanplay = () => console.log('[audio] canplay event fired');
   audioPlayer.onplay = () => console.log('[audio] play event fired');
   audioPlayer.onended = () => console.log('[audio] ended event fired');
@@ -182,7 +186,7 @@ async function sendMessageNonStreamed() {
     console.log("[JS LS]", timeString);
     UnityAnimationController.startIdle();
     UnityAnimationController.startLipSync(JSON.stringify(visemes));
-    BubbleTextController.appendToBubbleText(response);
+    BubbleTextController.appendToBubbleText(responseData.transcript);
   };
 
   try {

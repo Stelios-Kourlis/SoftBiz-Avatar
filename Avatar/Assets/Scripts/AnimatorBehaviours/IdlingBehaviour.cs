@@ -5,7 +5,7 @@ public class IdlingBehaviour : StateMachineBehaviour
     private readonly string[] idleTriggers = { "IdleArmStreching", "IdleNeckStreching" };
     [SerializeField] private float timer;
     [SerializeField] private float minIdleTimeSec = 10f, maxIdleTimeSec = 30f;
-    private bool currentStateIsIdle = false;
+    [SerializeField] private bool currentStateIsIdle = false;
 
     // OnStateEnter is called before OnStateEnter is called on any state inside this state machine
     override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
