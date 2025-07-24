@@ -69,9 +69,10 @@ document.getElementById('clickOverlay').addEventListener('click', () => {
   controls.style.margin = TextAreaShown ? '15px' : '-200px';
   wrapper.style.width = TextAreaShown ? "700px" : "256px";
   modelAndInput.style.backgroundColor = TextAreaShown ? "#0000007e" : "transparent";
-  modelAndInput.style.gap = TextAreaShown ? '0px' : (ButtonController.getCurrentButton().id == 'sendBtn' ? '225px' : '330px');
+  const currentButton = ButtonController.getCurrentButton();
+  modelAndInput.style.gap = TextAreaShown ? '0px' : ((currentButton.id == 'sendBtn' && !currentButton.disabled) ? '225px' : '330px');
 
-  if (BubbleTextController.isShowing()) BubbleTextController.cacheText();
+  if (!TextAreaShown) BubbleTextController.cacheText();
   else BubbleTextController.restoreCachedText();
 });
 
