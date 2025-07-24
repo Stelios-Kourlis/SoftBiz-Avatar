@@ -72,7 +72,7 @@ document.getElementById('clickOverlay').addEventListener('click', () => {
   const currentButton = ButtonController.getCurrentButton();
   modelAndInput.style.gap = TextAreaShown ? '0px' : ((currentButton.id == 'sendBtn' && !currentButton.disabled) ? '225px' : '330px');
 
-  if (!TextAreaShown) BubbleTextController.cacheText();
+  if (!TextAreaShown && BubbleTextController.isShowing()) BubbleTextController.cacheText();
   else BubbleTextController.restoreCachedText();
 });
 
