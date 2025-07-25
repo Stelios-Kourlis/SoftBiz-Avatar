@@ -296,9 +296,9 @@ public class AvatarBlendKeysController : MonoBehaviour
 
     public void StopLipSync()
     {
-        lipSyncSequence.Kill();
+        lipSyncSequence?.Kill();
         lipSyncSequence = null;
-        StopCoroutine(lipSyncCoroutine);
+        if (lipSyncCoroutine != null) StopCoroutine(lipSyncCoroutine);
         lipSyncCoroutine = null;
         Sequence restoringSequence = DOTween.Sequence();
         foreach (string viseme in visemeMap.Values)

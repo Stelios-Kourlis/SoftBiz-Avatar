@@ -123,6 +123,7 @@ async function sendMessage() {
 
   if (responseData.audioUrl === null) {
     BubbleTextController.appendToBubbleText("[No Audio Available]" + responseData.transcript);
+    UnityAnimationController.startIdle();
     console.error("No audio response from the server. This happened if no audio was created, maybe ran out of tokens")
     return;
   }
