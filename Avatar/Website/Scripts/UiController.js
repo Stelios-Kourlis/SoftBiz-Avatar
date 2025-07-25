@@ -176,7 +176,7 @@ export class ButtonController {
     }
 
     static showFinishButton() {
-        console.trace("Showing finish button");
+        console.log("Showing finish button");
         document.getElementById('sendBtn').style.display = 'none';
         document.getElementById('finishBtn').style.display = 'inline-block';
         document.getElementById('userInput').style.display = 'none';
@@ -186,7 +186,7 @@ export class ButtonController {
     }
 
     static showSkipButton() {
-        console.trace("Showing skip button");
+        console.log("Showing skip button");
         document.getElementById('sendBtn').style.display = 'none';
         document.getElementById('finishBtn').style.display = 'none';
         document.getElementById('userInput').style.display = 'none';
@@ -195,7 +195,7 @@ export class ButtonController {
     }
 
     static disableSendButton() {
-        console.trace("Disabling send button");
+        console.log("Disabling send button");
         document.getElementById('sendBtn').disabled = true;
         document.getElementById('sendBtn').textContent = 'Thinking…';
         document.getElementById('userInput').style.display = 'none';

@@ -163,6 +163,7 @@ async function sendMessageNonStreamed() {
     ButtonController.restoreSendBtn();
     UnityAnimationController.startIdle();
     BubbleTextController.appendToBubbleText("Something went wrong, please try again later.");
+    console.error("Error sending message to server:", error);
     return;
   }
 
@@ -176,14 +177,13 @@ async function sendMessageNonStreamed() {
   const responseData = await response.json();
   console.log('Response received:', responseData);
 
+  conversationHistory.push({ role: 'assistant', content: responseData.transcript });
+
   if (responseData.audioUrl === null) {
-    conversationHistory.push({ role: 'assistant', content: responseData.transcript });
     BubbleTextController.appendToBubbleText("[No Audio Available]" + responseData.transcript);
     console.error("No audio response from the server. This happened if no audio was created, maybe ran out of tokens")
     return;
   }
-
-  conversationHistory.push({ role: 'assistant', content: responseData.transcript });
 
   const audioUrl = responseData.audioUrl;
   const visemes = responseData.lipSyncData;
@@ -193,7 +193,7 @@ async function sendMessageNonStreamed() {
   audioPlayer.volume = 1.0;
   audioPlayer.muted = false;
   audioPlayer.onplay = () => {
-    console.log('Audio playback started at');
+    console.log('Audio playback started');
     UnityAnimationController.startIdle();
     UnityAnimationController.startLipSync(JSON.stringify(visemes));
     BubbleTextController.appendToBubbleText(responseData.transcript);
