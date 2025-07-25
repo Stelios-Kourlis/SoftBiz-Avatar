@@ -34,6 +34,20 @@ public class AvatarBlendKeysController : MonoBehaviour
     private readonly List<Coroutine> talkingCoroutines = new(3);
     [Obsolete("This field has been deprecated since it does not provide any lip sync. Use StartLipSync instead.")]
     private readonly List<Tween> activeTalkingTweens = new(3);
+    private Sequence lipSyncSequence;
+    private Coroutine lipSyncCoroutine;
+    private readonly Dictionary<string, string> visemeMap = new()
+        {
+            { "A", "PP" },
+            { "B", "E" },
+            { "C", "aa" }, //Not sure aa is the optimal connection here
+            { "D", "aa" }, //Also yes aa is lowercase, not a typo
+            { "E", "O" },
+            { "F", "U" },
+            { "G", "FF" },
+            { "H", "aa" },
+            { "X", "sil"}
+        };
 
     void Awake()
     {
@@ -258,19 +272,6 @@ public class AvatarBlendKeysController : MonoBehaviour
     {
         LipSyncData data = JsonUtility.FromJson<LipSyncData>(json);
 
-        Dictionary<string, string> visemeMap = new()
-        {
-            { "A", "PP" },
-            { "B", "E" },
-            { "C", "aa" }, //Not sure aa is the optimal connection here
-            { "D", "aa" }, //Also yes aa is lowercase, not a typo
-            { "E", "O" },
-            { "F", "U" },
-            { "G", "FF" },
-            { "H", "aa" },
-            { "X", "sil"}
-        };
-
         foreach (MouthCue cue in data.mouthCues)
         {
             if (visemeMap.TryGetValue(cue.value, out string viseme))
@@ -290,7 +291,30 @@ public class AvatarBlendKeysController : MonoBehaviour
     public void StartLipSync(string jsonData)
     {
         LipSyncData lsd = ParseLipSyncData(jsonData); //Bad abbrevation, I know
-        StartCoroutine(LipSyncCoroutine(lsd));
+        lipSyncCoroutine = StartCoroutine(LipSyncCoroutine(lsd));
+    }
+
+    public void StopLipSync()
+    {
+        lipSyncSequence.Kill();
+        lipSyncSequence = null;
+        StopCoroutine(lipSyncCoroutine);
+        lipSyncCoroutine = null;
+        Sequence restoringSequence = DOTween.Sequence();
+        foreach (string viseme in visemeMap.Values)
+        {
+            float? weightNullable = GetBlendShapeWeight("viseme_" + viseme);
+            if (!weightNullable.HasValue) continue;
+            float weight = weightNullable.Value;
+            if (weight > 0)
+            {
+                restoringSequence.Join(DOTween.To(() => weight, w =>
+                {
+                    TryApplyBlendShapeWeightToAll("viseme_" + viseme, w);
+                }, 0f, LIP_SYNC_TRANSITION_TIME).SetEase(LIP_SYNC_FADE_OUT_EASE));
+            }
+        }
+        restoringSequence.Play();
     }
 
     private IEnumerator LipSyncCoroutine(LipSyncData lsd)
@@ -300,26 +324,26 @@ public class AvatarBlendKeysController : MonoBehaviour
         foreach (MouthCue cue in lsd.mouthCues)
         {
             float duration = cue.end - cue.start;
-            Sequence seq = DOTween.Sequence();
+            lipSyncSequence = DOTween.Sequence();
 
             if (previousCue != null && previousCue.value != cue.value)
             {
-                seq.Join(DOTween.To(() => LIP_SYNC_MAX_WEIGHT, weight =>
+                lipSyncSequence.Join(DOTween.To(() => LIP_SYNC_MAX_WEIGHT, weight =>
                 {
                     TryApplyBlendShapeWeightToAll(previousCue.value, weight);
                 }, 0f, LIP_SYNC_TRANSITION_TIME).SetEase(LIP_SYNC_FADE_OUT_EASE));
             }
 
-            seq.Join(DOTween.To(() => 0f, weight =>
+            lipSyncSequence.Join(DOTween.To(() => 0f, weight =>
             {
                 TryApplyBlendShapeWeightToAll(cue.value, weight);
             }, LIP_SYNC_MAX_WEIGHT, LIP_SYNC_TRANSITION_TIME).SetEase(LIP_SYNC_FADE_IN_EASE));
 
             if (duration - LIP_SYNC_TRANSITION_TIME > 0)
-                seq.AppendInterval(duration - LIP_SYNC_TRANSITION_TIME);
+                lipSyncSequence.AppendInterval(duration - LIP_SYNC_TRANSITION_TIME);
 
-            seq.Play();
-            yield return seq.WaitForCompletion();
+            lipSyncSequence.Play();
+            yield return lipSyncSequence.WaitForCompletion();
 
             previousCue = cue;
         }

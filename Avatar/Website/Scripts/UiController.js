@@ -55,6 +55,7 @@ export class BubbleTextController {
         //audioPlayer.pause();
         if (forceStop) {
             document.getElementById('audioPlayer').pause();
+            UnityAnimationController.stopLipSync();
             paragraph.innerHTML = marked.parse(this.#fullResponse);
             this.#blockAppends = true;
             this.#appendQueue = [];
@@ -166,6 +167,8 @@ export class ButtonController {
         document.getElementById('userInput').focus();
         document.getElementById('micBtn').style.display = 'inline-block';
         document.getElementById('stopBtn').style.display = 'none';
+        document.getElementById('audioPlayer').pause();
+        UnityAnimationController.stopLipSync();
         const btn = document.getElementById('sendBtn');
         btn.disabled = false;
         btn.textContent = 'Send';

@@ -16,6 +16,10 @@ export function startLipSync(jsonLipSyncDataString) {
     unityInstance?.SendMessage('model', 'StartLipSync', jsonLipSyncDataString);
 }
 
+export function stopLipSync() {
+    unityInstance?.SendMessage('model', 'StopLipSync');
+}
+
 export async function waitForUnity() {
     return new Promise((resolve) => {
         const check = () => {
