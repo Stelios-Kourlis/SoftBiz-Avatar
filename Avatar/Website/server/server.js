@@ -201,6 +201,7 @@ app.post('/api/openai/stt', upload.single('audio'), async (req, res) => {
         const originalPath = req.file.path;
         const webmPath = `${originalPath}.webm`;
         fs.renameSync(originalPath, webmPath); // ✅ Rename to add .webm extension
+        console.log(`Renamed file to: ${webmPath}`);
         const r = await openai.audio.transcriptions.create({
             model: 'whisper-1',
             language: 'en',

@@ -178,20 +178,20 @@ async function handleMicClick(event) {
           }
 
           //PLAY BACK YOUR RECORDED AUDIO
-          // await new Promise((resolve) => {
-          //   const audioUrl = URL.createObjectURL(audioBlob);
-          //   const audio = new Audio(audioUrl);
-          //   audio.onended = () => {
-          //     URL.revokeObjectURL(audioUrl);
-          //     resolve();
-          //   };
-          //   
-          //   audio.play().then(() => {
-          //     console.log('Playing audio...');
-          //   }).catch(err => {
-          //     console.error('Audio play error:', err);
-          //   });
-          // });
+          await new Promise((resolve) => {
+            const audioUrl = URL.createObjectURL(audioBlob);
+            const audio = new Audio(audioUrl);
+            audio.onended = () => {
+              URL.revokeObjectURL(audioUrl);
+              resolve();
+            };
+
+            audio.play().then(() => {
+              console.log('Playing audio...');
+            }).catch(err => {
+              console.error('Audio play error:', err);
+            });
+          });
 
           const formData = new FormData();
           formData.append('audio', audioBlob, 'recording.webm');
@@ -205,12 +205,13 @@ async function handleMicClick(event) {
           console.log('[DEBUG] STT response status:', res.status);
 
 
+          const text = await res.text();
+
           if (!res.ok) {
             console.error('STT failed:', text);
             return;
           }
 
-          const text = await res.text();
           console.log('[STT] Transcript:', text);
 
           if (text) {
