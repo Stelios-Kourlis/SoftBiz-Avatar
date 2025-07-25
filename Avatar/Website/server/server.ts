@@ -278,7 +278,7 @@ app.post('/api/openai/stt', upload.single('audio'), async (
     fs.renameSync(originalPath, webmPath); // ✅ Rename to add .webm extension
 
     const r = await openai.audio.transcriptions.create({
-      model: 'whisper-1',
+      model: 'gpt-4o-mini-transcribe',
       language: 'en',
       file: fs.createReadStream(webmPath),
     })

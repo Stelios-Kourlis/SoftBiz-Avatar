@@ -24,6 +24,8 @@ public class AvatarBlendKeysController : MonoBehaviour
     /// <summary> The ease type of the transtition when exiting the previous viseme BlendShape </summary>
     [SerializeField] private Ease LIP_SYNC_FADE_OUT_EASE = Ease.OutCubic;
 
+    public bool IsLipSyncing => lipSyncCoroutine != null;
+
     /// <summary>
     /// The SkinnedMeshRenderers that have the BlendShapes for the eyes, eyelids, eyelashes, head, teeth and tongue.
     /// This assumes the model is an Avaturn T2 model.
@@ -34,13 +36,16 @@ public class AvatarBlendKeysController : MonoBehaviour
     private readonly List<Coroutine> talkingCoroutines = new(3);
     [Obsolete("This field has been deprecated since it does not provide any lip sync. Use StartLipSync instead.")]
     private readonly List<Tween> activeTalkingTweens = new(3);
+    /// <summary> The sequence that is currently running for lip sync. Null if no lipsync is happening</summary>
     private Sequence lipSyncSequence;
+    /// <summary> The coroutine that is currently running for lip sync. Null if no lipsync is happening</summary>
     private Coroutine lipSyncCoroutine;
+    /// <summary> a map for Rhubarb mouth shapes to model blend shapes</summary>
     private readonly Dictionary<string, string> visemeMap = new()
         {
             { "A", "PP" },
             { "B", "E" },
-            { "C", "aa" }, //Not sure aa is the optimal connection here
+            { "C", "aa" }, //Not sure aa is the optimal connection for c
             { "D", "aa" }, //Also yes aa is lowercase, not a typo
             { "E", "O" },
             { "F", "U" },
@@ -321,25 +326,29 @@ public class AvatarBlendKeysController : MonoBehaviour
     {
         Debug.Log($"[Unity LS] {DateTime.Now:HH:mm:ss.fff}");
         MouthCue previousCue = null;
+        System.Diagnostics.Stopwatch stopwatch = new();
+        stopwatch.Start();
+        float totalExpectedDuration = 0f;
         foreach (MouthCue cue in lsd.mouthCues)
         {
             float duration = cue.end - cue.start;
             lipSyncSequence = DOTween.Sequence();
+            totalExpectedDuration += duration;
 
             if (previousCue != null && previousCue.value != cue.value)
             {
                 lipSyncSequence.Join(DOTween.To(() => LIP_SYNC_MAX_WEIGHT, weight =>
                 {
                     TryApplyBlendShapeWeightToAll(previousCue.value, weight);
-                }, 0f, LIP_SYNC_TRANSITION_TIME).SetEase(LIP_SYNC_FADE_OUT_EASE));
+                }, 0f, Mathf.Min(LIP_SYNC_TRANSITION_TIME, duration)).SetEase(LIP_SYNC_FADE_OUT_EASE));
             }
 
             lipSyncSequence.Join(DOTween.To(() => 0f, weight =>
             {
                 TryApplyBlendShapeWeightToAll(cue.value, weight);
-            }, LIP_SYNC_MAX_WEIGHT, LIP_SYNC_TRANSITION_TIME).SetEase(LIP_SYNC_FADE_IN_EASE));
+            }, LIP_SYNC_MAX_WEIGHT, Mathf.Min(LIP_SYNC_TRANSITION_TIME, duration)).SetEase(LIP_SYNC_FADE_IN_EASE));
 
-            if (duration - LIP_SYNC_TRANSITION_TIME > 0)
+            if (duration > LIP_SYNC_TRANSITION_TIME)
                 lipSyncSequence.AppendInterval(duration - LIP_SYNC_TRANSITION_TIME);
 
             lipSyncSequence.Play();
@@ -347,6 +356,12 @@ public class AvatarBlendKeysController : MonoBehaviour
 
             previousCue = cue;
         }
+        stopwatch.Stop();
+        Debug.Log($"[Unity LS] Lip Sync Runtime {stopwatch.Elapsed.TotalSeconds} s");
+        Debug.Log($"[Unity LS] Unity Total Overhead: {stopwatch.Elapsed.TotalSeconds - totalExpectedDuration} s");
+        Debug.Log($"[Unity LS] Actual file duration {lsd.metadata.duration} s");
+        lipSyncSequence = null;
+        lipSyncCoroutine = null;
     }
 }
 

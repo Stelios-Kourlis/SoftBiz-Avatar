@@ -23,7 +23,16 @@ public class IdlingBehaviour : StateMachineBehaviour
     override public void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         //Do random idle animations
-        if (timer > 0) timer -= Time.deltaTime;
+
+        if (timer > 0)
+        {
+            if (animator.TryGetComponent(out AvatarBlendKeysController controller) && controller.IsLipSyncing)
+            {
+                timer += Time.deltaTime; //Increase timer if lip sync is happening instead of resseting it
+                return;
+            }
+            timer -= Time.deltaTime;
+        }
         if (timer < 0f)
         {
             timer = 0;
