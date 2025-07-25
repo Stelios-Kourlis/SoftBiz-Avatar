@@ -151,14 +151,20 @@ async function sendMessageNonStreamed() {
   conversationHistory.push({ role: 'user', content: userInput });
 
   console.log('Sending conv history to server:', conversationHistory);
-  // const response = await getResponseHandler().getResponse(conversationHistory);
-  const response = await fetch('http://localhost:3000/api/openai/lipsync', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      messages: conversationHistory,
+  try {
+    const response = await fetch('http://localhost:3000/api/openai/lipsync', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messages: conversationHistory,
+      })
     })
-  })
+  } catch (error) {
+    ButtonController.restoreSendBtn();
+    UnityAnimationController.startIdle();
+    BubbleTextController.appendToBubbleText("Something went wrong, please try again later.");
+    return;
+  }
 
   if (!response || !response.ok) {
     ButtonController.restoreSendBtn();
