@@ -54,6 +54,7 @@ export class BubbleTextController {
         ButtonController.showFinishButton();
         //audioPlayer.pause();
         if (forceStop) {
+            document.getElementById('audioPlayer').pause();
             paragraph.innerHTML = marked.parse(this.#fullResponse);
             this.#blockAppends = true;
             this.#appendQueue = [];
@@ -84,6 +85,7 @@ export class BubbleTextController {
             this.#timer = setInterval(() => {
                 paragraph.innerHTML = marked.parse(text.slice(0, i++));
                 if (i > text.length) {
+                    console.log("Animation finished");
                     this.#endAnim();
                     resolve();
                 }
@@ -157,6 +159,7 @@ export class ButtonController {
     }
 
     static restoreSendBtn() {
+        console.log("Restoring send button");
         document.getElementById('stopBtn').style.display = 'none';
         document.getElementById('finishBtn').style.display = 'none';
         document.getElementById('userInput').style.display = 'inline-block';
@@ -173,6 +176,7 @@ export class ButtonController {
     }
 
     static showFinishButton() {
+        console.trace("Showing finish button");
         document.getElementById('sendBtn').style.display = 'none';
         document.getElementById('finishBtn').style.display = 'inline-block';
         document.getElementById('userInput').style.display = 'none';
@@ -182,6 +186,7 @@ export class ButtonController {
     }
 
     static showSkipButton() {
+        console.trace("Showing skip button");
         document.getElementById('sendBtn').style.display = 'none';
         document.getElementById('finishBtn').style.display = 'none';
         document.getElementById('userInput').style.display = 'none';
@@ -190,6 +195,7 @@ export class ButtonController {
     }
 
     static disableSendButton() {
+        console.trace("Disabling send button");
         document.getElementById('sendBtn').disabled = true;
         document.getElementById('sendBtn').textContent = 'Thinking…';
         document.getElementById('userInput').style.display = 'none';

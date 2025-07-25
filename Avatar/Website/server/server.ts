@@ -154,8 +154,8 @@ async function getChatResponseNonStreamed(
 
 // Define the structure of the response body
 interface LipSyncResponseBody {
-  audioUrl: string; // Path to the processed WAV file
-  lipSyncData: any; // Replace `any` with the actual type if known
+  audioUrl: string | null; // Path to the processed WAV file
+  lipSyncData: string | null; // Replace `any` with the actual type if known
   transcript: string; // Transcript text
 }
 
@@ -202,8 +202,16 @@ app.post('/api/openai/lipsync', async (req: Request<{}, {}, TextRequestBody>, re
       || response.choices[0].message.audio === undefined
       || response.choices[0].message.audio?.data === undefined
       || response.choices[0].message.audio?.transcript === undefined) {
-      // console.error("Invalid response structure from OpenAI API:", response);
       console.error("Response:", JSON.stringify(response, null, 2));
+
+      if (response.choices[0].message.content) {
+        return res.json({
+          audioUrl: null,
+          lipSyncData: null,
+          transcript: response.choices[0].message.content
+        });
+      }
+
       return res.status(500).json({ error: "Invalid response structure from OpenAI API" });
     }
 

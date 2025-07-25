@@ -88,6 +88,7 @@ function getUserInput() {
   return userInput;
 }
 
+//Obsolete
 async function sendMessageStreamed() {
   const userInput = getUserInput();
   if (!userInput) return;
@@ -159,19 +160,22 @@ async function sendMessageNonStreamed() {
     })
   })
 
-  if (!response) {
+  if (!response || !response.ok) {
     ButtonController.restoreSendBtn();
     UnityAnimationController.startIdle();
+    BubbleTextController.appendToBubbleText("Something went wrong, please try again later.");
     return;
   }
 
   const responseData = await response.json();
-  if (responseData.transcript === undefined) {
-    BubbleTextController.appendToBubbleText("Something went wrong. Try again later.");
-    console.error("No valid response from the server. This happened if no audio was created, maybe ran out of tokens")
+  console.log('Response received:', responseData);
+
+  if (responseData.audioUrl === null) {
+    conversationHistory.push({ role: 'assistant', content: responseData.transcript });
+    BubbleTextController.appendToBubbleText("[No Audio Available]" + responseData.transcript);
+    console.error("No audio response from the server. This happened if no audio was created, maybe ran out of tokens")
     return;
   }
-  console.log('Response received:', responseData);
 
   conversationHistory.push({ role: 'assistant', content: responseData.transcript });
 
@@ -182,16 +186,8 @@ async function sendMessageNonStreamed() {
   console.log('Playing audio from URL:', `http://localhost:3000${audioUrl}`);
   audioPlayer.volume = 1.0;
   audioPlayer.muted = false;
-  //TODO Remove all debug prints
-  audioPlayer.oncanplay = () => console.log('[audio] canplay event fired');
-  audioPlayer.onplay = () => console.log('[audio] play event fired');
-  audioPlayer.onended = () => console.log('[audio] ended event fired');
-  audioPlayer.onerror = (e) => console.error('[audio] error event', e);
   audioPlayer.onplay = () => {
     console.log('Audio playback started at');
-    const now = new Date();
-    const timeString = now.toTimeString().split(' ')[0] + '.' + now.getMilliseconds().toString().padStart(3, '0');
-    console.log("[JS LS]", timeString);
     UnityAnimationController.startIdle();
     UnityAnimationController.startLipSync(JSON.stringify(visemes));
     BubbleTextController.appendToBubbleText(responseData.transcript);
@@ -202,9 +198,8 @@ async function sendMessageNonStreamed() {
   } catch (err) {
     console.warn('Audio play interrupted:', err);
   }
-
-  ButtonController.showFinishButton();
 }
+
 async function handleMicClick(event) {
   event.preventDefault();
   event.stopPropagation();

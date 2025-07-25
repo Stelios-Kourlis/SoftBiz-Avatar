@@ -146,8 +146,14 @@ app.post('/api/openai/lipsync', async (req, res) => {
             || response.choices[0].message.audio === undefined
             || response.choices[0].message.audio?.data === undefined
             || response.choices[0].message.audio?.transcript === undefined) {
-            // console.error("Invalid response structure from OpenAI API:", response);
             console.error("Response:", JSON.stringify(response, null, 2));
+            if (response.choices[0].message.content) {
+                return res.json({
+                    audioUrl: null,
+                    lipSyncData: null,
+                    transcript: response.choices[0].message.content
+                });
+            }
             return res.status(500).json({ error: "Invalid response structure from OpenAI API" });
         }
         //Save the transcript so it gets passed to Rhubarb as well
