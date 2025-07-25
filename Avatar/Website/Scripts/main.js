@@ -1,7 +1,5 @@
 
 import { ButtonController, BubbleTextController } from './UiController.js';
-import { StreamedResponseHandler } from './ResponseHandlers/StreamedResponseHandler.js';
-import { NonStreamedResponseHandler } from './ResponseHandlers/NonStreamedResponseHandler.js';
 import * as UnityAnimationController from './UnityAnimationController.js';
 
 /* main.js — chat + TTS + Unity */
@@ -22,11 +20,11 @@ let streamResponse = false;
 window.addEventListener('DOMContentLoaded', async () => {
   await UnityAnimationController.waitForUnity();
   UnityAnimationController.startIdle();
-  document.getElementById('sendBtn').addEventListener('click', streamResponse ? sendMessageStreamed : sendMessageNonStreamed);
+  document.getElementById('sendBtn').addEventListener('click', sendMessage);
   document.getElementById('finishBtn').addEventListener('click', ButtonController.restoreSendBtn);
   document.getElementById('micBtn').addEventListener('click', handleMicClick);
 
-  conversationHistory.push({ role: 'user', content: "Always respond with more than 50 characters but less than 200. Never include markdown syntax in your responses. Use English and only english. That is an order!" });
+  conversationHistory.push({ role: 'developer', content: "Always respond with more than 50 characters but less than 200. Never include markdown syntax in your responses. Use English and only english. That is an order!" });
 
   document.getElementById('streamCheckbox').addEventListener('change', () => {
     streamResponse = document.getElementById('streamCheckbox').checked;
@@ -56,7 +54,7 @@ window.addEventListener('keydown', e => {
   if (e.key === 'Enter') {
     const currentButton = ButtonController.getCurrentButton();
     if (currentButton.id === 'finishBtn') ButtonController.restoreSendBtn();
-    else if (currentButton.id === 'sendBtn') { streamResponse ? sendMessageStreamed() : sendMessageNonStreamed(); }
+    else if (currentButton.id === 'sendBtn') sendMessage();
   }
 });
 
@@ -76,10 +74,6 @@ document.getElementById('clickOverlay').addEventListener('click', () => {
   else BubbleTextController.restoreCachedText();
 });
 
-function getResponseHandler() {
-  return streamResponse ? StreamedResponseHandler : NonStreamedResponseHandler;
-}
-
 function getUserInput() {
   const userInputEl = document.getElementById('userInput');
   const userInput = userInputEl.value.trim();
@@ -88,71 +82,19 @@ function getUserInput() {
   return userInput;
 }
 
-//Obsolete
-async function sendMessageStreamed() {
-  const userInput = getUserInput();
-  if (!userInput) return;
-
-  ButtonController.disableSendButton();
-  UnityAnimationController.startThinking();
-
-  conversationHistory.push({ role: 'user', content: userInput });
-
-  let isFirtstChunk = true;
-  let fullResponse = '';
-  for await (const chunk of getResponseHandler().getResponse(conversationHistory)) {
-    if (isFirtstChunk) {
-      isFirtstChunk = false;
-      ButtonController.showSkipButton();
-    }
-    if (BubbleTextController.userPressedSkip) break;
-    BubbleTextController.appendToBubbleText(chunk);
-    fullResponse += chunk;
-  }
-  UnityAnimationController.startIdle();
-
-  if (ignoreTTS || BubbleTextController.userPressedSkip) return;
-
-  const lipsyncRes = await fetch('http://localhost:3000/api/openai/lipsync', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ text: fullResponse })
-  });
-
-  const { audioUrl, visemes } = await lipsyncRes.json();
-  console.log('Playing audio from URL:', `http://localhost:3000${audioUrl}`);
-  audioPlayer.src = `http://localhost:3000${audioUrl}`;
-  audioPlayer.volume = 1.0;
-  audioPlayer.muted = false;
-  audioPlayer.oncanplay = () => console.log('[audio] canplay event fired');
-  audioPlayer.onplay = () => {
-    console.log('Audio playback started at');
-    const now = new Date();
-    const timeString = now.toTimeString().split(' ')[0] + '.' + now.getMilliseconds().toString().padStart(3, '0');
-    console.log("[JS LS]", timeString);
-    UnityAnimationController.startLipSync(JSON.stringify(visemes));
-  };
-
-  try {
-    await audioPlayer.play();
-  } catch (err) {
-    console.warn('Audio play interrupted:', err);
-  }
-
-  ButtonController.showFinishButton();
-}
-
-async function sendMessageNonStreamed() {
+async function sendMessage() {
   const userInput = getUserInput();
   if (!userInput) return;
 
   ButtonController.disableSendButton();
   UnityAnimationController.startThinking();
   conversationHistory.push({ role: 'user', content: userInput });
+
+  let response;
 
   console.log('Sending conv history to server:', conversationHistory);
   try {
-    const response = await fetch('http://localhost:3000/api/openai/lipsync', {
+    response = await fetch('http://localhost:3000/api/openai/lipsync', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -261,22 +203,19 @@ async function handleMicClick(event) {
 
           console.log('[DEBUG] STT response status:', res.status);
 
-          const text = await res.text();
-          console.log('[DEBUG] STT raw response text:', text);
 
           if (!res.ok) {
             console.error('STT failed:', text);
             return;
           }
 
-          const data = JSON.parse(text);
-          const transcript = data.text?.trim();
-          console.log('[STT] Transcript:', transcript);
+          const text = await res.text();
+          console.log('[STT] Transcript:', text);
 
-          if (transcript) {
+          if (text) {
             // either use sendMsgDirect(transcript);
-            document.getElementById('userInput').value = transcript;
-            streamResponse ? sendMessageStreamed() : sendMessageNonStreamed()
+            document.getElementById('userInput').value = text;
+            sendMessage();
           }
         } catch (err) {
           console.error('❌ STT fetch crashed:', err);
