@@ -69,6 +69,7 @@ document.getElementById('clickOverlay').addEventListener('click', () => {
   modelAndInput.style.backgroundColor = TextAreaShown ? "#0000007e" : "transparent";
   const currentButton = ButtonController.getCurrentButton();
   modelAndInput.style.gap = TextAreaShown ? '0px' : ((currentButton.id == 'sendBtn' && !currentButton.disabled) ? '225px' : '330px');
+  if (TextAreaShown) UnityAnimationController.focusCanvas();
 
   if (!TextAreaShown && BubbleTextController.isShowing()) BubbleTextController.cacheText();
   else BubbleTextController.restoreCachedText();

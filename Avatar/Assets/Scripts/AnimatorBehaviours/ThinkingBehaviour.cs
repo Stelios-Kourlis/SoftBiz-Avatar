@@ -8,7 +8,7 @@ public class ThinkingBehaviour : StateMachineBehaviour
     private readonly float duration = 0.5f;
     Tween posTween, rotTween;
 
-    private Vector3 cabinetShownPosition = new(0.52f, 0.024f, 6.657f), cabinetHiddenPosition = new(0.5f, 0.024f, 7.5f);
+    private Vector3 cabinetShownPosition = new(0.52f, 0.024f, 6.657f), cabinetHiddenPosition = new(0.5f, 0.024f, 8.5f);
 
     override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {

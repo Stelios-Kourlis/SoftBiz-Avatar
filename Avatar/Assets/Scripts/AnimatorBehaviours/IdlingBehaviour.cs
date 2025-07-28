@@ -49,7 +49,6 @@ public class IdlingBehaviour : StateMachineBehaviour
 
     public override void OnStateMachineEnter(Animator animator, int stateMachinePathHash)
     {
-        Debug.Log($"IdlingBehaviour: Entering state machine with path hash {stateMachinePathHash}");
         posTween = Camera.main.transform.DOMove(idleCameraPosition, duration).SetEase(Ease.InOutQuad).OnComplete(() => posTween = null);
         rotTween = Camera.main.transform.DORotate(idleCameraRotation, duration).SetEase(Ease.InOutQuad).OnComplete(() => rotTween = null);
         base.OnStateMachineEnter(animator, stateMachinePathHash);

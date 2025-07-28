@@ -13,6 +13,7 @@ public class AvatarAnimationController : MonoBehaviour
         Idle = 0,
         Thinking = 1,
         Talking = 2,
+        Dancing = 3,
     }
 
     private Animator animator;
