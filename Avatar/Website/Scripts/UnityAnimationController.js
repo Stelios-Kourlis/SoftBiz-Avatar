@@ -22,8 +22,7 @@ export function stopLipSync() {
 }
 
 export function focusCanvas() {
-    unityCanvas.focus();
-    console.log('Unity canvas focused');
+    unityCanvas?.focus();
 }
 
 export async function waitForUnity() {

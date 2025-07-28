@@ -11,10 +11,6 @@ let isRecording = false;
 let recorder = null;
 let audioChunks = [];
 let micStream = null;
-// let ignoreTTS = !document.getElementById('ttsCheckbox').checked;
-// let streamResponse = document.getElementById('streamCheckbox').checked;
-let ignoreTTS = false;
-let streamResponse = false;
 
 /* ——— INIT ——— */
 window.addEventListener('DOMContentLoaded', async () => {
@@ -25,16 +21,6 @@ window.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('micBtn').addEventListener('click', handleMicClick);
 
   conversationHistory.push({ role: 'developer', content: "Always respond with more than 50 characters but less than 200. Never include markdown syntax in your responses. Use English and only english. That is an order!" });
-
-  document.getElementById('streamCheckbox').addEventListener('change', () => {
-    streamResponse = document.getElementById('streamCheckbox').checked;
-    console.log("Stream checkbox changed, streamResponse is now:", streamResponse);
-  });
-
-  document.getElementById('ttsCheckbox').addEventListener('change', () => {
-    ignoreTTS = !document.getElementById('ttsCheckbox').checked;
-    console.log("TTS checkbox changed, ignoreTTS is now:", ignoreTTS);
-  });
 
   document.getElementById('toggleDebugBtn').addEventListener('click', () => {
     document.querySelector('.debugContent').classList.toggle('collapsed');
@@ -56,6 +42,15 @@ window.addEventListener('keydown', e => {
     if (currentButton.id === 'finishBtn') ButtonController.restoreSendBtn();
     else if (currentButton.id === 'sendBtn') sendMessage();
   }
+});
+
+window.addEventListener('beforeunload', (e) => {
+  console.warn('[DEBUG] Reload is happening');
+  e.preventDefault();
+});
+
+window.addEventListener('unload', () => {
+  console.warn('[DEBUG] Page unloaded');
 });
 
 document.getElementById('clickOverlay').addEventListener('click', () => {
@@ -83,33 +78,7 @@ function getUserInput() {
   return userInput;
 }
 
-async function sendMessage() {
-  const userInput = getUserInput();
-  if (!userInput) return;
-
-  ButtonController.disableSendButton();
-  UnityAnimationController.startThinking();
-  conversationHistory.push({ role: 'user', content: userInput });
-
-  let response;
-
-  console.log('Sending conv history to server:', conversationHistory);
-  try {
-    response = await fetch('http://localhost:3000/api/openai/lipsync', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        messages: conversationHistory,
-      })
-    })
-  } catch (error) {
-    ButtonController.restoreSendBtn();
-    UnityAnimationController.startIdle();
-    BubbleTextController.appendToBubbleText("Something went wrong, please try again later.");
-    console.error("Error sending message to server:", error);
-    return;
-  }
-
+async function handleResponse(response) {
   if (!response || !response.ok) {
     ButtonController.restoreSendBtn();
     UnityAnimationController.startIdle();
@@ -150,6 +119,42 @@ async function sendMessage() {
   }
 }
 
+async function sendMessage() {
+  const userInput = getUserInput();
+  if (!userInput) return;
+
+  ButtonController.disableSendButton();
+  UnityAnimationController.startThinking();
+  conversationHistory.push({ role: 'user', content: userInput });
+
+  let response;
+
+  console.log('Sending conv history to server:', conversationHistory);
+  try {
+    response = await fetch('http://localhost:3000/api/openai/lipsync', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messages: conversationHistory,
+      })
+    })
+  } catch (error) {
+    ButtonController.restoreSendBtn();
+    UnityAnimationController.startIdle();
+    BubbleTextController.appendToBubbleText("Something went wrong, please try again later.");
+    console.error("Error sending message to server:", error);
+    return;
+  }
+
+  await handleResponse(response).catch(err => {
+    ButtonController.restoreSendBtn();
+    UnityAnimationController.startIdle();
+    BubbleTextController.appendToBubbleText("Something went wrong, please try again later.");
+    console.error("Error handling response:", err);
+  });
+
+}
+
 async function handleMicClick(event) {
   event.preventDefault();
   event.stopPropagation();
@@ -179,47 +184,43 @@ async function handleMicClick(event) {
           }
 
           //PLAY BACK YOUR RECORDED AUDIO
-          await new Promise((resolve) => {
-            const audioUrl = URL.createObjectURL(audioBlob);
-            const audio = new Audio(audioUrl);
-            audio.onended = () => {
-              URL.revokeObjectURL(audioUrl);
-              resolve();
-            };
+          // await new Promise((resolve) => {
+          //   const audioUrl = URL.createObjectURL(audioBlob);
+          //   const audio = new Audio(audioUrl);
+          //   audio.onended = () => {
+          //     URL.revokeObjectURL(audioUrl);
+          //     resolve();
+          //   };
 
-            audio.play().then(() => {
-              console.log('Playing audio...');
-            }).catch(err => {
-              console.error('Audio play error:', err);
-            });
-          });
+          //   audio.play().then(() => {
+          //     console.log('Playing audio...');
+          //   }).catch(err => {
+          //     console.error('Audio play error:', err);
+          //   });
+          // });
+
+          ButtonController.disableSendButton();
+          UnityAnimationController.startThinking();
+          conversationHistory.push({ role: 'user', content: "[Voice Input too large to store]" }); //Fill the encoded audio the server returns later
 
           const formData = new FormData();
           formData.append('audio', audioBlob, 'recording.webm');
+          formData.append('messages', JSON.stringify(conversationHistory));
 
-          console.log('🎙️ Sending audio to Whisper…');
-          const res = await fetch('http://localhost:3000/api/openai/stt', {
+
+          console.log('🎙️ Sending audio to OpenAI…');
+          const res = await fetch('http://localhost:3000/api/openai/lipsync', {
             method: 'POST',
             body: formData
           });
 
-          console.log('[DEBUG] STT response status:', res.status);
+          await handleResponse(res).catch(err => {
+            ButtonController.restoreSendBtn();
+            UnityAnimationController.startIdle();
+            BubbleTextController.appendToBubbleText("Something went wrong, please try again later.");
+            console.error("Error handling response:", err);
+          });
 
-
-          const text = await res.text();
-
-          if (!res.ok) {
-            console.error('STT failed:', text);
-            return;
-          }
-
-          console.log('[STT] Transcript:', text);
-
-          if (text) {
-            // either use sendMsgDirect(transcript);
-            document.getElementById('userInput').value = text;
-            sendMessage();
-          }
         } catch (err) {
           console.error('❌ STT fetch crashed:', err);
         }
