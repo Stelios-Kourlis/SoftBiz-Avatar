@@ -86,6 +86,20 @@ async function handleResponse(response) {
     return;
   }
 
+  if (response.basbase64inputAudio && response.base64inputAudio !== null) {
+    conversationHistory[conversationHistory.length - 1].content = [
+      {
+        type: 'text',
+        text: 'The user spoke their input instead of typing. Please transcribe the audio and treat the transcript as their text input.'
+      }, {
+        type: 'input_audio',
+        input_audio: {
+          data: base64Audio,
+          format: 'wav'
+        }
+      }]
+  }
+
   const responseData = await response.json();
   console.log('Response received:', responseData);
 
@@ -169,64 +183,7 @@ async function handleMicClick(event) {
         audioChunks.push(evt.data);
       };
 
-      recorder.onstop = async () => {
-        try {
-          isRecording = false;
-          micBtn.textContent = '🎤';
-          micStream.getTracks().forEach(track => track.stop());
-
-          const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-          console.log('[DEBUG] Blob size:', audioBlob.size);
-
-          if (audioBlob.size === 0) {
-            console.warn('❗️ Recording blob is empty, aborting.');
-            return;
-          }
-
-          //PLAY BACK YOUR RECORDED AUDIO
-          // await new Promise((resolve) => {
-          //   const audioUrl = URL.createObjectURL(audioBlob);
-          //   const audio = new Audio(audioUrl);
-          //   audio.onended = () => {
-          //     URL.revokeObjectURL(audioUrl);
-          //     resolve();
-          //   };
-
-          //   audio.play().then(() => {
-          //     console.log('Playing audio...');
-          //   }).catch(err => {
-          //     console.error('Audio play error:', err);
-          //   });
-          // });
-
-          ButtonController.disableSendButton();
-          UnityAnimationController.startThinking();
-          conversationHistory.push({ role: 'user', content: "[Voice Input too large to store]" }); //Fill the encoded audio the server returns later
-
-          const formData = new FormData();
-          formData.append('audio', audioBlob, 'recording.webm');
-          formData.append('messages', JSON.stringify(conversationHistory));
-
-
-          console.log('🎙️ Sending audio to OpenAI…');
-          const res = await fetch('http://localhost:3000/api/openai/lipsync', {
-            method: 'POST',
-            body: formData
-          });
-
-          await handleResponse(res).catch(err => {
-            ButtonController.restoreSendBtn();
-            UnityAnimationController.startIdle();
-            BubbleTextController.appendToBubbleText("Something went wrong, please try again later.");
-            console.error("Error handling response:", err);
-          });
-
-        } catch (err) {
-          console.error('❌ STT fetch crashed:', err);
-        }
-      };
-
-
+      recorder.onstop = stopRecording;
       recorder.start();
       isRecording = true;
       micBtn.textContent = '⏹️';
@@ -237,6 +194,63 @@ async function handleMicClick(event) {
   } else {
     if (recorder && recorder.state === 'recording') {
       recorder.stop(); // trigger onstop
+    }
+  }
+
+  async function stopRecording() {
+    try {
+      isRecording = false;
+      micBtn.textContent = '🎤';
+      micStream.getTracks().forEach(track => track.stop());
+
+      const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+      console.log('[DEBUG] Blob size:', audioBlob.size);
+
+      if (audioBlob.size === 0) {
+        console.warn('❗️ Recording blob is empty, aborting.');
+        return;
+      }
+
+      //PLAY BACK YOUR RECORDED AUDIO
+      // await new Promise((resolve) => {
+      //   const audioUrl = URL.createObjectURL(audioBlob);
+      //   const audio = new Audio(audioUrl);
+      //   audio.onended = () => {
+      //     URL.revokeObjectURL(audioUrl);
+      //     resolve();
+      //   };
+
+      //   audio.play().then(() => {
+      //     console.log('Playing audio...');
+      //   }).catch(err => {
+      //     console.error('Audio play error:', err);
+      //   });
+      // });
+
+      ButtonController.disableSendButton();
+      UnityAnimationController.startThinking();
+      conversationHistory.push({ role: 'user', content: "[Voice Input too large to store]" }); //Fill the encoded audio the server returns later
+
+      const formData = new FormData();
+      formData.append('audio', audioBlob, 'recording.webm');
+      formData.append('messages', JSON.stringify(conversationHistory));
+
+
+      console.log('🎙️ Sending audio to OpenAI…');
+      const res = await fetch('http://localhost:3000/api/openai/lipsync', {
+        method: 'POST',
+        body: formData
+      });
+
+      await handleResponse(res).catch(err => {
+        ButtonController.restoreSendBtn();
+        UnityAnimationController.startIdle();
+        BubbleTextController.appendToBubbleText("Something went wrong, please try again later.");
+        console.error("Error handling response:", err);
+      });
+
+    } catch (err) {
+      console.error('❌ STT fetch crashed:', err);
     }
   }
 }

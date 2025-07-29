@@ -70,7 +70,7 @@ app.post('/api/openai/lipsync', upload.single('audio'), async (req, res) => {
             req.body.messages[req.body.messages.length - 1].content = [
                 {
                     type: 'text',
-                    text: 'The user gave this audio as input instead of text'
+                    text: 'The user spoke their input instead of typing. Please transcribe the audio and treat the transcript as their text input.'
                 }, {
                     type: 'input_audio',
                     input_audio: {
@@ -94,7 +94,7 @@ app.post('/api/openai/lipsync', upload.single('audio'), async (req, res) => {
             },
         });
         printCurrentTime("[Response Received]");
-        console.log("Response:", JSON.stringify(response, null, 2));
+        // console.log("Response:", JSON.stringify(response, null, 2));
         if (!response) {
             console.error("No available response from OpenAI API:");
             return res.status(500).json({ error: "Invalid response from OpenAI API" });
@@ -110,7 +110,8 @@ app.post('/api/openai/lipsync', upload.single('audio'), async (req, res) => {
                 return res.json({
                     audioUrl: null,
                     lipSyncData: null,
-                    transcript: response.choices[0].message.content
+                    transcript: response.choices[0].message.content,
+                    base64inputAudio: base64Audio
                 });
             }
             return res.status(500).json({ error: "Invalid response structure from OpenAI API" });
@@ -137,7 +138,8 @@ app.post('/api/openai/lipsync', upload.single('audio'), async (req, res) => {
         res.json({
             audioUrl: '/uploads/tts.wav', // This is the processed WAV file
             lipSyncData: visemes,
-            transcript: response.choices[0].message.audio.transcript
+            transcript: response.choices[0].message.audio.transcript,
+            base64inputAudio: base64Audio
         });
     }
     catch (err) {

@@ -74,6 +74,7 @@ interface LipSyncResponseBody {
   audioUrl: string | null; // Path to the processed WAV file
   lipSyncData: string | null; // Replace `any` with the actual type if known
   transcript: string; // Transcript text
+  base64inputAudio: string | null;
 }
 
 //This endpoint is used for responses with lipsync data
@@ -135,7 +136,7 @@ app.post('/api/openai/lipsync', upload.single('audio'), async (req: Request<{}, 
 
     printCurrentTime("[Response Received]")
 
-    console.log("Response:", JSON.stringify(response, null, 2));
+    // console.log("Response:", JSON.stringify(response, null, 2));
 
     if (!response) {
       console.error("No available response from OpenAI API:");
@@ -154,7 +155,8 @@ app.post('/api/openai/lipsync', upload.single('audio'), async (req: Request<{}, 
         return res.json({
           audioUrl: null,
           lipSyncData: null,
-          transcript: response.choices[0].message.content
+          transcript: response.choices[0].message.content,
+          base64inputAudio: base64Audio
         });
       }
 
@@ -191,7 +193,8 @@ app.post('/api/openai/lipsync', upload.single('audio'), async (req: Request<{}, 
     res.json({
       audioUrl: '/uploads/tts.wav', // This is the processed WAV file
       lipSyncData: visemes,
-      transcript: response.choices[0].message.audio.transcript
+      transcript: response.choices[0].message.audio.transcript,
+      base64inputAudio: base64Audio
     });
   } catch (err) {
     console.error('Lipsync pipeline failed:', err);
