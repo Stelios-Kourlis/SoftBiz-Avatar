@@ -16,7 +16,7 @@ const __dirname = path.dirname(__filename);
 /* ——— load .env file ——— */
 dotenv.config({ path: path.join(__dirname, '.env') });
 const rhubarbExePath = path.join(process.env.RHUBARB_PATH ?? "", "rhubarb.exe");
-const { OPENAI_API_KEY, FRONTEND_ORIGIN = 'http://127.0.0.1:5500', PORT = 3000 } = process.env;
+const { OPENAI_API_KEY, FRONTEND_ORIGIN = 'http://localhost:8080', PORT = 3000 } = process.env;
 if (!OPENAI_API_KEY) {
     console.error('OPENAI_API_KEY missing in .env');
     process.exit(1);

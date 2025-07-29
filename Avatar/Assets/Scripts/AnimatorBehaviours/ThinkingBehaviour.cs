@@ -44,6 +44,8 @@ public class ThinkingBehaviour : StateMachineBehaviour
     {
         if (posTween != null && posTween.IsActive()) posTween.Kill();
         if (rotTween != null && rotTween.IsActive()) rotTween.Kill();
+        animator.transform.GetComponent<AvatarBlendKeysController>().BlendEyesLookDown();
+        GameObject.Find("Cabinet").GetComponent<Transform>().DOMove(cabinetHiddenPosition, duration).SetEase(Ease.InOutQuad);
     }
 
 
