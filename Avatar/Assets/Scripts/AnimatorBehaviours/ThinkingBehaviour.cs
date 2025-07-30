@@ -10,12 +10,13 @@ public class ThinkingBehaviour : StateMachineBehaviour
     Tween posTween, rotTween;
 
     private Vector3 cabinetShownPosition = new(0.52f, 0.024f, 6.657f), cabinetHiddenPosition = new(0.5f, 0.024f, 8.5f);
+    private Vector3 cabinetLowShownPosition = new(0.5f, 0.024f, 6.8f);
 
     override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         if (stateInfo.IsName("Empty"))
         {
-            int rand = Random.Range(4, 5);
+            int rand = Random.Range(1, 5);
             animator.SetInteger("ThinkingAnimation", rand);
         }
 
@@ -45,9 +46,13 @@ public class ThinkingBehaviour : StateMachineBehaviour
 
         if (stateInfo.IsName("Searching Files Low"))
         {
-            GameObject.Find("CabinetLow").GetComponent<Transform>().DOMove(cabinetShownPosition, duration).SetEase(Ease.InOutQuad);
+            GameObject.Find("CabinetLow").GetComponent<Transform>().DOMove(cabinetLowShownPosition, duration).SetEase(Ease.InOutQuad);
             posTween = Camera.main.transform.DOMove(searchingLowCameraPosition, duration).SetEase(Ease.InOutQuad).OnComplete(() => posTween = null);
             rotTween = Camera.main.transform.DORotate(searchingLowCameraRotation, duration).SetEase(Ease.InOutQuad).OnComplete(() => rotTween = null);
+        }
+        else
+        {
+            GameObject.Find("CabinetLow").GetComponent<Transform>().DOMove(cabinetHiddenPosition, duration).SetEase(Ease.InOutQuad);
         }
 
         if (stateInfo.IsName("Looking Up"))
