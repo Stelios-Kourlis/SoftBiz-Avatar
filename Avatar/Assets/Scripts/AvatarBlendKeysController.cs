@@ -363,6 +363,46 @@ public class AvatarBlendKeysController : MonoBehaviour
         lipSyncSequence = null;
         lipSyncCoroutine = null;
     }
+
+    public void BlendRightEyebrowUp()
+    {
+        if (GetBlendShapeWeight("browOuterUpRight") == 100f) return;
+        DOTween.To(() => 0f, weight =>
+        {
+            TryApplyBlendShapeWeightToAll("browOuterUpRight", weight);
+        }, 100f, 0.2f).WaitForCompletion();
+    }
+
+    public void BlendRightEyebrowDown()
+    {
+        if (GetBlendShapeWeight("browOuterUpRight") == 0f) return;
+        DOTween.To(() => 100f, weight =>
+        {
+            TryApplyBlendShapeWeightToAll("browOuterUpRight", weight);
+        }, 0f, 0.2f).WaitForCompletion();
+    }
+
+    public void BlendBothEyebrowsUp()
+    {
+        if (GetBlendShapeWeight("browInnerUp") == 100f) return;
+        DOTween.To(() => 0f, weight =>
+        {
+            TryApplyBlendShapeWeightToAll("browOuterUpRight", weight);
+            TryApplyBlendShapeWeightToAll("browOuterUpLeft", weight);
+            TryApplyBlendShapeWeightToAll("browInnerUp", weight);
+        }, 100f, 0.2f).WaitForCompletion();
+    }
+
+    public void BlendBothEyebrowsDown()
+    {
+        if (GetBlendShapeWeight("browInnerUp") == 0f) return;
+        DOTween.To(() => 100f, weight =>
+        {
+            TryApplyBlendShapeWeightToAll("browOuterUpRight", weight);
+            TryApplyBlendShapeWeightToAll("browOuterUpLeft", weight);
+            TryApplyBlendShapeWeightToAll("browInnerUp", weight);
+        }, 0f, 0.2f).WaitForCompletion();
+    }
 }
 
 
