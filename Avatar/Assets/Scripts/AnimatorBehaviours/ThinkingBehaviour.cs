@@ -16,7 +16,7 @@ public class ThinkingBehaviour : StateMachineBehaviour
     {
         if (stateInfo.IsName("Empty"))
         {
-            int rand = Random.Range(1, 5);
+            int rand = Random.Range(1, 4);
             animator.SetInteger("ThinkingAnimation", rand);
         }
 
