@@ -3,6 +3,9 @@ using UnityEditor.Callbacks;
 using System.IO;
 using UnityEngine;
 
+/// <summary>
+/// Copy the WebGL build to Website/UnityWebGL so the site always has the most recent build
+/// </summary>
 public class CopyToHTMLFolder
 {
     [PostProcessBuild]
@@ -22,7 +25,10 @@ public class CopyToHTMLFolder
         if (Directory.Exists(destFolder)) //Clear dest folder contents
         {
             foreach (var file in Directory.GetFiles(destFolder))
+            {
+                if (file.Equals(".gitkeep")) continue; // Keep .gitkeep file
                 File.Delete(file);
+            }
 
             foreach (var dir in Directory.GetDirectories(destFolder))
                 Directory.Delete(dir, true); // Delete subdirectories and their contents

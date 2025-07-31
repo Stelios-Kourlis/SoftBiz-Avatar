@@ -249,7 +249,7 @@ public class AvatarBlendKeysController : MonoBehaviour
         DOTween.To(() => 0f, weight =>
         {
             TryApplyBlendShapeWeightToAll("eyesLookUp", weight);
-            TryApplyBlendShapeWeightToAll("browOuterUpRight", weight * 2);
+            // TryApplyBlendShapeWeightToAll("browOuterUpRight", weight * 2);
         }, 50f, 0.2f).WaitForCompletion();
     }
 
@@ -262,7 +262,7 @@ public class AvatarBlendKeysController : MonoBehaviour
         DOTween.To(() => 50f, weight =>
         {
             TryApplyBlendShapeWeightToAll("eyesLookUp", weight);
-            TryApplyBlendShapeWeightToAll("browOuterUpRight", weight * 2);
+            // TryApplyBlendShapeWeightToAll("browOuterUpRight", weight * 2);
         }, 0f, 0.2f).WaitForCompletion();
     }
 
@@ -299,6 +299,9 @@ public class AvatarBlendKeysController : MonoBehaviour
         lipSyncCoroutine = StartCoroutine(LipSyncCoroutine(lsd));
     }
 
+    /// <summary>
+    /// Abruptly stops the current lip sync animation (if any is running).
+    /// </summary>
     public void StopLipSync()
     {
         lipSyncSequence?.Kill();
@@ -322,6 +325,9 @@ public class AvatarBlendKeysController : MonoBehaviour
         restoringSequence.Play();
     }
 
+    /// <summary>
+    /// Smoothly blend between mouth shapes based on the provided LipSyncData.
+    /// </summary>    
     private IEnumerator LipSyncCoroutine(LipSyncData lsd)
     {
         Debug.Log($"[Unity LS] {DateTime.Now:HH:mm:ss.fff}");
@@ -364,6 +370,9 @@ public class AvatarBlendKeysController : MonoBehaviour
         lipSyncCoroutine = null;
     }
 
+    /// <summary>
+    /// Smootly raise the right bow up
+    /// </summary>
     public void BlendRightEyebrowUp()
     {
         if (GetBlendShapeWeight("browOuterUpRight") == 100f) return;
@@ -373,6 +382,9 @@ public class AvatarBlendKeysController : MonoBehaviour
         }, 100f, 0.2f).WaitForCompletion();
     }
 
+    /// <summary>
+    /// Smoothly lower the right bow down
+    /// </summary>
     public void BlendRightEyebrowDown()
     {
         if (GetBlendShapeWeight("browOuterUpRight") == 0f) return;
@@ -382,6 +394,9 @@ public class AvatarBlendKeysController : MonoBehaviour
         }, 0f, 0.2f).WaitForCompletion();
     }
 
+    /// <summary>
+    /// Smoothly raise both eyebrows up
+    /// </summary>
     public void BlendBothEyebrowsUp()
     {
         if (GetBlendShapeWeight("browInnerUp") == 100f) return;
@@ -393,6 +408,9 @@ public class AvatarBlendKeysController : MonoBehaviour
         }, 100f, 0.2f).WaitForCompletion();
     }
 
+    /// <summary>
+    /// Smoothly lower both eyebrows down
+    /// </summary>
     public void BlendBothEyebrowsDown()
     {
         if (GetBlendShapeWeight("browInnerUp") == 0f) return;

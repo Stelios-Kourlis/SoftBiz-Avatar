@@ -8,6 +8,11 @@ using UnityEngine;
 [RequireComponent(typeof(Animator))]
 public class AvatarAnimationController : MonoBehaviour
 {
+    /// <summary>
+    /// Enum representing the different states the avatar can be in.
+    /// 
+    /// Talking is Obsolete and should not be used.
+    /// </summary>
     public enum States
     {
         Idle = 0,
