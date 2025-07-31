@@ -19,6 +19,15 @@ public class CopyToHTMLFolder
         if (!Directory.Exists(destFolder))
             Directory.CreateDirectory(destFolder);
 
+        if (Directory.Exists(destFolder)) //Clear dest folder contents
+        {
+            foreach (var file in Directory.GetFiles(destFolder))
+                File.Delete(file);
+
+            foreach (var dir in Directory.GetDirectories(destFolder))
+                Directory.Delete(dir, true); // Delete subdirectories and their contents
+        }
+
         CopyDirectory(pathToBuiltProject, destFolder);
 
         UnityEngine.Debug.Log($"Copied WebGL build to {destFolder}");
