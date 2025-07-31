@@ -15,11 +15,14 @@ public class IdlingBehaviour : StateMachineBehaviour
     // OnStateEnter is called before OnStateEnter is called on any state inside this state machine
     override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-        if (stateInfo.IsName("Idle") && !currentStateIsIdle)
+        if (stateInfo.IsName("Idle"))
         {
-            //Only reset the timer if we are entering the Idle state from another state
-            timer = Random.Range(minIdleTimeSec, maxIdleTimeSec);
-            currentStateIsIdle = true;
+            if (!currentStateIsIdle)
+            {
+                //Only reset the timer if we are entering the Idle state from another state
+                timer = Random.Range(minIdleTimeSec, maxIdleTimeSec);
+                currentStateIsIdle = true;
+            }
         }
         else currentStateIsIdle = false;
     }
