@@ -56,6 +56,10 @@ public class AvatarBlendKeysController : MonoBehaviour
 
     void Awake()
     {
+#if UNITY_WEBGL && !UNITY_EDITOR
+    WebGLInput.captureAllKeyboardInput = false;
+    Debug.LogWarning("WebGLInput.captureAllKeyboardInput is set to false. This is required for the avatar to work properly in WebGL builds.");
+#endif
         eyeMesh = transform.Find("Eye_Mesh").GetComponent<SkinnedMeshRenderer>();
         eyeAoMesh = transform.Find("EyeAO_Mesh").GetComponent<SkinnedMeshRenderer>();
         eyelashMesh = transform.Find("Eyelash_Mesh").GetComponent<SkinnedMeshRenderer>();
