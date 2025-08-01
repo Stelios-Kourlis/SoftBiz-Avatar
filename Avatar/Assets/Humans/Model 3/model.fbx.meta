@@ -8,57 +8,57 @@ ModelImporter:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: Body
-    second: {fileID: 2100000, guid: 8ea0861129b56584f94f42a34de207c5, type: 2}
+    second: {fileID: 8521078559622990976, guid: 7761b2b298745a34bb5655d5e8cd0b25, type: 3}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: EyeAO
-    second: {fileID: 2100000, guid: 7daedda06d86d5f45ae8cbd3cc02c7b4, type: 2}
+    second: {fileID: 6454117013284119618, guid: 7761b2b298745a34bb5655d5e8cd0b25, type: 3}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: Eyelash
-    second: {fileID: 2100000, guid: d086d092dd49b204f80c6010d6f1355c, type: 2}
+    second: {fileID: -7894200693436803047, guid: 7761b2b298745a34bb5655d5e8cd0b25, type: 3}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: Eyes
-    second: {fileID: 2100000, guid: 3a84787f6d93e0543a262ae339b00318, type: 2}
+    second: {fileID: 4218272456290611267, guid: 7761b2b298745a34bb5655d5e8cd0b25, type: 3}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: Head
-    second: {fileID: 2100000, guid: 9695e29361704384f98ea050b729475d, type: 2}
+    second: {fileID: 87783618589476533, guid: 7761b2b298745a34bb5655d5e8cd0b25, type: 3}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: Teeth
-    second: {fileID: 2100000, guid: ab538a2f8aa24704e8f70901d4e1c0d8, type: 2}
+    second: {fileID: 1190345594517916363, guid: 7761b2b298745a34bb5655d5e8cd0b25, type: 3}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: Teeth.001
-    second: {fileID: 2100000, guid: 1955bd9d56f4ae749a2f7d9b411399f8, type: 2}
+    second: {fileID: -229877432113853365, guid: 7761b2b298745a34bb5655d5e8cd0b25, type: 3}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: avaturn_hair_0_material
-    second: {fileID: 2100000, guid: db29ce214eab2114c8e6626c996c8032, type: 2}
+    second: {fileID: 5654804321838842103, guid: 7761b2b298745a34bb5655d5e8cd0b25, type: 3}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: avaturn_hair_1_material
-    second: {fileID: 2100000, guid: a6570e12fcbd3274eb1a53b0b9a236fe, type: 2}
+    second: {fileID: -8496073823189075129, guid: 7761b2b298745a34bb5655d5e8cd0b25, type: 3}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: avaturn_look_0_material
-    second: {fileID: 2100000, guid: ec5baae2f0ad4c84fa5fb0fb3830b50a, type: 2}
+    second: {fileID: 6540941884980302035, guid: 7761b2b298745a34bb5655d5e8cd0b25, type: 3}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: avaturn_shoes_0_material
-    second: {fileID: 2100000, guid: 2302ffb4038d1d743ac10bea921a4e3b, type: 2}
+    second: {fileID: -1478458054894493653, guid: 7761b2b298745a34bb5655d5e8cd0b25, type: 3}
   materials:
     materialImportMode: 2
     materialName: 0
