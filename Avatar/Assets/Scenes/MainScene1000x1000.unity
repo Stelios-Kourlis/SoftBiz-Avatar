@@ -522,7 +522,7 @@ GameObject:
   - component: {fileID: 124883558}
   - component: {fileID: 124883557}
   m_Layer: 5
-  m_Name: Force Talking
+  m_Name: Stop Lip Sync
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -594,7 +594,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 462618947}
         m_TargetAssemblyTypeName: TestButtonLinker, Assembly-CSharp
-        m_MethodName: StartTalking
+        m_MethodName: StopLipSync
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1071,7 +1071,7 @@ GameObject:
   - component: {fileID: 462618947}
   m_Layer: 5
   m_Name: Canvas
-  m_TagString: Untagged
+  m_TagString: EditorOnly
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1320,7 +1320,7 @@ GameObject:
   - component: {fileID: 683352354}
   m_Layer: 0
   m_Name: Audio Source
-  m_TagString: Untagged
+  m_TagString: EditorOnly
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1654,7 +1654,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Force Talking
+  m_text: Stop Lip Sync
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -1887,8 +1887,8 @@ RectTransform:
   m_Children:
   - {fileID: 1100366329}
   - {fileID: 2048804490}
-  - {fileID: 124883556}
   - {fileID: 1808291084}
+  - {fileID: 124883556}
   m_Father: {fileID: 462618946}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}

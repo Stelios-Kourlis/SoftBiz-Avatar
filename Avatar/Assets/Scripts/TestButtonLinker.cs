@@ -34,4 +34,10 @@ public class TestButtonLinker : MonoBehaviour
         model.GetComponent<AvatarBlendKeysController>().StartLipSync(jsonData);
         GameObject.Find("Audio Source").GetComponent<AudioSource>().Play();
     }
+
+    public void StopLipSync()
+    {
+        model.GetComponent<AvatarBlendKeysController>().StopLipSync();
+        GameObject.Find("Audio Source").GetComponent<AudioSource>().Stop();
+    }
 }
